@@ -46,6 +46,14 @@ db.exec(`
     article_ids TEXT NOT NULL DEFAULT '[]',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS crawl_failures (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_name TEXT NOT NULL,
+    source_url TEXT NOT NULL,
+    error_message TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 const sourceColumns = db.prepare('PRAGMA table_info(sources)').all().map((column) => column.name);
@@ -176,6 +184,38 @@ export function latestArticles(limit = 50) {
     FROM articles
     JOIN sources ON sources.id = articles.source_id
     ORDER BY COALESCE(articles.published_at, articles.created_at) DESC, articles.id DESC
+    LIMIT ?
+  `).all(limit);
+}
+
+export function logCrawlFailures(failures) {
+  if (!Array.isArray(failures) || failures.length === 0) return;
+  const insertFailure = db.prepare(`
+    INSERT INTO crawl_failures (source_name, source_url, error_message)
+    VALUES (?, ?, ?)
+  `);
+  const pruneFailures = db.prepare(`
+    DELETE FROM crawl_failures
+    WHERE id NOT IN (
+      SELECT id FROM crawl_failures ORDER BY created_at DESC, id DESC LIMIT 200
+    )
+  `);
+
+  const tx = db.transaction((items) => {
+    items.forEach((item) => {
+      insertFailure.run(item.sourceName, item.sourceUrl, item.errorMessage);
+    });
+    pruneFailures.run();
+  });
+
+  tx(failures);
+}
+
+export function latestCrawlFailures(limit = 30) {
+  return db.prepare(`
+    SELECT id, source_name, source_url, error_message, created_at
+    FROM crawl_failures
+    ORDER BY created_at DESC, id DESC
     LIMIT ?
   `).all(limit);
 }

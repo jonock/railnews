@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { db, listSources, listTopics } from './db.js';
+import { db, listSources, listTopics, logCrawlFailures } from './db.js';
 import { config } from './config.js';
 
 const USER_AGENT = 'RailnewsBot/0.1 (+daily railway briefing; contact site owner)';
@@ -104,6 +104,107 @@ function parseRailmarketDate($, element, container, articleUrl) {
   const fromUrl = articleUrl.match(/\/(20\d{2})[/-](\d{1,2})[/-](\d{1,2})(?:[/-]|$)/);
   if (fromUrl) return toIsoDateTime(fromUrl[1], fromUrl[2], fromUrl[3]);
 
+  return null;
+}
+
+function parseIsoCandidate(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
+
+async function parseJarnvagarPublishedAt(articleUrl) {
+  try {
+    const response = await fetch(articleUrl, {
+      headers: {
+        'user-agent': USER_AGENT,
+        accept: 'text/html,application/xhtml+xml'
+      }
+    });
+    if (!response.ok) return null;
+    const html = await response.text();
+    if (/Just a moment|challenges\.cloudflare\.com/i.test(html)) return null;
+
+    const $ = cheerio.load(html);
+    const metaCandidates = [
+      $('meta[property="article:published_time"]').attr('content'),
+      $('meta[name="article:published_time"]').attr('content'),
+      $('meta[property="og:article:published_time"]').attr('content'),
+      $('time[datetime]').first().attr('datetime')
+    ];
+    for (const candidate of metaCandidates) {
+      const iso = parseIsoCandidate(candidate);
+      if (iso) return iso;
+    }
+
+    const jsonLdNodes = $('script[type="application/ld+json"]').toArray();
+    for (const node of jsonLdNodes) {
+      const raw = $(node).contents().text();
+      if (!raw) continue;
+      try {
+        const data = JSON.parse(raw);
+        const stack = Array.isArray(data) ? [...data] : [data];
+        while (stack.length) {
+          const item = stack.pop();
+          if (!item || typeof item !== 'object') continue;
+          const iso = parseIsoCandidate(item.datePublished);
+          if (iso) return iso;
+          if (Array.isArray(item['@graph'])) stack.push(...item['@graph']);
+          if (Array.isArray(item.mainEntityOfPage)) stack.push(...item.mainEntityOfPage);
+        }
+      } catch {
+        // ignore malformed JSON-LD chunks
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+async function enrichJarnvagarPublishedAt(articles) {
+  await Promise.all(articles.map(async (article) => {
+    if (article.publishedAt) return;
+    article.publishedAt = await parseJarnvagarPublishedAt(article.url);
+  }));
+}
+
+async function parseRailmarketPublishedAt(articleUrl) {
+  try {
+    const response = await fetch(articleUrl, {
+      headers: {
+        'user-agent': USER_AGENT,
+        accept: 'text/html,application/xhtml+xml'
+      }
+    });
+    if (!response.ok) return null;
+    const html = await response.text();
+    if (/Just a moment|challenges\.cloudflare\.com/i.test(html)) return null;
+
+    const $ = cheerio.load(html);
+    const metaCandidates = [
+      $('meta[property="article:published_time"]').attr('content'),
+      $('meta[name="article:published_time"]').attr('content'),
+      $('meta[property="og:article:published_time"]').attr('content'),
+      $('meta[property="og:updated_time"]').attr('content'),
+      $('time[datetime]').first().attr('datetime')
+    ];
+    for (const candidate of metaCandidates) {
+      const iso = parseIsoCandidate(candidate);
+      if (iso) return iso;
+    }
+
+    const contentText = cleanText($('main, article, body').first().text());
+    const fromText = parseRailmarketDateFromText(contentText);
+    if (fromText) return fromText;
+
+    const fromUrl = articleUrl.match(/\/(20\d{2})[/-](\d{1,2})[/-](\d{1,2})(?:[/-]|$)/);
+    if (fromUrl) return toIsoDateTime(fromUrl[1], fromUrl[2], fromUrl[3]);
+  } catch {
+    return null;
+  }
   return null;
 }
 
@@ -236,6 +337,7 @@ export async function crawlSources() {
   `);
 
   const results = [];
+  const failures = [];
   for (const source of sources) {
     try {
       const response = await fetch(source.url, {
@@ -253,6 +355,9 @@ export async function crawlSources() {
 
       const $ = cheerio.load(html);
       const extracted = extractArticles($, source);
+      if (source.url.includes('jarnvagar.nu')) {
+        await enrichJarnvagarPublishedAt(extracted);
+      }
       const seen = new Set();
       let saved = 0;
 
@@ -275,8 +380,60 @@ export async function crawlSources() {
       results.push({ source: source.name, found: extracted.length, saved });
     } catch (error) {
       results.push({ source: source.name, found: 0, saved: 0, error: error.message });
+      failures.push({ sourceName: source.name, sourceUrl: source.url, errorMessage: error.message });
     }
   }
 
+  logCrawlFailures(failures);
   return results;
+}
+
+export async function backfillJarnvagarPublishedAt() {
+  const rows = db.prepare(`
+    SELECT articles.id, articles.url
+    FROM articles
+    JOIN sources ON sources.id = articles.source_id
+    WHERE sources.url LIKE '%jarnvagar.nu%'
+      AND articles.published_at IS NULL
+    ORDER BY articles.id DESC
+  `).all();
+
+  const updatePublishedAt = db.prepare('UPDATE articles SET published_at = ? WHERE id = ?');
+
+  let checked = 0;
+  let updated = 0;
+  for (const row of rows) {
+    checked += 1;
+    const publishedAt = await parseJarnvagarPublishedAt(row.url);
+    if (!publishedAt) continue;
+    updatePublishedAt.run(publishedAt, row.id);
+    updated += 1;
+  }
+
+  return { checked, updated, skipped: checked - updated };
+}
+
+export async function backfillRailmarketPublishedAt() {
+  const rows = db.prepare(`
+    SELECT articles.id, articles.url
+    FROM articles
+    JOIN sources ON sources.id = articles.source_id
+    WHERE sources.url LIKE '%railmarket.com%'
+      AND articles.published_at IS NULL
+    ORDER BY articles.id DESC
+  `).all();
+
+  const updatePublishedAt = db.prepare('UPDATE articles SET published_at = ? WHERE id = ?');
+
+  let checked = 0;
+  let updated = 0;
+  for (const row of rows) {
+    checked += 1;
+    const publishedAt = await parseRailmarketPublishedAt(row.url);
+    if (!publishedAt) continue;
+    updatePublishedAt.run(publishedAt, row.id);
+    updated += 1;
+  }
+
+  return { checked, updated, skipped: checked - updated };
 }

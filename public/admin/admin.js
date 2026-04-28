@@ -7,6 +7,7 @@ const briefingList = document.querySelector('#briefingList');
 const sourceList = document.querySelector('#sourceList');
 const topicList = document.querySelector('#topicList');
 const articleList = document.querySelector('#articleList');
+const crawlFailureList = document.querySelector('#crawlFailureList');
 const tokenDialog = document.querySelector('#tokenDialog');
 const sourceDialog = document.querySelector('#sourceDialog');
 const sourceIdInput = document.querySelector('#sourceIdInput');
@@ -16,6 +17,8 @@ const sourceKeywordsInput = document.querySelector('#sourceKeywordsInput');
 const runBriefingButton = document.querySelector('#runBriefing');
 const runCrawlButton = document.querySelector('#runCrawl');
 const deleteTodayArticlesButton = document.querySelector('#deleteTodayArticles');
+const redateJarnvagarButton = document.querySelector('#redateJarnvagar');
+const redateRailmarketButton = document.querySelector('#redateRailmarket');
 
 let currentSources = [];
 let actionsBusy = false;
@@ -98,6 +101,17 @@ function renderArticles(articles) {
   }).join('') : '<p>Noch keine passenden Meldungen gefunden.</p>';
 }
 
+function renderCrawlFailures(failures) {
+  crawlFailureList.innerHTML = failures.length ? failures.map((item) => `
+    <div class="mini-item">
+      <strong>${escapeHtml(item.source_name)}</strong>
+      <small>${escapeHtml(item.source_url)}</small>
+      <small>${escapeHtml(item.error_message)}</small>
+      <small>${escapeHtml(item.created_at)}</small>
+    </div>
+  `).join('') : '<p>Keine Crawl-Fehler in den letzten Läufen.</p>';
+}
+
 async function load() {
   status.textContent = 'Wird geladen';
   const data = await api('/api/admin/state');
@@ -105,6 +119,7 @@ async function load() {
   renderSources(data.sources);
   renderTopics(data.topics);
   renderArticles(data.articles);
+  renderCrawlFailures(data.crawlFailures || []);
   status.textContent = 'Bereit';
 }
 
@@ -125,7 +140,7 @@ function setActionLoading(button, loadingText, active) {
 }
 
 function syncActionButtonsState() {
-  [runBriefingButton, runCrawlButton, deleteTodayArticlesButton].forEach((button) => {
+  [runBriefingButton, runCrawlButton, deleteTodayArticlesButton, redateJarnvagarButton, redateRailmarketButton].forEach((button) => {
     if (!button) return;
     const isLoading = button.dataset.loading === 'true';
     button.disabled = actionsBusy || isLoading;
@@ -220,6 +235,42 @@ runCrawlButton.addEventListener('click', async () => {
     status.textContent = `Fehler beim Crawling: ${error.message}`;
   } finally {
     setActionLoading(runCrawlButton, '', false);
+    setActionsBusy(false);
+  }
+});
+
+redateJarnvagarButton.addEventListener('click', async () => {
+  if (actionsBusy) return;
+  if (!window.confirm('Järnvägar-Artikel ohne Datum nachträglich korrigieren?')) return;
+  setActionsBusy(true);
+  setActionLoading(redateJarnvagarButton, 'Korrigiere Datumswerte', true);
+  status.textContent = 'Järnvägar-Datumswerte werden korrigiert';
+  try {
+    const response = await api('/api/articles/redate/jarnvagar', { method: 'POST' });
+    await load();
+    status.textContent = `Korrektur fertig (${response.updated || 0}/${response.checked || 0} aktualisiert)`;
+  } catch (error) {
+    status.textContent = `Fehler bei Datumskorrektur: ${error.message}`;
+  } finally {
+    setActionLoading(redateJarnvagarButton, '', false);
+    setActionsBusy(false);
+  }
+});
+
+redateRailmarketButton.addEventListener('click', async () => {
+  if (actionsBusy) return;
+  if (!window.confirm('Railmarket-Artikel ohne Datum nachträglich korrigieren?')) return;
+  setActionsBusy(true);
+  setActionLoading(redateRailmarketButton, 'Korrigiere Datumswerte', true);
+  status.textContent = 'Railmarket-Datumswerte werden korrigiert';
+  try {
+    const response = await api('/api/articles/redate/railmarket', { method: 'POST' });
+    await load();
+    status.textContent = `Korrektur fertig (${response.updated || 0}/${response.checked || 0} aktualisiert)`;
+  } catch (error) {
+    status.textContent = `Fehler bei Datumskorrektur: ${error.message}`;
+  } finally {
+    setActionLoading(redateRailmarketButton, '', false);
     setActionsBusy(false);
   }
 });

@@ -64,6 +64,8 @@
         <div class="actions">
           <button id="runCrawl" type="button" class="secondary">Crawling jetzt starten</button>
           <button id="runBriefing" type="button">Briefing jetzt erstellen</button>
+          <button id="redateJarnvagar" type="button" class="secondary">Järnvägar-Daten korrigieren</button>
+          <button id="redateRailmarket" type="button" class="secondary">Railmarket-Daten korrigieren</button>
         </div>
         <div id="briefingList" class="stack"></div>
       </section>
@@ -75,6 +77,12 @@
           <button id="deleteTodayArticles" type="button" class="secondary">Alle Artikel von heute löschen</button>
         </div>
         <div id="articleList" class="article-grid"></div>
+      </section>
+
+      <section class="articles">
+        <p class="section-kicker">Crawler-Fehler</p>
+        <h2>Quellen mit Problemen</h2>
+        <div id="crawlFailureList" class="mini-list"></div>
       </section>
     </main>
 
