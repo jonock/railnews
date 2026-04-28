@@ -156,6 +156,32 @@ app.post('/api/cron/daily', async (req, res, next) => {
   }
 });
 
+app.delete('/api/articles/today', requireAdmin, (_req, res, next) => {
+  try {
+    const result = db.prepare(`
+      DELETE FROM articles
+      WHERE date(COALESCE(published_at, created_at), 'localtime') = date('now', 'localtime')
+    `).run();
+    res.json({ ok: true, deleted: result.changes });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete('/api/articles/:id', requireAdmin, (req, res, next) => {
+  try {
+    const articleId = Number(req.params.id);
+    if (!Number.isInteger(articleId) || articleId <= 0) {
+      return res.status(400).json({ error: 'Invalid article id' });
+    }
+    const result = db.prepare('DELETE FROM articles WHERE id = ?').run(articleId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Article not found' });
+    res.json({ ok: true, deleted: 1 });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use((error, _req, res, _next) => {
   console.error(error);
   res.status(500).json({ error: error.message || 'Unexpected error' });

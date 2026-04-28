@@ -15,8 +15,10 @@ const sourceUrlInput = document.querySelector('#sourceUrlInput');
 const sourceKeywordsInput = document.querySelector('#sourceKeywordsInput');
 const runBriefingButton = document.querySelector('#runBriefing');
 const runCrawlButton = document.querySelector('#runCrawl');
+const deleteTodayArticlesButton = document.querySelector('#deleteTodayArticles');
 
 let currentSources = [];
+let actionsBusy = false;
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
@@ -86,6 +88,7 @@ function renderArticles(articles) {
     const tags = JSON.parse(article.matched_topics || '[]');
     return `
       <article class="article-card">
+        <button class="secondary article-delete" type="button" data-article-id="${article.id}" aria-label="Artikel löschen">Löschen</button>
         <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
         <div class="tags">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>
         <p>${escapeHtml(article.excerpt.slice(0, 220))}</p>
@@ -119,6 +122,22 @@ function setActionLoading(button, loadingText, active) {
   if (button.dataset.originalLabel) {
     button.textContent = button.dataset.originalLabel;
   }
+}
+
+function syncActionButtonsState() {
+  [runBriefingButton, runCrawlButton, deleteTodayArticlesButton].forEach((button) => {
+    if (!button) return;
+    const isLoading = button.dataset.loading === 'true';
+    button.disabled = actionsBusy || isLoading;
+  });
+  articleList.querySelectorAll('.article-delete').forEach((button) => {
+    button.disabled = actionsBusy;
+  });
+}
+
+function setActionsBusy(active) {
+  actionsBusy = active;
+  syncActionButtonsState();
 }
 
 document.querySelector('#sourceForm').addEventListener('submit', async (event) => {
@@ -171,17 +190,25 @@ document.querySelector('#topicForm').addEventListener('submit', async (event) =>
 });
 
 runBriefingButton.addEventListener('click', async () => {
+  if (actionsBusy) return;
+  setActionsBusy(true);
   setActionLoading(runBriefingButton, 'Briefing wird erstellt', true);
   status.textContent = 'Briefing wird erstellt';
   try {
     await api('/api/briefings/run', { method: 'POST' });
     await load();
+    status.textContent = 'Briefing erfolgreich erstellt';
+  } catch (error) {
+    status.textContent = `Fehler beim Briefing: ${error.message}`;
   } finally {
     setActionLoading(runBriefingButton, '', false);
+    setActionsBusy(false);
   }
 });
 
 runCrawlButton.addEventListener('click', async () => {
+  if (actionsBusy) return;
+  setActionsBusy(true);
   setActionLoading(runCrawlButton, 'Crawling läuft', true);
   status.textContent = 'Crawling wird gestartet';
   try {
@@ -189,8 +216,48 @@ runCrawlButton.addEventListener('click', async () => {
     const savedTotal = (response.results || []).reduce((sum, source) => sum + (source.saved || 0), 0);
     await load();
     status.textContent = `Crawling fertig (${savedTotal} neue/aktualisierte Meldungen)`;
+  } catch (error) {
+    status.textContent = `Fehler beim Crawling: ${error.message}`;
   } finally {
     setActionLoading(runCrawlButton, '', false);
+    setActionsBusy(false);
+  }
+});
+
+deleteTodayArticlesButton.addEventListener('click', async () => {
+  if (actionsBusy) return;
+  if (!window.confirm('Alle heutigen Artikel wirklich löschen?')) return;
+  setActionsBusy(true);
+  setActionLoading(deleteTodayArticlesButton, 'Lösche heutige Artikel', true);
+  status.textContent = 'Heutige Artikel werden gelöscht';
+  try {
+    const response = await api('/api/articles/today', { method: 'DELETE' });
+    await load();
+    status.textContent = `${response.deleted || 0} heutige Artikel gelöscht`;
+  } catch (error) {
+    status.textContent = `Fehler beim Löschen: ${error.message}`;
+  } finally {
+    setActionLoading(deleteTodayArticlesButton, '', false);
+    setActionsBusy(false);
+  }
+});
+
+articleList.addEventListener('click', async (event) => {
+  const button = event.target.closest('.article-delete');
+  if (!button || actionsBusy) return;
+  const articleId = button.dataset.articleId;
+  if (!articleId) return;
+  if (!window.confirm('Diesen Artikel wirklich löschen?')) return;
+  setActionsBusy(true);
+  status.textContent = 'Artikel wird gelöscht';
+  try {
+    await api(`/api/articles/${articleId}`, { method: 'DELETE' });
+    await load();
+    status.textContent = 'Artikel gelöscht';
+  } catch (error) {
+    status.textContent = `Fehler beim Löschen: ${error.message}`;
+  } finally {
+    setActionsBusy(false);
   }
 });
 

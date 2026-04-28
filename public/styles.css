@@ -581,6 +581,7 @@ textarea {
 }
 
 .article-card {
+  position: relative;
   min-height: 220px;
   display: grid;
   align-content: start;
@@ -591,6 +592,13 @@ textarea {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(248, 251, 246, .95));
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.article-delete {
+  justify-self: end;
+  min-height: 32px;
+  padding-inline: 12px;
+  font-size: .76rem;
 }
 
 .article-card:hover {
