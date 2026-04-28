@@ -2,14 +2,17 @@ import { config } from './config.js';
 
 function extractiveBriefing(articles) {
   if (articles.length === 0) {
-    return 'No matching Scandinavian railway updates were found today.';
+    return 'Heute wurden keine passenden Eisenbahnmeldungen aus Skandinavien gefunden.';
   }
 
-  return articles.map((article) => {
+  const intro = 'Automatisch erzeugtes deutschsprachiges Kurzbriefing auf Basis der gefundenen Quellenmeldungen.';
+  const items = articles.map((article) => {
     const topics = JSON.parse(article.matched_topics || '[]').join(', ');
-    const excerpt = article.excerpt.replace(article.title, '').trim().slice(0, 360);
-    return `- ${article.title}${topics ? ` (${topics})` : ''}\n  ${excerpt}\n  Link: ${article.url}`;
+    const source = article.source_name ? ` von ${article.source_name}` : '';
+    return `- Originaltitel: ${article.title}${topics ? ` (${topics})` : ''}\n  Einordnung: Diese Meldung${source} wurde als relevant für das skandinavische Bahnmonitoring erkannt. Bitte die Quelle für Details, Zahlen und Originalformulierungen prüfen.\n  Quelle: ${article.url}`;
   }).join('\n\n');
+
+  return `${intro}\n\n${items}`;
 }
 
 export async function createBriefingText(articles) {
@@ -18,11 +21,11 @@ export async function createBriefingText(articles) {
   const input = [
     {
       role: 'system',
-      content: 'Du schreibst knappe tägliche Briefings zur Eisenbahnbranche auf Deutsch. Erhalte Quellenlinks unverändert. Fokussiere auf Skandinavien und praktische Auswirkungen für die Branche.'
+      content: 'Du schreibst ausschließlich auf Deutsch. Du erstellst knappe tägliche Briefings zur Eisenbahnbranche. Übersetze fremdsprachige Inhalte sinngemäß ins Deutsche, erhalte Quellenlinks unverändert und fokussiere auf Skandinavien sowie praktische Auswirkungen für die Branche.'
     },
     {
       role: 'user',
-      content: `Erstelle ein deutsches Tagesbriefing aus diesen Artikeln. Gruppiere zusammengehörige Meldungen, erkläre kurz die Relevanz und nenne jede Quellen-URL.\n\n${JSON.stringify(articles, null, 2)}`
+      content: `Erstelle ein Tagesbriefing vollständig auf Deutsch aus diesen Artikeln. Gruppiere zusammengehörige Meldungen, übersetze schwedische oder englische Titel/Inhalte sinngemäß, erkläre kurz die Relevanz und nenne jede Quellen-URL.\n\n${JSON.stringify(articles, null, 2)}`
     }
   ];
 
@@ -41,7 +44,7 @@ export async function createBriefingText(articles) {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Briefing LLM request failed: ${response.status} ${error}`);
+    throw new Error(`Briefing-LLM-Anfrage fehlgeschlagen: ${response.status} ${error}`);
   }
 
   const data = await response.json();

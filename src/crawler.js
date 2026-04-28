@@ -200,7 +200,7 @@ export async function crawlSources() {
           title: article.title,
           excerpt: article.excerpt,
           publishedAt: article.publishedAt,
-          matchedTopics: JSON.stringify(matches.length ? matches : ['General'])
+          matchedTopics: JSON.stringify(matches.length ? matches : ['Allgemein'])
         });
         saved += 1;
       }

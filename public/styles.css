@@ -451,7 +451,7 @@ h2 {
   bottom: 4px;
   width: 6px;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--lime), var(--spruce));
+  background: #ff3f1f;
 }
 
 .briefing-card:first-child {
