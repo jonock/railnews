@@ -1,6 +1,6 @@
 import { db } from '../db.js';
 import { crawlSources } from '../crawler.js';
-import { createBriefingText } from '../llm.js';
+import { createBriefingText, isLlmConfigured } from '../llm.js';
 
 function todayKey() {
   return new Intl.DateTimeFormat('en-CA', {
@@ -36,7 +36,7 @@ export async function runDailyBriefing(date = todayKey(), options = {}) {
       created_at = CURRENT_TIMESTAMP
   `).run(date, title, summary, articleIds);
 
-  return { date, crawlResults, articleCount: articles.length };
+  return { date, crawlResults, articleCount: articles.length, llmConfigured: isLlmConfigured() };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

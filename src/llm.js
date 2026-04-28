@@ -56,3 +56,7 @@ export async function createBriefingText(articles) {
     return extractiveBriefing(articles);
   }
 }
+
+export function isLlmConfigured() {
+  return Boolean(config.openai.apiKey);
+}

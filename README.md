@@ -19,6 +19,8 @@ npm run dev
 
 Then open `http://localhost:3000`.
 
+The app loads `.env` on startup. Restart the server after changing values such as `OPENAI_API_KEY`.
+
 The public German website is available at `/`.
 The German backend for sources, topics, and manual briefing runs is available at `/admin/`.
 
@@ -27,6 +29,8 @@ Create a briefing manually:
 ```bash
 npm run briefing
 ```
+
+The command output includes `llmConfigured`. If it is `false`, the app did not receive `OPENAI_API_KEY` and will use the German fallback briefing.
 
 ## Coolify
 
