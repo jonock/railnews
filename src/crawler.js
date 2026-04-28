@@ -62,6 +62,10 @@ function matchesFocus(article) {
   });
 }
 
+function sourceImpliesFocus(source) {
+  return source.url.includes('jarnvagar.nu') || source.url.includes('railmarket.com/eu/sweden');
+}
+
 function extractLokReport($, source) {
   const articles = [];
   $('a').each((_, element) => {
@@ -98,6 +102,46 @@ function extractGeneric($, source) {
   return articles;
 }
 
+function extractJarnvagar($, source) {
+  const articles = [];
+  $('article.et_pb_post, article.post').each((_, element) => {
+    const link = $(element).find('h2 a[href], .entry-title a[href], a[href]').first();
+    const url = absoluteUrl(link.attr('href'), source.url);
+    const title = cleanText(link.text());
+    if (!url || title.length < 12) return;
+
+    const excerpt = cleanText($(element).find('.post-content, .entry-summary, p').text() || $(element).text()).slice(0, 900);
+    articles.push({ url, title, excerpt, publishedAt: null });
+  });
+  return articles;
+}
+
+function extractRailmarket($, source) {
+  const articles = [];
+  $('a[href]').each((_, element) => {
+    const url = absoluteUrl($(element).attr('href'), source.url);
+    const title = cleanText($(element).text());
+    if (!url || title.length < 12) return;
+    if (!url.includes('railmarket.com/news/')) return;
+
+    const container = $(element).closest('article, li, .card, div');
+    articles.push({
+      url,
+      title,
+      excerpt: cleanText(container.text()).slice(0, 900),
+      publishedAt: null
+    });
+  });
+  return articles;
+}
+
+function extractArticles($, source) {
+  if (source.url.includes('lok-report.de')) return extractLokReport($, source);
+  if (source.url.includes('jarnvagar.nu')) return extractJarnvagar($, source);
+  if (source.url.includes('railmarket.com')) return extractRailmarket($, source);
+  return extractGeneric($, source);
+}
+
 export async function crawlSources() {
   const sources = listSources().filter((source) => source.active);
   const topics = listTopics();
@@ -113,34 +157,45 @@ export async function crawlSources() {
 
   const results = [];
   for (const source of sources) {
-    const response = await fetch(source.url, {
-      headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/xhtml+xml' }
-    });
-    if (!response.ok) throw new Error(`Failed to crawl ${source.url}: HTTP ${response.status}`);
-
-    const html = await response.text();
-    const $ = cheerio.load(html);
-    const extracted = source.url.includes('lok-report.de') ? extractLokReport($, source) : extractGeneric($, source);
-    const seen = new Set();
-    let saved = 0;
-
-    for (const article of extracted) {
-      if (seen.has(article.url)) continue;
-      seen.add(article.url);
-      if (!matchesFocus(article)) continue;
-      const matches = topicMatches(article, topics);
-      insert.run({
-        sourceId: source.id,
-        url: article.url,
-        title: article.title,
-        excerpt: article.excerpt,
-        publishedAt: article.publishedAt,
-        matchedTopics: JSON.stringify(matches.length ? matches : ['General'])
+    try {
+      const response = await fetch(source.url, {
+        headers: {
+          'user-agent': USER_AGENT,
+          accept: 'text/html,application/xhtml+xml'
+        }
       });
-      saved += 1;
-    }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    results.push({ source: source.name, found: extracted.length, saved });
+      const html = await response.text();
+      if (/Just a moment|challenges\.cloudflare\.com/i.test(html)) {
+        throw new Error('Cloudflare challenge');
+      }
+
+      const $ = cheerio.load(html);
+      const extracted = extractArticles($, source);
+      const seen = new Set();
+      let saved = 0;
+
+      for (const article of extracted) {
+        if (seen.has(article.url)) continue;
+        seen.add(article.url);
+        if (!sourceImpliesFocus(source) && !matchesFocus(article)) continue;
+        const matches = topicMatches(article, topics);
+        insert.run({
+          sourceId: source.id,
+          url: article.url,
+          title: article.title,
+          excerpt: article.excerpt,
+          publishedAt: article.publishedAt,
+          matchedTopics: JSON.stringify(matches.length ? matches : ['General'])
+        });
+        saved += 1;
+      }
+
+      results.push({ source: source.name, found: extracted.length, saved });
+    } catch (error) {
+      results.push({ source: source.name, found: 0, saved: 0, error: error.message });
+    }
   }
 
   return results;

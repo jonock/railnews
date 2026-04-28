@@ -8,56 +8,24 @@
   </head>
   <body class="public-page">
     <header class="topbar public-hero">
-      <nav class="site-nav" aria-label="Hauptnavigation">
-        <a class="brand-mark" href="/">
-          <span>RN</span>
-          Railnews
-        </a>
-        <a class="admin-link" href="/admin/">Backend</a>
-      </nav>
-
       <div class="hero-grid">
-        <div>
-          <p class="eyebrow">Tägliches Eisenbahnbriefing</p>
-          <h1>Skandinavien auf der Schiene 🚆</h1>
-          <p class="hero-copy">Hier findest du jeden Tag neue Bahnmeldungen aus skandinavischen Quellen – mit Links und kompaktem Überblick.</p>
-          <div class="fun-chips" aria-label="Themenbeispiele">
-            <span>🚄 Hochgeschwindigkeit</span>
-            <span>🛤️ Infrastruktur</span>
-            <span>🌙 Nachtzüge</span>
-          </div>
-        </div>
-        <div class="signal-panel" aria-label="Monitoring-Status">
-          <span class="signal-dot"></span>
-          <strong>Status: aktiv</strong>
-          <p>Neue Quellenmeldungen werden gesammelt und im Briefing zusammengeführt.</p>
+        <div class="hero-center">
+          <img class="hero-image" src="/images/header.png" alt="Zwei Personen lesen gemeinsam eine Zeitung">
+          <p class="hero-region">Skandinavien auf der Schiene</p>
+          <h1>Railnews</h1>
+          <p class="hero-copy">Tägliche Bahnmeldungen aus skandinavischen Quellen, kompakt zusammengeführt.</p>
+          <a class="hero-cta" href="#briefing">Aktuelles Briefing</a>
         </div>
       </div>
     </header>
 
     <main class="public-layout">
-      <section class="info-strip" aria-label="Informationen">
-        <article>
-          <span>Region</span>
-          <strong>Skandinavien</strong>
-        </article>
-        <article>
-          <span>Format</span>
-          <strong>Links + Kurztexte</strong>
-        </article>
-        <article>
-          <span>Rhythmus</span>
-          <strong>Täglich</strong>
-        </article>
-      </section>
-
-      <section class="briefings">
+      <section class="briefings" id="briefing">
         <div class="section-head">
           <div>
             <p class="section-kicker">Briefing</p>
             <h2>Aktuelle Lage</h2>
           </div>
-          <span id="status">Wird geladen</span>
         </div>
         <div id="briefingList" class="stack"></div>
       </section>
@@ -72,6 +40,10 @@
         <div id="articleList" class="article-grid"></div>
       </section>
     </main>
+
+    <footer class="public-footer">
+      <a class="admin-link" href="/admin/">Backend</a>
+    </footer>
 
     <script src="/app.js" type="module"></script>
   </body>

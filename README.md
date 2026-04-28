@@ -61,6 +61,10 @@ POST /api/cron/daily?secret=<CRON_SECRET>
 
 ## First source
 
-The app seeds `https://www.lok-report.de/` as the first source and focuses on Scandinavian railway topics by default.
+The app seeds these first sources and focuses on Scandinavian railway topics by default:
+
+- `https://www.lok-report.de/`
+- `https://jarnvagar.nu/`
+- `https://railmarket.com/eu/sweden/news`
 
 `FOCUS_KEYWORDS` acts as the region gate. The editable topics then classify or refine matching Scandinavian stories.

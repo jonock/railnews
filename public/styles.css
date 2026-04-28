@@ -28,6 +28,10 @@ body {
   color: var(--ink);
 }
 
+.public-page {
+  background: #f7f2e8;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -40,16 +44,8 @@ body::before {
   mask-image: linear-gradient(180deg, #000 0, transparent 72%);
 }
 
-body::after {
-  content: "";
-  position: fixed;
-  right: -120px;
-  top: 120px;
-  width: 360px;
-  height: 360px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 211, 111, .34), rgba(255, 211, 111, 0));
-  pointer-events: none;
+.public-page::before {
+  display: none;
 }
 
 button,
@@ -96,8 +92,8 @@ p {
 h1 {
   max-width: 980px;
   margin-bottom: 0;
-  font-size: clamp(3rem, 7vw, 6.8rem);
-  line-height: .93;
+  font-size: clamp(2.7rem, 5.4vw, 5.6rem);
+  line-height: .98;
   letter-spacing: 0;
 }
 
@@ -109,13 +105,13 @@ h2 {
 }
 
 .topbar {
-  min-height: 470px;
+  min-height: 360px;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 56px;
-  padding: 24px clamp(20px, 5vw, 72px) 52px;
+  gap: 44px;
+  padding: 24px clamp(20px, 5vw, 72px) 46px;
   color: #fff;
   overflow: hidden;
   background:
@@ -134,6 +130,20 @@ h2 {
   opacity: .78;
 }
 
+.public-page .topbar {
+  min-height: 760px;
+  margin: 0;
+  border-radius: 0;
+  padding: 22px clamp(22px, 4vw, 54px) 58px;
+  color: #111;
+  background: transparent;
+  box-shadow: none;
+}
+
+.public-page .topbar::after {
+  display: none;
+}
+
 .admin-topbar {
   min-height: 400px;
   background:
@@ -150,6 +160,11 @@ h2 {
   gap: 16px;
 }
 
+.public-page .site-nav {
+  color: #111;
+  justify-content: flex-end;
+}
+
 .brand-mark,
 .admin-link {
   display: inline-flex;
@@ -161,6 +176,39 @@ h2 {
   color: #fff;
   text-decoration: none;
   backdrop-filter: blur(18px);
+}
+
+.public-page .brand-mark {
+  border: 0;
+  background: transparent;
+  color: #111;
+  backdrop-filter: none;
+  padding: 0;
+}
+
+.public-page .brand-mark span {
+  display: none;
+}
+
+.public-page .admin-link {
+  min-height: 36px;
+  border: 0;
+  background: #111;
+  color: #fff;
+  padding: 0 18px;
+  font-size: .78rem;
+  letter-spacing: .02em;
+  backdrop-filter: none;
+}
+
+.public-footer {
+  display: flex;
+  justify-content: center;
+  padding: 10px clamp(20px, 5vw, 72px) 44px;
+}
+
+.public-footer .admin-link {
+  color: #fff;
 }
 
 .brand-mark {
@@ -194,6 +242,77 @@ h2 {
   gap: 28px;
 }
 
+.public-page .hero-grid,
+.admin-page .hero-grid {
+  grid-template-columns: 1fr;
+}
+
+.public-page .hero-grid {
+  min-height: 610px;
+  align-items: center;
+}
+
+.hero-center {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.hero-region {
+  margin: 0 0 18px;
+  color: #b9b2a5;
+  font-size: .82rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.hero-image {
+  width: min(100%, 980px);
+  aspect-ratio: 8 / 3;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  margin: 0 auto 44px;
+  border-radius: 18px;
+}
+
+.public-page h1 {
+  max-width: none;
+  color: #ff3f1f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(5.2rem, 17vw, 15rem);
+  font-weight: 500;
+  line-height: .82;
+  letter-spacing: -.03em;
+}
+
+.public-page .hero-copy {
+  max-width: 620px;
+  margin: 28px 0 0;
+  color: #24211d;
+  font-size: clamp(1rem, 1.5vw, 1.32rem);
+  line-height: 1.45;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin-top: 24px;
+  border-radius: 999px;
+  padding: 0 18px;
+  background: #111;
+  color: #fff;
+  text-decoration: none;
+  font-size: .74rem;
+  font-weight: 850;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
 .eyebrow,
 .section-kicker {
   margin: 0 0 10px;
@@ -216,55 +335,6 @@ h2 {
   line-height: 1.55;
 }
 
-.fun-chips {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.fun-chips span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, .34);
-  background: rgba(255, 255, 255, .18);
-  font-size: .84rem;
-  font-weight: 700;
-}
-
-.signal-panel {
-  border: 1px solid rgba(255, 255, 255, .28);
-  border-radius: 28px;
-  padding: 22px;
-  background: rgba(255, 255, 255, .14);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
-}
-
-.signal-panel strong {
-  display: block;
-  margin: 10px 0 8px;
-  font-size: 1.25rem;
-}
-
-.signal-panel p {
-  margin-bottom: 0;
-  color: rgba(255, 255, 255, .82);
-  line-height: 1.45;
-}
-
-.signal-dot {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--lime);
-  box-shadow: 0 0 0 8px rgba(200, 240, 74, .18);
-}
-
 .public-layout,
 .layout {
   position: relative;
@@ -277,20 +347,18 @@ h2 {
   gap: 24px;
 }
 
+.public-page .public-layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: 36px;
+}
+
 .layout {
   display: grid;
   grid-template-columns: minmax(310px, .86fr) minmax(0, 1.65fr);
   gap: 24px;
 }
 
-.info-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: -82px;
-}
-
-.info-strip article,
 .briefings,
 .settings section,
 .articles {
@@ -301,39 +369,19 @@ h2 {
   backdrop-filter: blur(20px);
 }
 
-.public-page .briefings {
-  position: relative;
-  overflow: hidden;
+.public-page .briefings,
+.public-page .articles {
+  border: 0;
+  border-radius: 26px;
+  background: #fffaf0;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
-.public-page .briefings::after {
-  content: "🎫";
-  position: absolute;
-  right: 22px;
-  top: 22px;
-  font-size: 2rem;
-  opacity: .22;
-}
-
-.info-strip article {
-  min-height: 124px;
-  display: grid;
-  align-content: center;
-  gap: 8px;
-  padding: 22px;
-}
-
-.info-strip span,
 .meta,
 .mini-item small,
 #status {
   color: var(--muted);
-}
-
-.info-strip strong {
-  color: var(--spruce-dark);
-  font-size: clamp(1.35rem, 2vw, 2.15rem);
-  line-height: 1;
 }
 
 .briefings,
@@ -565,13 +613,8 @@ menu {
 
 @media (max-width: 920px) {
   .hero-grid,
-  .layout,
-  .info-strip {
+  .layout {
     grid-template-columns: 1fr;
-  }
-
-  .info-strip {
-    margin-top: -52px;
   }
 
   .articles {
@@ -583,6 +626,16 @@ menu {
   .topbar {
     min-height: 560px;
     padding-top: 18px;
+  }
+
+  .public-page .topbar {
+    min-height: 620px;
+    margin: 0;
+    padding-inline: 18px;
+  }
+
+  .public-page .hero-grid {
+    min-height: 480px;
   }
 
   .admin-topbar {
@@ -605,11 +658,5 @@ menu {
 
   #status {
     align-self: flex-start;
-  }
-
-  body::after {
-    width: 260px;
-    height: 260px;
-    right: -100px;
   }
 }

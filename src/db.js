@@ -47,18 +47,22 @@ db.exec(`
   );
 `);
 
-const sourceCount = db.prepare('SELECT COUNT(*) AS count FROM sources').get().count;
-if (sourceCount === 0) {
-  db.prepare('INSERT INTO sources (name, url) VALUES (?, ?)').run('LOK Report', 'https://www.lok-report.de/');
-}
+const defaultSources = [
+  ['LOK Report', 'https://www.lok-report.de/'],
+  ['Järnvägar.nu', 'https://jarnvagar.nu/'],
+  ['RAILMARKET Sweden', 'https://railmarket.com/eu/sweden/news']
+];
+
+const insertSource = db.prepare('INSERT OR IGNORE INTO sources (name, url) VALUES (?, ?)');
+defaultSources.forEach(([name, url]) => insertSource.run(name, url));
 
 const topicCount = db.prepare('SELECT COUNT(*) AS count FROM topics').get().count;
 if (topicCount === 0) {
   const insertTopic = db.prepare('INSERT INTO topics (label, keywords) VALUES (?, ?)');
   [
-    ['Betrieb und Infrastruktur', 'Bahn,Eisenbahn,Zug,Strecke,Infrastruktur,railway,train,line,infrastructure,Korridor'],
-    ['Projekte und Ausschreibungen', 'Ausschreibung,Vergabe,Projekt,Modernisierung,contract,tender,upgrade,Ausbau'],
-    ['Fahrzeuge und Signaltechnik', 'Fahrzeug,Triebzug,Lokomotive,ERTMS,ETCS,Signal,rolling stock,locomotive']
+    ['Betrieb und Infrastruktur', 'Bahn,Eisenbahn,Zug,Strecke,Infrastruktur,railway,train,line,infrastructure,Korridor,järnväg,tåg,spår,trafik,underhåll,Malmbanan,Ostlänken'],
+    ['Projekte und Ausschreibungen', 'Ausschreibung,Vergabe,Projekt,Modernisierung,contract,tender,upgrade,Ausbau,upphandling,investering,nationella planen'],
+    ['Fahrzeuge und Signaltechnik', 'Fahrzeug,Triebzug,Lokomotive,ERTMS,ETCS,Signal,rolling stock,locomotive,fordon,signalsystem,X2000']
   ].forEach(([label, keywords]) => insertTopic.run(label, keywords));
 }
 
@@ -66,6 +70,18 @@ const renameTopic = db.prepare('UPDATE topics SET label = ? WHERE label = ?');
 renameTopic.run('Betrieb und Infrastruktur', 'Operations and infrastructure');
 renameTopic.run('Projekte und Ausschreibungen', 'Projects and tenders');
 renameTopic.run('Fahrzeuge und Signaltechnik', 'Rolling stock and signalling');
+
+function appendTopicKeywords(label, keywords) {
+  const topic = db.prepare('SELECT id, keywords FROM topics WHERE label = ?').get(label);
+  if (!topic) return;
+  const existing = new Set(topic.keywords.split(',').map((keyword) => keyword.trim()).filter(Boolean));
+  keywords.forEach((keyword) => existing.add(keyword));
+  db.prepare('UPDATE topics SET keywords = ? WHERE id = ?').run([...existing].join(','), topic.id);
+}
+
+appendTopicKeywords('Betrieb und Infrastruktur', ['järnväg', 'tåg', 'spår', 'trafik', 'underhåll', 'Malmbanan', 'Ostlänken']);
+appendTopicKeywords('Projekte und Ausschreibungen', ['upphandling', 'investering', 'nationella planen']);
+appendTopicKeywords('Fahrzeuge und Signaltechnik', ['fordon', 'signalsystem', 'X2000']);
 
 export function listSources() {
   return db.prepare('SELECT * FROM sources ORDER BY name').all();

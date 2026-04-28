@@ -1,4 +1,3 @@
-const status = document.querySelector('#status');
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');
 
@@ -49,13 +48,11 @@ function renderArticles(articles) {
 }
 
 async function load() {
-  status.textContent = 'Wird geladen';
   const data = await api('/api/public');
   renderBriefings(data.briefings);
   renderArticles(data.articles);
-  status.textContent = 'Aktualisiert';
 }
 
 load().catch((error) => {
-  status.textContent = error.message;
+  briefingList.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
 });
