@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v1';
+const CACHE_NAME = 'railnews-v2';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -36,6 +36,11 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  if (url.pathname.startsWith('/admin')) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirst(request));
