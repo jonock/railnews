@@ -36,6 +36,28 @@ button {
   cursor: pointer;
 }
 
+button.secondary,
+.admin-link {
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .4);
+}
+
+.admin-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.dialog-card button.secondary {
+  background: #e7ebe8;
+  color: var(--ink);
+  border: 0;
+}
+
 .topbar {
   min-height: 220px;
   display: flex;
@@ -47,6 +69,13 @@ button {
   background:
     linear-gradient(120deg, rgba(23, 33, 28, .88), rgba(20, 108, 91, .68)),
     url("https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1800&q=80") center/cover;
+}
+
+.admin-topbar {
+  min-height: 190px;
+  background:
+    linear-gradient(120deg, rgba(23, 33, 28, .92), rgba(41, 58, 76, .76)),
+    url("https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1800&q=80") center/cover;
 }
 
 .eyebrow {
@@ -69,13 +98,26 @@ h1 {
   letter-spacing: 0;
 }
 
+.hero-copy {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, .88);
+  line-height: 1.5;
+}
+
 h2 {
   font-size: 1rem;
 }
 
+.public-layout {
+  display: grid;
+  gap: 24px;
+  padding: 28px clamp(20px, 5vw, 72px) 48px;
+}
+
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(300px, .8fr);
+  grid-template-columns: minmax(300px, .85fr) minmax(0, 1.65fr);
   gap: 24px;
   padding: 28px clamp(20px, 5vw, 72px) 48px;
 }
@@ -106,6 +148,10 @@ h2 {
   grid-column: 1 / -1;
 }
 
+.actions {
+  margin: 0 0 18px;
+}
+
 .section-head {
   display: flex;
   align-items: center;
@@ -131,6 +177,12 @@ h2 {
 .briefing-card h3 {
   margin: 0 0 8px;
   font-size: 1.25rem;
+}
+
+.meta {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: .86rem;
 }
 
 .briefing-card pre {

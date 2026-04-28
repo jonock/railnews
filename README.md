@@ -19,6 +19,9 @@ npm run dev
 
 Then open `http://localhost:3000`.
 
+The public German website is available at `/`.
+The German backend for sources, topics, and manual briefing runs is available at `/admin/`.
+
 Create a briefing manually:
 
 ```bash

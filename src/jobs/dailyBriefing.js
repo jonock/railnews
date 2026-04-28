@@ -23,7 +23,7 @@ export async function runDailyBriefing(date = todayKey()) {
   `).all(date);
 
   const summary = await createBriefingText(articles);
-  const title = `Scandinavian Railway Briefing - ${date}`;
+  const title = `Skandinavien-Bahnbriefing - ${date}`;
   const articleIds = JSON.stringify(articles.map((article) => article.id));
 
   db.prepare(`

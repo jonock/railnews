@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Railnews Backend</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar admin-topbar">
+      <div>
+        <p class="eyebrow">Backend</p>
+        <h1>Recherche steuern</h1>
+        <p class="hero-copy">Quellen, Themen und die tägliche Briefing-Erstellung verwalten.</p>
+      </div>
+      <a class="admin-link" href="/">Öffentliche Seite</a>
+    </header>
+
+    <main class="layout">
+      <aside class="settings">
+        <section>
+          <h2>Quellen</h2>
+          <form id="sourceForm" class="form">
+            <input name="name" placeholder="Name der Quelle" required>
+            <input name="url" type="url" placeholder="https://example.com/news" required>
+            <button type="submit">Quelle hinzufügen</button>
+          </form>
+          <div id="sourceList" class="mini-list"></div>
+        </section>
+
+        <section>
+          <h2>Recherchethemen</h2>
+          <form id="topicForm" class="form">
+            <input name="label" placeholder="Thema" required>
+            <textarea name="keywords" placeholder="Kommagetrennte Keywords" required></textarea>
+            <button type="submit">Thema hinzufügen</button>
+          </form>
+          <div id="topicList" class="mini-list"></div>
+        </section>
+      </aside>
+
+      <section class="briefings">
+        <div class="section-head">
+          <h2>Briefings</h2>
+          <span id="status">Wird geladen</span>
+        </div>
+        <div class="actions">
+          <button id="runBriefing" type="button">Briefing jetzt erstellen</button>
+        </div>
+        <div id="briefingList" class="stack"></div>
+      </section>
+
+      <section class="articles">
+        <h2>Zuletzt gefundene Meldungen</h2>
+        <div id="articleList" class="article-grid"></div>
+      </section>
+    </main>
+
+    <dialog id="tokenDialog">
+      <form method="dialog" class="dialog-card">
+        <h2>Admin-Token</h2>
+        <input id="tokenInput" type="password" placeholder="ADMIN_TOKEN">
+        <menu>
+          <button value="cancel" class="secondary">Abbrechen</button>
+          <button id="saveToken" value="default">Speichern</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="/admin/admin.js" type="module"></script>
+  </body>
+</html>

@@ -18,11 +18,11 @@ export async function createBriefingText(articles) {
   const input = [
     {
       role: 'system',
-      content: 'You write concise daily railway sector briefings. Keep source links intact. Focus on Scandinavia and practical industry impact.'
+      content: 'Du schreibst knappe tägliche Briefings zur Eisenbahnbranche auf Deutsch. Erhalte Quellenlinks unverändert. Fokussiere auf Skandinavien und praktische Auswirkungen für die Branche.'
     },
     {
       role: 'user',
-      content: `Create a daily briefing from these articles. Group related updates, mention why each matters, and include each source URL.\n\n${JSON.stringify(articles, null, 2)}`
+      content: `Erstelle ein deutsches Tagesbriefing aus diesen Artikeln. Gruppiere zusammengehörige Meldungen, erkläre kurz die Relevanz und nenne jede Quellen-URL.\n\n${JSON.stringify(articles, null, 2)}`
     }
   ];
 

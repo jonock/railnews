@@ -15,7 +15,14 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-app.get('/api/state', (_req, res) => {
+app.get('/api/public', (_req, res) => {
+  res.json({
+    briefings: latestBriefings(),
+    articles: latestArticles()
+  });
+});
+
+app.get('/api/admin/state', requireAdmin, (_req, res) => {
   res.json({
     sources: listSources(),
     topics: listTopics(),

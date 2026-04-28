@@ -56,11 +56,16 @@ const topicCount = db.prepare('SELECT COUNT(*) AS count FROM topics').get().coun
 if (topicCount === 0) {
   const insertTopic = db.prepare('INSERT INTO topics (label, keywords) VALUES (?, ?)');
   [
-    ['Operations and infrastructure', 'Bahn,Eisenbahn,Zug,Strecke,Infrastruktur,railway,train,line,infrastructure,Korridor'],
-    ['Projects and tenders', 'Ausschreibung,Vergabe,Projekt,Modernisierung,contract,tender,upgrade,Ausbau'],
-    ['Rolling stock and signalling', 'Fahrzeug,Triebzug,Lokomotive,ERTMS,ETCS,Signal,rolling stock,locomotive']
+    ['Betrieb und Infrastruktur', 'Bahn,Eisenbahn,Zug,Strecke,Infrastruktur,railway,train,line,infrastructure,Korridor'],
+    ['Projekte und Ausschreibungen', 'Ausschreibung,Vergabe,Projekt,Modernisierung,contract,tender,upgrade,Ausbau'],
+    ['Fahrzeuge und Signaltechnik', 'Fahrzeug,Triebzug,Lokomotive,ERTMS,ETCS,Signal,rolling stock,locomotive']
   ].forEach(([label, keywords]) => insertTopic.run(label, keywords));
 }
+
+const renameTopic = db.prepare('UPDATE topics SET label = ? WHERE label = ?');
+renameTopic.run('Betrieb und Infrastruktur', 'Operations and infrastructure');
+renameTopic.run('Projekte und Ausschreibungen', 'Projects and tenders');
+renameTopic.run('Fahrzeuge und Signaltechnik', 'Rolling stock and signalling');
 
 export function listSources() {
   return db.prepare('SELECT * FROM sources ORDER BY name').all();
