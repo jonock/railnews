@@ -25,7 +25,10 @@ function escapeHtml(value = '') {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, options);
+  const response = await fetch(path, {
+    cache: 'no-store',
+    ...options
+  });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
@@ -61,7 +64,7 @@ function renderArticles(articles) {
 }
 
 async function load() {
-  const data = await api('/api/public');
+  const data = await api(`/api/public?t=${Date.now()}`);
   renderBriefings(data.briefings);
   renderArticles(data.articles);
 }

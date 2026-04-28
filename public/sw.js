@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v2';
+const CACHE_NAME = 'railnews-v3';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -43,7 +43,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 
@@ -62,15 +62,3 @@ async function cacheFirst(request) {
   return response;
 }
 
-async function networkFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
-  try {
-    const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
-    return response;
-  } catch (error) {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    throw error;
-  }
-}
