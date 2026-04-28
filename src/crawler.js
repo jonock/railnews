@@ -40,6 +40,73 @@ function parseGermanDate(text) {
   return `${year}-${month}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute}:00+01:00`;
 }
 
+function toIsoDateTime(year, month, day) {
+  if (!year || !month || !day) return null;
+  const y = String(year);
+  const m = String(month).padStart(2, '0');
+  const d = String(day).padStart(2, '0');
+  if (!/^\d{4}$/.test(y) || !/^\d{2}$/.test(m) || !/^\d{2}$/.test(d)) return null;
+  return `${y}-${m}-${d}T00:00:00Z`;
+}
+
+function parseRailmarketDateFromText(text) {
+  const normalized = cleanText(text);
+  if (!normalized) return null;
+
+  const ymd = normalized.match(/\b(20\d{2})[./-](\d{1,2})[./-](\d{1,2})\b/);
+  if (ymd) return toIsoDateTime(ymd[1], ymd[2], ymd[3]);
+
+  const dmy = normalized.match(/\b(\d{1,2})[./-](\d{1,2})[./-](20\d{2})\b/);
+  if (dmy) return toIsoDateTime(dmy[3], dmy[2], dmy[1]);
+
+  const monthMap = {
+    january: '01',
+    february: '02',
+    march: '03',
+    april: '04',
+    may: '05',
+    june: '06',
+    july: '07',
+    august: '08',
+    september: '09',
+    october: '10',
+    november: '11',
+    december: '12'
+  };
+  const monthName = normalized.match(/\b([A-Za-z]+)\s+(\d{1,2}),\s*(20\d{2})\b/);
+  if (monthName) {
+    const month = monthMap[monthName[1].toLowerCase()];
+    if (month) return toIsoDateTime(monthName[3], month, monthName[2]);
+  }
+
+  return null;
+}
+
+function parseRailmarketDate($, element, container, articleUrl) {
+  const parseIsoCandidate = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toISOString();
+  };
+
+  const elementDate = $(element).attr('datetime') || $(element).find('time[datetime]').first().attr('datetime');
+  const elementIso = parseIsoCandidate(elementDate);
+  if (elementIso) return elementIso;
+
+  const containerDate = container.find('time[datetime], [datetime]').first().attr('datetime');
+  const containerIso = parseIsoCandidate(containerDate);
+  if (containerIso) return containerIso;
+
+  const fromText = parseRailmarketDateFromText(container.text());
+  if (fromText) return fromText;
+
+  const fromUrl = articleUrl.match(/\/(20\d{2})[/-](\d{1,2})[/-](\d{1,2})(?:[/-]|$)/);
+  if (fromUrl) return toIsoDateTime(fromUrl[1], fromUrl[2], fromUrl[3]);
+
+  return null;
+}
+
 function topicMatches(article, topics) {
   const haystack = `${article.title} ${article.excerpt}`.toLowerCase();
   return topics
@@ -142,7 +209,7 @@ function extractRailmarket($, source) {
       url,
       title,
       excerpt: cleanText(container.text()).slice(0, 900),
-      publishedAt: null
+      publishedAt: parseRailmarketDate($, element, container, url)
     });
   });
   return articles;
