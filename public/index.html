@@ -6,27 +6,64 @@
     <title>Railnews - Skandinavien-Briefing</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
-  <body>
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Tägliches Eisenbahnbriefing</p>
-        <h1>Railnews</h1>
-        <p class="hero-copy">Aktuelle Meldungen zur Eisenbahnbranche in Skandinavien, kuratiert aus ausgewählten Quellen.</p>
+  <body class="public-page">
+    <header class="topbar public-hero">
+      <nav class="site-nav" aria-label="Hauptnavigation">
+        <a class="brand-mark" href="/">
+          <span>RN</span>
+          Railnews
+        </a>
+        <a class="admin-link" href="/admin/">Backend</a>
+      </nav>
+
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Tägliches Eisenbahnbriefing</p>
+          <h1>Skandinavien auf der Schiene</h1>
+          <p class="hero-copy">Kuratiertes Branchenmonitoring für Bahnprojekte, Infrastruktur, Betreiber und Fahrzeuge in Nordeuropa.</p>
+        </div>
+        <div class="signal-panel" aria-label="Monitoring-Status">
+          <span class="signal-dot"></span>
+          <strong>Täglicher Lauf</strong>
+          <p>Quellen prüfen, Relevanz filtern, Briefing erzeugen.</p>
+        </div>
       </div>
-      <a class="admin-link" href="/admin/">Backend</a>
     </header>
 
     <main class="public-layout">
+      <section class="info-strip" aria-label="Informationen">
+        <article>
+          <span>Fokus</span>
+          <strong>Skandinavien</strong>
+        </article>
+        <article>
+          <span>Quellen</span>
+          <strong>Erweiterbar</strong>
+        </article>
+        <article>
+          <span>Ausgabe</span>
+          <strong>Täglich</strong>
+        </article>
+      </section>
+
       <section class="briefings">
         <div class="section-head">
-          <h2>Aktuelle Briefings</h2>
+          <div>
+            <p class="section-kicker">Briefing</p>
+            <h2>Aktuelle Lage</h2>
+          </div>
           <span id="status">Wird geladen</span>
         </div>
         <div id="briefingList" class="stack"></div>
       </section>
 
       <section class="articles">
-        <h2>Gefundene Meldungen</h2>
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Quellenlage</p>
+            <h2>Gefundene Meldungen</h2>
+          </div>
+        </div>
         <div id="articleList" class="article-grid"></div>
       </section>
     </main>

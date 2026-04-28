@@ -6,19 +6,34 @@
     <title>Railnews Backend</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
-  <body>
+  <body class="admin-page">
     <header class="topbar admin-topbar">
-      <div>
-        <p class="eyebrow">Backend</p>
-        <h1>Recherche steuern</h1>
-        <p class="hero-copy">Quellen, Themen und die tägliche Briefing-Erstellung verwalten.</p>
+      <nav class="site-nav" aria-label="Backend-Navigation">
+        <a class="brand-mark" href="/">
+          <span>RN</span>
+          Railnews
+        </a>
+        <a class="admin-link" href="/">Öffentliche Seite</a>
+      </nav>
+
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Backend</p>
+          <h1>Recherche steuern</h1>
+          <p class="hero-copy">Quellen, Themen und die tägliche Briefing-Erstellung verwalten.</p>
+        </div>
+        <div class="signal-panel">
+          <span class="signal-dot"></span>
+          <strong>Adminbereich</strong>
+          <p>Geschützt über den gesetzten Admin-Token.</p>
+        </div>
       </div>
-      <a class="admin-link" href="/">Öffentliche Seite</a>
     </header>
 
     <main class="layout">
       <aside class="settings">
         <section>
+          <p class="section-kicker">Crawler</p>
           <h2>Quellen</h2>
           <form id="sourceForm" class="form">
             <input name="name" placeholder="Name der Quelle" required>
@@ -29,6 +44,7 @@
         </section>
 
         <section>
+          <p class="section-kicker">Filter</p>
           <h2>Recherchethemen</h2>
           <form id="topicForm" class="form">
             <input name="label" placeholder="Thema" required>
@@ -41,7 +57,10 @@
 
       <section class="briefings">
         <div class="section-head">
-          <h2>Briefings</h2>
+          <div>
+            <p class="section-kicker">Ausgabe</p>
+            <h2>Briefings</h2>
+          </div>
           <span id="status">Wird geladen</span>
         </div>
         <div class="actions">
@@ -51,6 +70,7 @@
       </section>
 
       <section class="articles">
+        <p class="section-kicker">Kontrolle</p>
         <h2>Zuletzt gefundene Meldungen</h2>
         <div id="articleList" class="article-grid"></div>
       </section>
