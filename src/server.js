@@ -32,21 +32,22 @@ app.get('/api/admin/state', requireAdmin, (_req, res) => {
 });
 
 app.post('/api/sources', requireAdmin, (req, res) => {
-  const { name, url } = req.body;
+  const { name, url, keywords = '' } = req.body;
   if (!name || !url) return res.status(400).json({ error: 'name and url are required' });
-  const result = db.prepare('INSERT INTO sources (name, url) VALUES (?, ?)').run(name.trim(), url.trim());
+  const result = db.prepare('INSERT INTO sources (name, url, keywords) VALUES (?, ?, ?)').run(name.trim(), url.trim(), keywords.trim());
   res.status(201).json({ id: result.lastInsertRowid });
 });
 
 app.patch('/api/sources/:id', requireAdmin, (req, res) => {
-  const { name, url, active } = req.body;
+  const { name, url, keywords, active } = req.body;
   db.prepare(`
     UPDATE sources
     SET name = COALESCE(?, name),
         url = COALESCE(?, url),
+        keywords = COALESCE(?, keywords),
         active = COALESCE(?, active)
     WHERE id = ?
-  `).run(name?.trim(), url?.trim(), active === undefined ? null : Number(Boolean(active)), req.params.id);
+  `).run(name?.trim(), url?.trim(), keywords?.trim(), active === undefined ? null : Number(Boolean(active)), req.params.id);
   res.json({ ok: true });
 });
 

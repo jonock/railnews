@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Railnews Backend</title>
+    <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body class="admin-page">
@@ -33,6 +34,7 @@
           <form id="sourceForm" class="form">
             <input name="name" placeholder="Name der Quelle" required>
             <input name="url" type="url" placeholder="https://example.com/news" required>
+            <textarea name="keywords" placeholder="Quellenspezifische Keywords, kommagetrennt"></textarea>
             <button type="submit">Quelle hinzufügen</button>
           </form>
           <div id="sourceList" class="mini-list"></div>
@@ -78,6 +80,29 @@
         <menu>
           <button value="cancel" class="secondary">Abbrechen</button>
           <button id="saveToken" value="default">Speichern</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="sourceDialog">
+      <form method="dialog" class="dialog-card source-editor">
+        <h2>Quellen-Keywords</h2>
+        <input type="hidden" id="sourceIdInput">
+        <label>
+          Quelle
+          <input id="sourceNameInput" type="text">
+        </label>
+        <label>
+          URL
+          <input id="sourceUrlInput" type="url">
+        </label>
+        <label>
+          Keywords
+          <textarea id="sourceKeywordsInput" placeholder="Kommagetrennte Keywords"></textarea>
+        </label>
+        <menu>
+          <button value="cancel" class="secondary">Abbrechen</button>
+          <button id="saveSource" value="default">Speichern</button>
         </menu>
       </form>
     </dialog>

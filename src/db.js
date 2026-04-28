@@ -14,6 +14,7 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     url TEXT NOT NULL UNIQUE,
+    keywords TEXT NOT NULL DEFAULT '',
     active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
@@ -47,14 +48,23 @@ db.exec(`
   );
 `);
 
+const sourceColumns = db.prepare('PRAGMA table_info(sources)').all().map((column) => column.name);
+if (!sourceColumns.includes('keywords')) {
+  db.exec("ALTER TABLE sources ADD COLUMN keywords TEXT NOT NULL DEFAULT ''");
+}
+
 const defaultSources = [
-  ['LOK Report', 'https://www.lok-report.de/'],
-  ['Järnvägar.nu', 'https://jarnvagar.nu/'],
-  ['RAILMARKET Sweden', 'https://railmarket.com/eu/sweden/news']
+  ['LOK Report', 'https://www.lok-report.de/', 'Schweden,Norwegen,Dänemark,Finnland,Skandinavien,Trafikverket,Bane NOR,Banedanmark,DSB,SJ,VR'],
+  ['Järnvägar.nu', 'https://jarnvagar.nu/', 'järnväg,tåg,spår,trafik,underhåll,Ostlänken,Malmbanan,X2000,SJ,Trafikverket,nationella planen,nattåg'],
+  ['RAILMARKET Sweden', 'https://railmarket.com/eu/sweden/news', 'Sweden,Swedish,SJ,Trafikverket,Green Cargo,Transitio,Norrtåg,Stockholm,Gothenburg,Malmö,Kiruna']
 ];
 
-const insertSource = db.prepare('INSERT OR IGNORE INTO sources (name, url) VALUES (?, ?)');
-defaultSources.forEach(([name, url]) => insertSource.run(name, url));
+const insertSource = db.prepare('INSERT OR IGNORE INTO sources (name, url, keywords) VALUES (?, ?, ?)');
+const updateEmptySourceKeywords = db.prepare("UPDATE sources SET keywords = ? WHERE url = ? AND TRIM(keywords) = ''");
+defaultSources.forEach(([name, url, keywords]) => {
+  insertSource.run(name, url, keywords);
+  updateEmptySourceKeywords.run(keywords, url);
+});
 
 const topicCount = db.prepare('SELECT COUNT(*) AS count FROM topics').get().count;
 if (topicCount === 0) {
@@ -82,6 +92,70 @@ function appendTopicKeywords(label, keywords) {
 appendTopicKeywords('Betrieb und Infrastruktur', ['järnväg', 'tåg', 'spår', 'trafik', 'underhåll', 'Malmbanan', 'Ostlänken']);
 appendTopicKeywords('Projekte und Ausschreibungen', ['upphandling', 'investering', 'nationella planen']);
 appendTopicKeywords('Fahrzeuge und Signaltechnik', ['fordon', 'signalsystem', 'X2000']);
+
+function seedStarterContent() {
+  const articleCount = db.prepare('SELECT COUNT(*) AS count FROM articles').get().count;
+  if (articleCount > 0) return;
+
+  const sources = Object.fromEntries(db.prepare('SELECT id, name FROM sources').all().map((source) => [source.name, source.id]));
+  const insertArticle = db.prepare(`
+    INSERT OR IGNORE INTO articles (source_id, url, title, excerpt, published_at, matched_topics)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+
+  const starterArticles = [
+    [
+      sources['Järnvägar.nu'],
+      'https://jarnvagar.nu/stopp-for-ostlanken-och-tenhult-byarum/',
+      'Stopp för Ostlänken och Tenhult–Byarum',
+      'Die schwedische Infrastrukturplanung verschiebt Prioritäten: Ostlänken wird gekürzt, Tenhult–Byarum gestoppt und andere Bahnprojekte werden neu bewertet.',
+      '2026-04-28T08:00:00+02:00',
+      ['Betrieb und Infrastruktur', 'Projekte und Ausschreibungen']
+    ],
+    [
+      sources['Järnvägar.nu'],
+      'https://jarnvagar.nu/okad-satsning-pa-malmbanan/',
+      'Ökad satsning på Malmbanan',
+      'Mehr Aufmerksamkeit für die Malmbanan: Die wichtige Erzbahn im Norden bleibt ein Schwerpunkt für Kapazität, Unterhalt und robuste Güterverkehre.',
+      '2026-04-27T08:00:00+02:00',
+      ['Betrieb und Infrastruktur']
+    ],
+    [
+      sources['Järnvägar.nu'],
+      'https://jarnvagar.nu/totalstopp-for-x2000-efter-hjulskada/',
+      'Totalstopp för X2000 efter hjulskada',
+      'SJ stoppte den X2000-Verkehr nach einem Radschaden vorübergehend. Der Vorfall zeigt, wie sensibel Fahrzeugverfügbarkeit und Flottenkontrolle bleiben.',
+      '2026-04-26T08:00:00+02:00',
+      ['Fahrzeuge und Signaltechnik']
+    ]
+  ];
+
+  const articleIds = [];
+  starterArticles.forEach(([sourceId, url, title, excerpt, publishedAt, topics]) => {
+    if (!sourceId) return;
+    const result = insertArticle.run(sourceId, url, title, excerpt, publishedAt, JSON.stringify(topics));
+    const article = db.prepare('SELECT id FROM articles WHERE url = ?').get(url);
+    if (article) articleIds.push(article.id);
+  });
+
+  db.prepare(`
+    INSERT OR IGNORE INTO briefings (briefing_date, title, summary, article_ids)
+    VALUES (?, ?, ?, ?)
+  `).run(
+    '2026-04-28',
+    'Skandinavien-Bahnbriefing - 2026-04-28',
+    [
+      'Schweden steht diese Woche im Mittelpunkt: Die neue Infrastrukturplanung verschiebt einzelne Projektprioritäten, während die Malmbanan weiter als strategische Güterachse hervorsticht.',
+      '',
+      'Besonders relevant sind die Entscheidungen rund um Ostlänken und Tenhult–Byarum. Sie zeigen, dass Kapazitätsausbau, Finanzierung und Umsetzbarkeit stärker gegeneinander abgewogen werden.',
+      '',
+      'Im Fahrzeugbereich bleibt die X2000-Flotte im Blick. Der kurzzeitige Verkehrsstopp nach einem Radschaden unterstreicht die Bedeutung von Verfügbarkeit und technischer Überwachung im Fernverkehr.'
+    ].join('\n'),
+    JSON.stringify(articleIds)
+  );
+}
+
+seedStarterContent();
 
 export function listSources() {
   return db.prepare('SELECT * FROM sources ORDER BY name').all();

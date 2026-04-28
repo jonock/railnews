@@ -78,6 +78,13 @@ button.secondary {
   box-shadow: none;
 }
 
+.mini-item button {
+  justify-self: start;
+  min-height: 34px;
+  padding-inline: 12px;
+  font-size: .78rem;
+}
+
 a {
   color: inherit;
 }
@@ -601,6 +608,19 @@ dialog {
 .dialog-card {
   width: min(420px, 90vw);
   padding: 26px;
+}
+
+.dialog-card label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: .85rem;
+  font-weight: 750;
+}
+
+.source-editor {
+  width: min(640px, 92vw);
 }
 
 menu {

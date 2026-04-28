@@ -8,6 +8,13 @@ const sourceList = document.querySelector('#sourceList');
 const topicList = document.querySelector('#topicList');
 const articleList = document.querySelector('#articleList');
 const tokenDialog = document.querySelector('#tokenDialog');
+const sourceDialog = document.querySelector('#sourceDialog');
+const sourceIdInput = document.querySelector('#sourceIdInput');
+const sourceNameInput = document.querySelector('#sourceNameInput');
+const sourceUrlInput = document.querySelector('#sourceUrlInput');
+const sourceKeywordsInput = document.querySelector('#sourceKeywordsInput');
+
+let currentSources = [];
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
@@ -50,11 +57,14 @@ function renderBriefings(briefings) {
 }
 
 function renderSources(sources) {
+  currentSources = sources;
   sourceList.innerHTML = sources.map((source) => `
     <div class="mini-item">
       <strong>${escapeHtml(source.name)}</strong>
       <small>${escapeHtml(source.url)}</small>
+      <small>${escapeHtml(source.keywords || 'Keine Keywords gesetzt')}</small>
       <small>${source.active ? 'Aktiv' : 'Pausiert'}</small>
+      <button class="secondary edit-source" type="button" data-source-id="${source.id}">Keywords bearbeiten</button>
     </div>
   `).join('');
 }
@@ -101,6 +111,33 @@ document.querySelector('#sourceForm').addEventListener('submit', async (event) =
     body: JSON.stringify(Object.fromEntries(form))
   });
   event.currentTarget.reset();
+  await load();
+});
+
+sourceList.addEventListener('click', (event) => {
+  const button = event.target.closest('.edit-source');
+  if (!button) return;
+  const source = currentSources.find((item) => String(item.id) === button.dataset.sourceId);
+  if (!source) return;
+
+  sourceIdInput.value = source.id;
+  sourceNameInput.value = source.name;
+  sourceUrlInput.value = source.url;
+  sourceKeywordsInput.value = source.keywords || '';
+  sourceDialog.showModal();
+});
+
+document.querySelector('#saveSource').addEventListener('click', async (event) => {
+  event.preventDefault();
+  await api(`/api/sources/${sourceIdInput.value}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      name: sourceNameInput.value,
+      url: sourceUrlInput.value,
+      keywords: sourceKeywordsInput.value
+    })
+  });
+  sourceDialog.close();
   await load();
 });
 

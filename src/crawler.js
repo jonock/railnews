@@ -62,6 +62,19 @@ function matchesFocus(article) {
   });
 }
 
+function matchesSourceKeywords(article, source) {
+  const keywords = source.keywords?.split(',').map((keyword) => keyword.trim().toLowerCase()).filter(Boolean) || [];
+  if (keywords.length === 0) return matchesFocus(article);
+
+  const haystack = `${article.title} ${article.excerpt}`.toLowerCase();
+  return keywords.some((keyword) => {
+    if (keyword.length <= 3) {
+      return new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegex(keyword)}([^\\p{L}\\p{N}]|$)`, 'iu').test(haystack);
+    }
+    return haystack.includes(keyword);
+  });
+}
+
 function sourceImpliesFocus(source) {
   return source.url.includes('jarnvagar.nu') || source.url.includes('railmarket.com/eu/sweden');
 }
@@ -179,7 +192,7 @@ export async function crawlSources() {
       for (const article of extracted) {
         if (seen.has(article.url)) continue;
         seen.add(article.url);
-        if (!sourceImpliesFocus(source) && !matchesFocus(article)) continue;
+        if (!sourceImpliesFocus(source) && !matchesSourceKeywords(article, source)) continue;
         const matches = topicMatches(article, topics);
         insert.run({
           sourceId: source.id,
