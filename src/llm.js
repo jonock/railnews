@@ -29,24 +29,30 @@ export async function createBriefingText(articles) {
     }
   ];
 
-  const response = await fetch(`${config.openai.baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${config.openai.apiKey}`,
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: config.openai.model,
-      messages: input,
-      temperature: 0.2
-    })
-  });
+  try {
+    const response = await fetch(`${config.openai.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${config.openai.apiKey}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: config.openai.model,
+        messages: input,
+        temperature: 0.2
+      })
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Briefing-LLM-Anfrage fehlgeschlagen: ${response.status} ${error}`);
+    if (!response.ok) {
+      const error = await response.text();
+      console.error(`Briefing-LLM-Anfrage fehlgeschlagen: ${response.status} ${error}`);
+      return extractiveBriefing(articles);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || extractiveBriefing(articles);
+  } catch (error) {
+    console.error('Briefing-LLM-Anfrage fehlgeschlagen:', error);
+    return extractiveBriefing(articles);
   }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content?.trim() || extractiveBriefing(articles);
 }

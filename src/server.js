@@ -81,7 +81,7 @@ app.post('/api/public/stories', async (req, res, next) => {
       JSON.stringify(['Manuell'])
     );
 
-    const briefing = await runDailyBriefing(todayKey());
+    const briefing = await runDailyBriefing(todayKey(), { crawl: false });
     res.status(201).json({ ok: true, briefing });
   } catch (error) {
     next(error);

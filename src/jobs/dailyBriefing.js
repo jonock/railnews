@@ -11,8 +11,8 @@ function todayKey() {
   }).format(new Date());
 }
 
-export async function runDailyBriefing(date = todayKey()) {
-  const crawlResults = await crawlSources();
+export async function runDailyBriefing(date = todayKey(), options = {}) {
+  const crawlResults = options.crawl === false ? [] : await crawlSources();
   const articles = db.prepare(`
     SELECT articles.*, sources.name AS source_name
     FROM articles
