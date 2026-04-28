@@ -307,6 +307,7 @@ h2 {
 .hero-cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 40px;
   margin-top: 24px;
   border-radius: 999px;
@@ -318,6 +319,24 @@ h2 {
   font-weight: 850;
   letter-spacing: .04em;
   text-transform: uppercase;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.hero-actions .hero-cta {
+  margin-top: 24px;
+}
+
+.secondary-cta {
+  border: 1px solid #111;
+  background: transparent;
+  color: #111;
+  box-shadow: none;
 }
 
 .eyebrow,
@@ -621,6 +640,16 @@ dialog {
 
 .source-editor {
   width: min(640px, 92vw);
+}
+
+.story-form {
+  width: min(620px, 92vw);
+}
+
+.form-status {
+  min-height: 20px;
+  color: var(--muted);
+  font-size: .9rem;
 }
 
 menu {

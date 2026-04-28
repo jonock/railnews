@@ -3,8 +3,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d5f4b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Railnews">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Railnews - Skandinavien-Briefing</title>
     <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body class="public-page">
@@ -15,7 +22,10 @@
           <p class="hero-region">Skandinavien auf der Schiene</p>
           <h1>Railnews</h1>
           <p class="hero-copy">Tägliche Bahnmeldungen aus skandinavischen Quellen, kompakt zusammengeführt.</p>
-          <a class="hero-cta" href="#briefing">Aktuelles Briefing</a>
+          <div class="hero-actions">
+            <a class="hero-cta" href="#briefing">Aktuelles Briefing</a>
+            <button class="hero-cta secondary-cta" id="openStoryDialog" type="button">Meldung hinzufügen</button>
+          </div>
         </div>
       </div>
     </header>
@@ -45,6 +55,29 @@
     <footer class="public-footer">
       <a class="admin-link" href="/admin/">Backend</a>
     </footer>
+
+    <dialog id="storyDialog">
+      <form method="dialog" class="dialog-card story-form">
+        <h2>Meldung hinzufügen</h2>
+        <label>
+          Titel
+          <input id="storyTitle" type="text" placeholder="Titel der Meldung" required>
+        </label>
+        <label>
+          Link
+          <input id="storyUrl" type="url" placeholder="https://..." required>
+        </label>
+        <label>
+          Kurznotiz
+          <textarea id="storyExcerpt" placeholder="Warum ist die Meldung relevant?"></textarea>
+        </label>
+        <p id="storyStatus" class="form-status"></p>
+        <menu>
+          <button value="cancel" class="secondary" type="button" id="cancelStory">Abbrechen</button>
+          <button id="saveStory" value="default" type="submit">Speichern</button>
+        </menu>
+      </form>
+    </dialog>
 
     <script src="/app.js" type="module"></script>
   </body>

@@ -54,15 +54,16 @@ if (!sourceColumns.includes('keywords')) {
 }
 
 const defaultSources = [
-  ['LOK Report', 'https://www.lok-report.de/', 'Schweden,Norwegen,Dänemark,Finnland,Skandinavien,Trafikverket,Bane NOR,Banedanmark,DSB,SJ,VR'],
-  ['Järnvägar.nu', 'https://jarnvagar.nu/', 'järnväg,tåg,spår,trafik,underhåll,Ostlänken,Malmbanan,X2000,SJ,Trafikverket,nationella planen,nattåg'],
-  ['RAILMARKET Sweden', 'https://railmarket.com/eu/sweden/news', 'Sweden,Swedish,SJ,Trafikverket,Green Cargo,Transitio,Norrtåg,Stockholm,Gothenburg,Malmö,Kiruna']
+  ['LOK Report', 'https://www.lok-report.de/', 'Schweden,Norwegen,Dänemark,Finnland,Skandinavien,Trafikverket,Bane NOR,Banedanmark,DSB,SJ,VR', 1],
+  ['Järnvägar.nu', 'https://jarnvagar.nu/', 'järnväg,tåg,spår,trafik,underhåll,Ostlänken,Malmbanan,X2000,SJ,Trafikverket,nationella planen,nattåg', 1],
+  ['RAILMARKET Sweden', 'https://railmarket.com/eu/sweden/news', 'Sweden,Swedish,SJ,Trafikverket,Green Cargo,Transitio,Norrtåg,Stockholm,Gothenburg,Malmö,Kiruna', 1],
+  ['Manuelle Meldungen', 'https://railnews.local/manual-stories', 'manuell,Einreichung,Story', 0]
 ];
 
-const insertSource = db.prepare('INSERT OR IGNORE INTO sources (name, url, keywords) VALUES (?, ?, ?)');
+const insertSource = db.prepare('INSERT OR IGNORE INTO sources (name, url, keywords, active) VALUES (?, ?, ?, ?)');
 const updateEmptySourceKeywords = db.prepare("UPDATE sources SET keywords = ? WHERE url = ? AND TRIM(keywords) = ''");
-defaultSources.forEach(([name, url, keywords]) => {
-  insertSource.run(name, url, keywords);
+defaultSources.forEach(([name, url, keywords, active]) => {
+  insertSource.run(name, url, keywords, active);
   updateEmptySourceKeywords.run(keywords, url);
 });
 

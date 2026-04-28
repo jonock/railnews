@@ -1,5 +1,18 @@
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');
+const storyDialog = document.querySelector('#storyDialog');
+const storyStatus = document.querySelector('#storyStatus');
+const storyTitle = document.querySelector('#storyTitle');
+const storyUrl = document.querySelector('#storyUrl');
+const storyExcerpt = document.querySelector('#storyExcerpt');
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((error) => {
+      console.warn('Service worker registration failed', error);
+    });
+  });
+}
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
@@ -11,8 +24,8 @@ function escapeHtml(value = '') {
   })[character]);
 }
 
-async function api(path) {
-  const response = await fetch(path);
+async function api(path, options = {}) {
+  const response = await fetch(path, options);
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
@@ -52,6 +65,41 @@ async function load() {
   renderBriefings(data.briefings);
   renderArticles(data.articles);
 }
+
+document.querySelector('#openStoryDialog').addEventListener('click', () => {
+  storyStatus.textContent = '';
+  storyDialog.showModal();
+});
+
+document.querySelector('#cancelStory').addEventListener('click', () => {
+  storyDialog.close();
+});
+
+document.querySelector('.story-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  storyStatus.textContent = 'Meldung wird gespeichert und Briefing neu erstellt...';
+
+  try {
+    await api('/api/public/stories', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: storyTitle.value,
+        url: storyUrl.value,
+        excerpt: storyExcerpt.value
+      })
+    });
+
+    storyTitle.value = '';
+    storyUrl.value = '';
+    storyExcerpt.value = '';
+    storyDialog.close();
+    await load();
+    document.querySelector('#briefing').scrollIntoView({ behavior: 'smooth' });
+  } catch (error) {
+    storyStatus.textContent = error.message;
+  }
+});
 
 load().catch((error) => {
   briefingList.innerHTML = `<p>${escapeHtml(error.message)}</p>`;

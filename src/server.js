@@ -31,6 +31,63 @@ app.get('/api/admin/state', requireAdmin, (_req, res) => {
   });
 });
 
+function todayKey() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Zurich',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+}
+
+function manualSourceId() {
+  db.prepare(`
+    INSERT OR IGNORE INTO sources (name, url, keywords, active)
+    VALUES (?, ?, ?, 0)
+  `).run('Manuelle Meldungen', 'https://railnews.local/manual-stories', 'manuell,Einreichung,Story');
+  return db.prepare('SELECT id FROM sources WHERE url = ?').get('https://railnews.local/manual-stories').id;
+}
+
+app.post('/api/public/stories', async (req, res, next) => {
+  try {
+    const { title, url, excerpt = '' } = req.body;
+    if (!title || !url) return res.status(400).json({ error: 'title and url are required' });
+
+    let normalizedUrl;
+    try {
+      normalizedUrl = new URL(url).toString();
+    } catch {
+      return res.status(400).json({ error: 'url must be a valid URL' });
+    }
+
+    const cleanTitle = title.trim().slice(0, 240);
+    const cleanExcerpt = excerpt.trim().slice(0, 1000);
+    if (cleanTitle.length < 6) return res.status(400).json({ error: 'title is too short' });
+
+    db.prepare(`
+      INSERT INTO articles (source_id, url, title, excerpt, published_at, matched_topics)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(url) DO UPDATE SET
+        title = excluded.title,
+        excerpt = excluded.excerpt,
+        published_at = excluded.published_at,
+        matched_topics = excluded.matched_topics
+    `).run(
+      manualSourceId(),
+      normalizedUrl,
+      cleanTitle,
+      cleanExcerpt || 'Manuell hinzugefügte Meldung für das heutige Briefing.',
+      new Date().toISOString(),
+      JSON.stringify(['Manuell'])
+    );
+
+    const briefing = await runDailyBriefing(todayKey());
+    res.status(201).json({ ok: true, briefing });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post('/api/sources', requireAdmin, (req, res) => {
   const { name, url, keywords = '' } = req.body;
   if (!name || !url) return res.status(400).json({ error: 'name and url are required' });
