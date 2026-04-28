@@ -171,6 +171,13 @@ async function enrichJarnvagarPublishedAt(articles) {
   }));
 }
 
+async function enrichRailmarketPublishedAt(articles) {
+  await Promise.all(articles.map(async (article) => {
+    if (article.publishedAt) return;
+    article.publishedAt = await parseRailmarketPublishedAt(article.url);
+  }));
+}
+
 async function parseRailmarketPublishedAt(articleUrl) {
   try {
     const response = await fetch(articleUrl, {
@@ -357,6 +364,9 @@ export async function crawlSources() {
       const extracted = extractArticles($, source);
       if (source.url.includes('jarnvagar.nu')) {
         await enrichJarnvagarPublishedAt(extracted);
+      }
+      if (source.url.includes('railmarket.com')) {
+        await enrichRailmarketPublishedAt(extracted);
       }
       const seen = new Set();
       let saved = 0;

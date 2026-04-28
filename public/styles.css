@@ -633,6 +633,30 @@ h2 {
   line-height: 1.62;
 }
 
+.briefing-body {
+  color: #2d3832;
+}
+
+.briefing-body h4,
+.briefing-body h5 {
+  margin: 20px 0 8px;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.briefing-body h4 {
+  font-size: 1.08rem;
+}
+
+.briefing-body h5 {
+  font-size: 1rem;
+}
+
+.briefing-body p {
+  margin: 0 0 14px;
+  line-height: 1.62;
+}
+
 .form {
   display: grid;
   gap: 10px;

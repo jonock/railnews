@@ -33,6 +33,20 @@ function escapeHtml(value = '') {
   })[character]);
 }
 
+function renderBriefingBody(text = '') {
+  const escaped = escapeHtml(text);
+  return escaped
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      if (block.startsWith('## ')) return `<h4>${block.slice(3)}</h4>`;
+      if (block.startsWith('### ')) return `<h5>${block.slice(4)}</h5>`;
+      return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+    })
+    .join('');
+}
+
 function formatDate(value) {
   if (!value) return '';
   return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(value));
@@ -63,7 +77,7 @@ function renderBriefings(briefings) {
     <article class="briefing-card">
       <p class="meta">${escapeHtml(briefing.briefing_date)}</p>
       <h3>${escapeHtml(briefing.title)}</h3>
-      <pre>${escapeHtml(briefing.summary)}</pre>
+      <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
     </article>
   `).join('') : '<p>Noch keine Briefings vorhanden.</p>';
 }
