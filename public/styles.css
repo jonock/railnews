@@ -563,6 +563,23 @@ h2 {
 
 .actions {
   margin: 0 0 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.actions-main,
+.actions-maintenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actions-main button {
+  min-width: 220px;
+}
+
+.actions-maintenance button {
+  min-width: 260px;
 }
 
 .stack {
@@ -835,5 +852,11 @@ menu {
 
   #status {
     align-self: flex-start;
+  }
+
+  .actions-main button,
+  .actions-maintenance button {
+    width: 100%;
+    min-width: 0;
   }
 }

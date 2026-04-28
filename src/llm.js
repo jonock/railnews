@@ -5,14 +5,23 @@ function extractiveBriefing(articles) {
     return 'Heute wurden keine passenden Eisenbahnmeldungen aus Skandinavien gefunden.';
   }
 
-  const intro = 'Automatisch erzeugtes deutschsprachiges Kurzbriefing auf Basis der gefundenen Quellenmeldungen.';
-  const items = articles.map((article) => {
-    const topics = JSON.parse(article.matched_topics || '[]').join(', ');
-    const source = article.source_name ? ` von ${article.source_name}` : '';
-    return `- Originaltitel: ${article.title}${topics ? ` (${topics})` : ''}\n  Einordnung: Diese Meldung${source} wurde als relevant für das skandinavische Bahnmonitoring erkannt. Bitte die Quelle für Details, Zahlen und Originalformulierungen prüfen.\n  Quelle: ${article.url}`;
+  const grouped = new Map();
+  for (const article of articles) {
+    const topics = JSON.parse(article.matched_topics || '[]');
+    const primaryTopic = topics[0] || 'Allgemeine Entwicklungen';
+    if (!grouped.has(primaryTopic)) grouped.set(primaryTopic, []);
+    grouped.get(primaryTopic).push(article);
+  }
+
+  const sections = [...grouped.entries()].map(([topic, topicArticles]) => {
+    const paragraphs = topicArticles.map((article) => {
+      const source = article.source_name ? ` (${article.source_name})` : '';
+      return `${article.title}${source}. Quelle: ${article.url}`;
+    }).join('\n\n');
+    return `## ${topic}\n${paragraphs}`;
   }).join('\n\n');
 
-  return `${intro}\n\n${items}`;
+  return `Automatisch erzeugtes deutschsprachiges Kurzbriefing auf Basis der gefundenen Quellenmeldungen.\n\n${sections}`;
 }
 
 export async function createBriefingText(articles) {
@@ -21,11 +30,26 @@ export async function createBriefingText(articles) {
   const input = [
     {
       role: 'system',
-      content: 'Du schreibst ausschließlich auf Deutsch. Du erstellst knappe tägliche Briefings zur Eisenbahnbranche. Übersetze fremdsprachige Inhalte sinngemäß ins Deutsche, erhalte Quellenlinks unverändert und fokussiere auf Skandinavien sowie praktische Auswirkungen für die Branche.'
+      content: 'Du schreibst ausschließlich auf Deutsch. Du erstellst knappe tägliche Briefings zur Eisenbahnbranche. Übersetze fremdsprachige Inhalte sinngemäß ins Deutsche, erhalte Quellenlinks unverändert und fokussiere auf Skandinavien sowie praktische Auswirkungen für die Branche. Antworte mit klaren Zwischentiteln und kurzen Absätzen.'
     },
     {
       role: 'user',
-      content: `Erstelle ein Tagesbriefing vollständig auf Deutsch aus diesen Artikeln. Gruppiere zusammengehörige Meldungen, übersetze schwedische oder englische Titel/Inhalte sinngemäß, erkläre kurz die Relevanz und nenne jede Quellen-URL.\n\n${JSON.stringify(articles, null, 2)}`
+      content: `Erstelle ein Tagesbriefing vollständig auf Deutsch aus diesen Artikeln.
+
+Formatvorgaben:
+- Verwende nur Zwischentitel (Markdown "## ...") und darunter kurze Absätze.
+- KEINE nummerierten Listen.
+- KEINE Bullet-Listen.
+- Jeder Absatz muss mindestens eine konkrete Quellen-URL enthalten.
+- Gruppiere zusammengehörige Meldungen pro Zwischentitel.
+- Beende mit einem kurzen Abschnitt "## Einordnung" als Fließtext.
+
+Inhalt:
+- Übersetze schwedische oder englische Titel/Inhalte sinngemäß.
+- Erkläre kurz die Relevanz für die Bahnbranche in Skandinavien.
+
+Artikel:
+${JSON.stringify(articles, null, 2)}`
     }
   ];
 
