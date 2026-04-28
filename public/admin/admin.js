@@ -13,6 +13,8 @@ const sourceIdInput = document.querySelector('#sourceIdInput');
 const sourceNameInput = document.querySelector('#sourceNameInput');
 const sourceUrlInput = document.querySelector('#sourceUrlInput');
 const sourceKeywordsInput = document.querySelector('#sourceKeywordsInput');
+const runBriefingButton = document.querySelector('#runBriefing');
+const runCrawlButton = document.querySelector('#runCrawl');
 
 let currentSources = [];
 
@@ -103,6 +105,22 @@ async function load() {
   status.textContent = 'Bereit';
 }
 
+function setActionLoading(button, loadingText, active) {
+  if (!button) return;
+  if (active) {
+    button.dataset.loading = 'true';
+    button.dataset.originalLabel = button.textContent;
+    button.textContent = loadingText;
+    button.disabled = true;
+    return;
+  }
+  button.disabled = false;
+  button.dataset.loading = 'false';
+  if (button.dataset.originalLabel) {
+    button.textContent = button.dataset.originalLabel;
+  }
+}
+
 document.querySelector('#sourceForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = new FormData(event.currentTarget);
@@ -152,10 +170,28 @@ document.querySelector('#topicForm').addEventListener('submit', async (event) =>
   await load();
 });
 
-document.querySelector('#runBriefing').addEventListener('click', async () => {
+runBriefingButton.addEventListener('click', async () => {
+  setActionLoading(runBriefingButton, 'Briefing wird erstellt', true);
   status.textContent = 'Briefing wird erstellt';
-  await api('/api/briefings/run', { method: 'POST' });
-  await load();
+  try {
+    await api('/api/briefings/run', { method: 'POST' });
+    await load();
+  } finally {
+    setActionLoading(runBriefingButton, '', false);
+  }
+});
+
+runCrawlButton.addEventListener('click', async () => {
+  setActionLoading(runCrawlButton, 'Crawling läuft', true);
+  status.textContent = 'Crawling wird gestartet';
+  try {
+    const response = await api('/api/crawl/run', { method: 'POST' });
+    const savedTotal = (response.results || []).reduce((sum, source) => sum + (source.saved || 0), 0);
+    await load();
+    status.textContent = `Crawling fertig (${savedTotal} neue/aktualisierte Meldungen)`;
+  } finally {
+    setActionLoading(runCrawlButton, '', false);
+  }
 });
 
 document.querySelector('#saveToken').addEventListener('click', () => {

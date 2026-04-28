@@ -59,6 +59,10 @@ button {
   border: 0;
   border-radius: 999px;
   padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   background: var(--spruce);
   color: #fff;
   font-weight: 750;
@@ -70,6 +74,22 @@ button {
 button:hover {
   transform: translateY(-1px);
   box-shadow: 0 14px 28px rgba(13, 95, 75, .24);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: .88;
+  transform: none;
+}
+
+button[data-loading="true"]::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: button-spinner .8s linear infinite;
 }
 
 button.secondary {
@@ -658,6 +678,12 @@ menu {
   gap: 10px;
   padding: 0;
   margin-bottom: 0;
+}
+
+@keyframes button-spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 920px) {

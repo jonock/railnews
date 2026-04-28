@@ -2,6 +2,7 @@ import express from 'express';
 import cron from 'node-cron';
 import { config } from './config.js';
 import { db, latestArticles, latestBriefings, listSources, listTopics } from './db.js';
+import { crawlSources } from './crawler.js';
 import { runDailyBriefing } from './jobs/dailyBriefing.js';
 
 const app = express();
@@ -130,6 +131,15 @@ app.patch('/api/topics/:id', requireAdmin, (req, res) => {
 app.post('/api/briefings/run', requireAdmin, async (_req, res, next) => {
   try {
     res.json(await runDailyBriefing());
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/crawl/run', requireAdmin, async (_req, res, next) => {
+  try {
+    const results = await crawlSources();
+    res.json({ ok: true, results });
   } catch (error) {
     next(error);
   }
