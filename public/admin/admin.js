@@ -33,6 +33,11 @@ function escapeHtml(value = '') {
   })[character]);
 }
 
+function formatDate(value) {
+  if (!value) return '';
+  return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(value));
+}
+
 function headers() {
   return {
     'content-type': 'application/json',
@@ -89,13 +94,14 @@ function renderTopics(topics) {
 function renderArticles(articles) {
   articleList.innerHTML = articles.length ? articles.map((article) => {
     const tags = JSON.parse(article.matched_topics || '[]');
+    const date = article.published_at || article.created_at;
     return `
       <article class="article-card">
         <button class="secondary article-delete" type="button" data-article-id="${article.id}" aria-label="Artikel löschen">Löschen</button>
         <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
         <div class="tags">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>
         <p>${escapeHtml(article.excerpt.slice(0, 220))}</p>
-        <small>${escapeHtml(article.source_name)}</small>
+        <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDate(date))}` : ''}</small>
       </article>
     `;
   }).join('') : '<p>Noch keine passenden Meldungen gefunden.</p>';
