@@ -62,19 +62,49 @@ function renderBriefings(briefings) {
   `).join('') : '<p>Noch keine Briefings vorhanden.</p>';
 }
 
+function formatDateGroup(value) {
+  if (!value) return 'Ohne Datum';
+  return new Intl.DateTimeFormat('de-DE', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date(value));
+}
+
 function renderArticles(articles) {
-  articleList.innerHTML = articles.length ? articles.map((article) => {
-    const tags = JSON.parse(article.matched_topics || '[]');
+  if (!articles.length) {
+    articleList.innerHTML = '<p>Noch keine passenden Meldungen gefunden.</p>';
+    return;
+  }
+
+  const grouped = new Map();
+  for (const article of articles) {
     const date = article.published_at || article.created_at;
-    return `
-      <article class="article-card">
-        <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
-        <div class="tags">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>
-        <p>${escapeHtml(article.excerpt.slice(0, 240))}</p>
-        <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDate(date))}` : ''}</small>
-      </article>
-    `;
-  }).join('') : '<p>Noch keine passenden Meldungen gefunden.</p>';
+    const groupKey = date ? new Date(date).toISOString().slice(0, 10) : 'undated';
+    if (!grouped.has(groupKey)) grouped.set(groupKey, { label: formatDateGroup(date), items: [] });
+    grouped.get(groupKey).items.push(article);
+  }
+
+  articleList.innerHTML = [...grouped.values()].map((group) => `
+    <section class="article-date-group">
+      <h3 class="article-date-heading">${escapeHtml(group.label)}</h3>
+      <div class="article-grid">
+        ${group.items.map((article) => {
+          const tags = JSON.parse(article.matched_topics || '[]');
+          const date = article.published_at || article.created_at;
+          return `
+            <article class="article-card">
+              <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
+              <div class="tags">${tags.map((tag) => `<span class=\"tag\">${escapeHtml(tag)}</span>`).join('')}</div>
+              <p>${escapeHtml(article.excerpt.slice(0, 240))}</p>
+              <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDate(date))}` : ''}</small>
+            </article>
+          `;
+        }).join('')}
+      </div>
+    </section>
+  `).join('');
 }
 
 async function load() {
