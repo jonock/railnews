@@ -65,6 +65,7 @@ const defaultSources = [
   ['LOK Report', 'https://www.lok-report.de/', 'Schweden,Norwegen,Dänemark,Finnland,Skandinavien,Trafikverket,Bane NOR,Banedanmark,DSB,SJ,VR', 1],
   ['Järnvägar.nu', 'https://jarnvagar.nu/', 'järnväg,tåg,spår,trafik,underhåll,Ostlänken,Malmbanan,X2000,SJ,Trafikverket,nationella planen,nattåg', 1],
   ['RAILMARKET Sweden', 'https://railmarket.com/eu/sweden/news', 'Sweden,Swedish,SJ,Trafikverket,Green Cargo,Transitio,Norrtåg,Stockholm,Gothenburg,Malmö,Kiruna', 1],
+  ['Rail Color News', 'https://railcolornews.com/', 'rail color news,sweden,norway,denmark,finland,scandinavia,nordic,sj,vr,dsb,bane nor,trafikverket', 1],
   ['Manuelle Meldungen', 'https://railnews.local/manual-stories', 'manuell,Einreichung,Story', 0]
 ];
 

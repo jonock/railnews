@@ -70,5 +70,6 @@ The app seeds these first sources and focuses on Scandinavian railway topics by 
 - `https://www.lok-report.de/`
 - `https://jarnvagar.nu/`
 - `https://railmarket.com/eu/sweden/news`
+- `https://railcolornews.com/`
 
 `FOCUS_KEYWORDS` acts as the region gate. The editable topics then classify or refine matching Scandinavian stories.
