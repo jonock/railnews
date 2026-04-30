@@ -17,7 +17,7 @@ export async function runDailyBriefing(date = todayKey(), options = {}) {
     SELECT articles.*, sources.name AS source_name
     FROM articles
     JOIN sources ON sources.id = articles.source_id
-    WHERE date(COALESCE(articles.published_at, articles.created_at)) >= date(?, '-2 day')
+    WHERE date(COALESCE(articles.published_at, articles.created_at)) >= date(?, '-1 day')
     ORDER BY COALESCE(articles.published_at, articles.created_at) DESC
     LIMIT 30
   `).all(date);
