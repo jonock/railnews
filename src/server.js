@@ -16,6 +16,16 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+
+app.get('/health', (_req, res) => {
+  try {
+    db.prepare('SELECT 1').get();
+    res.json({ status: 'ok' });
+  } catch (error) {
+    res.status(503).json({ status: 'error', error: error.message });
+  }
+});
+
 app.get('/api/public', (_req, res) => {
   res.json({
     briefings: latestBriefings(),
