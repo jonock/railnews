@@ -709,6 +709,32 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+
+.article-groups {
+  display: grid;
+  gap: 26px;
+}
+
+.article-date-group {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.article-date-group:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.article-date-heading {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 780;
+  color: var(--rail);
+  text-transform: capitalize;
+}
+
 .article-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
