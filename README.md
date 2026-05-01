@@ -51,6 +51,8 @@ OPENAI_API_KEY=<optional>
 ```
 
 The app runs its own daily cron from `BRIEFING_CRON` and `BRIEFING_TIMEZONE`.
+For Coolify health checks, use `GET /health` (expects HTTP 200 with `{"status": "ok"}`).
+For Dockerfile deployments on Coolify, the image also includes a Docker `HEALTHCHECK` that probes `http://127.0.0.1:3000/health`.
 If you prefer Coolify scheduled tasks, run:
 
 ```bash
