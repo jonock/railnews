@@ -24,6 +24,32 @@ function escapeHtml(value = '') {
   })[character]);
 }
 
+
+function publicationNameFromUrl(url) {
+  try {
+    const { hostname } = new URL(url);
+    const cleanHost = hostname.replace(/^www\./, '').toLowerCase();
+    const map = {
+      'railmarket.com': 'RailMarket',
+      'railcolornews.com': 'Railcolor News',
+      'lok-report.de': 'Lok-Report',
+      'jarnvagar.nu': 'Järnvägar.nu'
+    };
+    return map[cleanHost] || cleanHost;
+  } catch {
+    return 'Quelle';
+  }
+}
+
+function replaceLinksWithPills(text = '') {
+  return text.replace(/https?:\/\/[^\s<)]+/g, (url) => {
+    const trimmedUrl = url.replace(/[.,;:!?]+$/, '');
+    const safeUrl = escapeHtml(trimmedUrl);
+    const label = escapeHtml(publicationNameFromUrl(trimmedUrl));
+    return `<a class="source-pill" href="${safeUrl}" target="_blank" rel="noreferrer">${label}</a>`;
+  });
+}
+
 function renderBriefingBody(text = '') {
   const escaped = escapeHtml(text);
   return escaped
@@ -33,7 +59,7 @@ function renderBriefingBody(text = '') {
     .map((block) => {
       if (block.startsWith('## ')) return `<h4>${block.slice(3)}</h4>`;
       if (block.startsWith('### ')) return `<h5>${block.slice(4)}</h5>`;
-      return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+      return `<p>${replaceLinksWithPills(block).replace(/\n/g, '<br>')}</p>`;
     })
     .join('');
 }
