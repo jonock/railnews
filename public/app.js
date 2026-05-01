@@ -82,14 +82,44 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(value));
 }
 
+function todayBriefingKey() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Zurich',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+}
+
 function renderBriefings(briefings) {
-  briefingList.innerHTML = briefings.length ? briefings.map((briefing) => `
-    <article class="briefing-card">
-      <p class="meta">${escapeHtml(briefing.briefing_date)}</p>
-      <h3>${escapeHtml(briefing.title)}</h3>
-      <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
-    </article>
-  `).join('') : '<p>Noch keine Briefings vorhanden.</p>';
+  if (!briefings.length) {
+    briefingList.innerHTML = '<p>Noch keine Briefings vorhanden.</p>';
+    return;
+  }
+
+  const todayKey = todayBriefingKey();
+  briefingList.innerHTML = briefings.map((briefing) => {
+    const isToday = briefing.briefing_date === todayKey;
+    const collapseLabel = isToday ? 'Aktuelles Briefing (immer geöffnet)' : 'Vergangenes Briefing öffnen';
+    return `
+      <article class="briefing-card">
+        <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
+          <summary class="briefing-summary">
+            <p class="meta">${escapeHtml(briefing.briefing_date)}</p>
+            <h3>${escapeHtml(briefing.title)}</h3>
+            <span class="briefing-toggle-label">${collapseLabel}</span>
+          </summary>
+          <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
+        </details>
+      </article>
+    `;
+  }).join('');
+
+  briefingList.querySelectorAll('.briefing-details[data-lock-open="true"]').forEach((item) => {
+    item.addEventListener('toggle', () => {
+      if (!item.open) item.open = true;
+    });
+  });
 }
 
 function formatDateGroup(value) {
