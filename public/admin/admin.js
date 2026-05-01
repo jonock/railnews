@@ -51,11 +51,15 @@ function publicationNameFromUrl(url) {
 }
 
 function replaceLinksWithPills(text = '') {
-  return text.replace(/https?:\/\/[^\s<)]+/g, (url) => {
+  const renderPill = (url) => {
     const trimmedUrl = url.replace(/[.,;:!?]+$/, '');
     const safeUrl = escapeHtml(trimmedUrl);
     const label = escapeHtml(publicationNameFromUrl(trimmedUrl));
     return `<a class="source-pill" href="${safeUrl}" target="_blank" rel="noreferrer">${label}</a>`;
+  };
+
+  return text.replace(/\(\s*(https?:\/\/[^\s)]+)\s*\)|https?:\/\/[^\s<)]+/g, (match, wrappedUrl) => {
+    return renderPill(wrappedUrl || match);
   });
 }
 
