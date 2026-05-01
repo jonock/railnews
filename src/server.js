@@ -141,7 +141,7 @@ app.patch('/api/topics/:id', requireAdmin, (req, res) => {
 
 app.post('/api/briefings/run', requireAdmin, async (_req, res, next) => {
   try {
-    res.json(await runDailyBriefing());
+    res.json(await runDailyBriefing(undefined, { crawl: false }));
   } catch (error) {
     next(error);
   }
