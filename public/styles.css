@@ -657,6 +657,28 @@ h2 {
   line-height: 1.62;
 }
 
+
+.briefing-body .source-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(13, 95, 75, .28);
+  background: rgba(13, 95, 75, .08);
+  color: var(--spruce);
+  font-size: .84rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  margin: 2px 4px 2px 0;
+}
+
+.briefing-body .source-pill:hover,
+.briefing-body .source-pill:focus-visible {
+  background: rgba(13, 95, 75, .14);
+  border-color: rgba(13, 95, 75, .44);
+}
+
 .form {
   display: grid;
   gap: 10px;
