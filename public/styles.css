@@ -619,6 +619,34 @@ h2 {
   line-height: 1.18;
 }
 
+.briefing-details {
+  padding-bottom: 2px;
+}
+
+.briefing-summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.briefing-summary::-webkit-details-marker {
+  display: none;
+}
+
+.briefing-toggle-label {
+  display: inline-block;
+  font-size: .78rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.briefing-details[open] .briefing-toggle-label {
+  margin-bottom: 14px;
+}
+
+.briefing-details[data-lock-open="true"] .briefing-summary {
+  cursor: default;
+}
+
 .meta {
   margin-bottom: 8px;
   font-size: .86rem;
