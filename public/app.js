@@ -100,14 +100,13 @@ function renderBriefings(briefings) {
   const todayKey = todayBriefingKey();
   briefingList.innerHTML = briefings.map((briefing) => {
     const isToday = briefing.briefing_date === todayKey;
-    const collapseLabel = isToday ? 'Aktuelles Briefing (immer geöffnet)' : 'Vergangenes Briefing öffnen';
     return `
       <article class="briefing-card">
         <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
           <summary class="briefing-summary">
             <p class="meta">${escapeHtml(briefing.briefing_date)}</p>
             <h3>${escapeHtml(briefing.title)}</h3>
-            <span class="briefing-toggle-label">${collapseLabel}</span>
+            ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
           </summary>
           <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
         </details>
