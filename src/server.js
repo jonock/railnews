@@ -37,9 +37,10 @@ app.get('/api/articles/search', (req, res) => {
   const query = String(req.query.q || '').trim();
   if (!query) return res.status(400).json({ error: 'q query parameter is required' });
 
-  const limit = req.query.limit === undefined ? 50 : Number(req.query.limit);
-  if (!Number.isFinite(limit) || limit <= 0) {
-    return res.status(400).json({ error: 'limit must be a positive number' });
+  const rawLimit = req.query.limit;
+  const limit = rawLimit === undefined ? 50 : Number(rawLimit);
+  if (!Number.isInteger(limit) || limit <= 0) {
+    return res.status(400).json({ error: 'limit must be a positive integer' });
   }
 
   res.json({ query, articles: searchArticles(query, limit) });

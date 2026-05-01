@@ -195,7 +195,7 @@ export function searchArticles(query, limit = 50) {
 
   const escapedQuery = normalizedQuery.replace(/[%_\\]/g, '\\$&');
   const searchPattern = `%${escapedQuery}%`;
-  const cappedLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
+  const cappedLimit = Math.max(1, Math.min(Math.trunc(Number(limit) || 50), 100));
 
   return db.prepare(`
     SELECT articles.*, sources.name AS source_name
