@@ -49,9 +49,9 @@ function replaceLinksWithPills(text = '') {
     return `<a class="source-pill" href="${safeUrl}" target="_blank" rel="noreferrer">${label}</a>`;
   };
 
-  return text
-    .replace(/\(\s*(https?:\/\/[^\s)]+)\s*\)/g, (_match, url) => ` ${renderPill(url)}`)
-    .replace(/https?:\/\/[^\s<)]+/g, (url) => renderPill(url));
+  return text.replace(/\(\s*(https?:\/\/[^\s)]+)\s*\)|https?:\/\/[^\s<)]+/g, (match, wrappedUrl) => {
+    return renderPill(wrappedUrl || match);
+  });
 }
 
 function renderBriefingBody(text = '') {
