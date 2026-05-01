@@ -189,6 +189,27 @@ export function latestArticles(limit = 50) {
   `).all(limit);
 }
 
+export function searchArticles(query, limit = 50) {
+  const normalizedQuery = String(query || '').trim();
+  if (!normalizedQuery) return [];
+
+  const escapedQuery = normalizedQuery.replace(/[%_\\]/g, '\\$&');
+  const searchPattern = `%${escapedQuery}%`;
+  const cappedLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
+
+  return db.prepare(`
+    SELECT articles.*, sources.name AS source_name
+    FROM articles
+    JOIN sources ON sources.id = articles.source_id
+    WHERE articles.title LIKE ? ESCAPE '\\'
+       OR articles.excerpt LIKE ? ESCAPE '\\'
+       OR articles.url LIKE ? ESCAPE '\\'
+       OR sources.name LIKE ? ESCAPE '\\'
+    ORDER BY COALESCE(articles.published_at, articles.created_at) DESC, articles.id DESC
+    LIMIT ?
+  `).all(searchPattern, searchPattern, searchPattern, searchPattern, cappedLimit);
+}
+
 export function logCrawlFailures(failures) {
   if (!Array.isArray(failures) || failures.length === 0) return;
   const insertFailure = db.prepare(`
