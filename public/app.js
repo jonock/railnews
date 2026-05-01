@@ -5,6 +5,10 @@ const storyStatus = document.querySelector('#storyStatus');
 const storyTitle = document.querySelector('#storyTitle');
 const storyUrl = document.querySelector('#storyUrl');
 const storyExcerpt = document.querySelector('#storyExcerpt');
+const articleSearchForm = document.querySelector('#articleSearchForm');
+const articleSearchInput = document.querySelector('#articleSearchInput');
+const clearArticleSearchButton = document.querySelector('#clearArticleSearch');
+const articleSearchStatus = document.querySelector('#articleSearchStatus');
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -170,6 +174,20 @@ async function load() {
   const data = await api(`/api/public?t=${Date.now()}`);
   renderBriefings(data.briefings);
   renderArticles(data.articles);
+  articleSearchStatus.textContent = '';
+}
+
+async function runArticleSearch() {
+  const query = articleSearchInput.value.trim();
+  if (!query) {
+    articleSearchStatus.textContent = 'Bitte einen Suchbegriff eingeben.';
+    return;
+  }
+
+  articleSearchStatus.textContent = `Suche nach „${query}“…`;
+  const data = await api(`/api/articles/search?q=${encodeURIComponent(query)}&t=${Date.now()}`);
+  renderArticles(data.articles);
+  articleSearchStatus.textContent = `${data.articles.length} Treffer für „${query}“`;
 }
 
 document.querySelector('#openStoryDialog').addEventListener('click', () => {
@@ -204,6 +222,26 @@ document.querySelector('.story-form').addEventListener('submit', async (event) =
     document.querySelector('#briefing').scrollIntoView({ behavior: 'smooth' });
   } catch (error) {
     storyStatus.textContent = error.message;
+  }
+});
+
+articleSearchForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  try {
+    await runArticleSearch();
+  } catch (error) {
+    articleSearchStatus.textContent = error.message;
+  }
+});
+
+clearArticleSearchButton.addEventListener('click', async () => {
+  articleSearchInput.value = '';
+  articleSearchStatus.textContent = '';
+  try {
+    const data = await api(`/api/public?t=${Date.now()}`);
+    renderArticles(data.articles);
+  } catch (error) {
+    articleSearchStatus.textContent = error.message;
   }
 });
 

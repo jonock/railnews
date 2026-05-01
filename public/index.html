@@ -47,7 +47,14 @@
             <p class="section-kicker">Quellenlage</p>
             <h2>Gefundene Meldungen</h2>
           </div>
+          <form id="articleSearchForm" class="article-search" role="search">
+            <label for="articleSearchInput" class="sr-only">Meldungen durchsuchen</label>
+            <input id="articleSearchInput" type="search" placeholder="Suche nach Titel, Quelle oder Stichwort">
+            <button type="submit">Suchen</button>
+            <button type="button" id="clearArticleSearch" class="secondary">Zurücksetzen</button>
+          </form>
         </div>
+        <p id="articleSearchStatus" class="search-status"></p>
         <div id="articleList" class="article-groups"></div>
       </section>
     </main>

@@ -1,7 +1,7 @@
 import express from 'express';
 import cron from 'node-cron';
 import { config } from './config.js';
-import { db, latestArticles, latestBriefings, latestCrawlFailures, listSources, listTopics } from './db.js';
+import { db, latestArticles, latestBriefings, latestCrawlFailures, listSources, listTopics, searchArticles } from './db.js';
 import { backfillJarnvagarPublishedAt, backfillRailmarketPublishedAt, crawlSources } from './crawler.js';
 import { runDailyBriefing } from './jobs/dailyBriefing.js';
 
@@ -31,6 +31,19 @@ app.get('/api/public', (_req, res) => {
     briefings: latestBriefings(),
     articles: latestArticles()
   });
+});
+
+app.get('/api/articles/search', (req, res) => {
+  const query = String(req.query.q || '').trim();
+  if (!query) return res.status(400).json({ error: 'q query parameter is required' });
+
+  const rawLimit = req.query.limit;
+  const limit = rawLimit === undefined ? 50 : Number(rawLimit);
+  if (!Number.isInteger(limit) || limit <= 0) {
+    return res.status(400).json({ error: 'limit must be a positive integer' });
+  }
+
+  res.json({ query, articles: searchArticles(query, limit) });
 });
 
 app.get('/api/admin/state', requireAdmin, (_req, res) => {
