@@ -67,25 +67,48 @@ function replaceLinksWithPills(text = '') {
   });
 }
 
+function chapterSlug(value = '') {
+  return String(value)
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48) || 'chapter';
+}
+
+function hashString(value = '') {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
 function buildBriefingChapters(text = '') {
-  const escaped = escapeHtml(text);
-  return escaped
+  return String(text || '')
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean)
     .map((block, index) => {
+      const escapedBlock = escapeHtml(block);
       if (block.startsWith('## ')) {
-        const title = block.slice(3);
-        return { key: `chapter-${index}`, title, html: `<h4>${title}</h4>` };
+        const title = block.slice(3).trim();
+        const key = `${chapterSlug(title)}-${hashString(`h2:${title}`)}`;
+        return { key, title, html: `<h4>${escapeHtml(title)}</h4>` };
       }
       if (block.startsWith('### ')) {
-        const title = block.slice(4);
-        return { key: `chapter-${index}`, title, html: `<h5>${title}</h5>` };
+        const title = block.slice(4).trim();
+        const key = `${chapterSlug(title)}-${hashString(`h3:${title}`)}`;
+        return { key, title, html: `<h5>${escapeHtml(title)}</h5>` };
       }
+      const title = `Abschnitt ${index + 1}`;
+      const key = `body-${hashString(`p:${block}`)}`;
       return {
-        key: `chapter-${index}`,
-        title: `Abschnitt ${index + 1}`,
-        html: `<p>${replaceLinksWithPills(block).replace(/\n/g, '<br>')}</p>`
+        key,
+        title,
+        html: `<p>${replaceLinksWithPills(escapedBlock).replace(/\n/g, '<br>')}</p>`
       };
     })
 }
