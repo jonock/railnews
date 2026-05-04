@@ -95,15 +95,14 @@
           <textarea id="commentText" placeholder="Dein Kommentar zum Kapitel" required></textarea>
         </label>
         <fieldset class="face-chooser">
-          <legend>Wer kommentiert?</legend>
-          <label>
-            <input type="radio" name="commentFace" value="left" checked>
-            Linke Person
-          </label>
-          <label>
-            <input type="radio" name="commentFace" value="right">
-            Rechte Person
-          </label>
+          <legend>Wer kommentiert? (auf Gesicht klicken)</legend>
+          <div class="face-image-picker" id="faceImagePicker" role="radiogroup" aria-label="Kommentierende Person">
+            <img src="/images/header.png" alt="Zwei Personen">
+            <button type="button" class="face-hotspot left" data-face="left" aria-label="Linke Person auswählen"></button>
+            <button type="button" class="face-hotspot right" data-face="right" aria-label="Rechte Person auswählen"></button>
+          </div>
+          <p id="faceSelectionLabel" class="face-selection-label">Ausgewählt: Linke Person</p>
+          <input id="commentFaceValue" type="hidden" value="left">
         </fieldset>
         <p id="commentStatus" class="form-status"></p>
         <menu>

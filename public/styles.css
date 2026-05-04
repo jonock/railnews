@@ -711,13 +711,6 @@ h2 {
   outline: none;
 }
 
-.chapter-comment-button {
-  min-height: 34px;
-  padding: 0 12px;
-  font-size: .78rem;
-  margin-bottom: 8px;
-}
-
 .chapter-comments-empty {
   margin: 0;
   color: var(--muted);
@@ -998,6 +991,49 @@ dialog {
   align-items: center;
   gap: 8px;
   margin: 0 0 8px;
+}
+
+.face-image-picker {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  max-width: 420px;
+}
+
+.face-image-picker img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.face-hotspot {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.face-hotspot.left {
+  left: 0;
+}
+
+.face-hotspot.right {
+  right: 0;
+}
+
+.face-hotspot[data-selected="true"] {
+  outline: 3px solid rgba(200, 240, 74, .95);
+  background: rgba(200, 240, 74, .18);
+}
+
+.face-selection-label {
+  margin: 8px 0 0;
+  font-size: .86rem;
+  color: var(--muted);
 }
 
 .form-status {

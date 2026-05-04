@@ -13,6 +13,9 @@ const commentDialog = document.querySelector('#commentDialog');
 const commentContext = document.querySelector('#commentContext');
 const commentText = document.querySelector('#commentText');
 const commentStatus = document.querySelector('#commentStatus');
+const faceImagePicker = document.querySelector('#faceImagePicker');
+const faceSelectionLabel = document.querySelector('#faceSelectionLabel');
+const commentFaceValue = document.querySelector('#commentFaceValue');
 let selectedCommentTarget = null;
 let commentsByBriefing = {};
 
@@ -162,7 +165,6 @@ function renderBriefings(briefings) {
                 data-chapter-key="${chapter.key}"
                 data-chapter-title="${escapeHtml(chapter.title)}">
                 <div class="chapter-main">${chapter.html}</div>
-                <button type="button" class="chapter-comment-button">Kommentieren</button>
                 <div class="chapter-comments">${renderChapterComments(briefing.id, chapter.key)}</div>
               </section>
             `).join('')}
@@ -310,8 +312,11 @@ function openCommentDialog(chapterElement) {
   commentContext.textContent = `${selectedCommentTarget.briefingTitle} · ${selectedCommentTarget.chapterTitle}`;
   commentText.value = '';
   commentStatus.textContent = '';
-  const defaultFace = commentDialog.querySelector('input[name="commentFace"][value="left"]');
-  if (defaultFace) defaultFace.checked = true;
+  commentFaceValue.value = 'left';
+  faceSelectionLabel.textContent = 'Ausgewählt: Linke Person';
+  faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
+    button.dataset.selected = button.dataset.face === 'left' ? 'true' : 'false';
+  });
   commentDialog.showModal();
 }
 
@@ -336,7 +341,7 @@ document.querySelector('#cancelComment').addEventListener('click', () => {
 document.querySelector('.comment-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!selectedCommentTarget) return;
-  const selectedFace = commentDialog.querySelector('input[name="commentFace"]:checked')?.value || 'left';
+  const selectedFace = commentFaceValue.value || 'left';
   commentStatus.textContent = 'Kommentar wird gespeichert...';
   try {
     await api(`/api/briefings/${selectedCommentTarget.briefingId}/comments`, {
@@ -354,6 +359,17 @@ document.querySelector('.comment-form').addEventListener('submit', async (event)
   } catch (error) {
     commentStatus.textContent = error.message;
   }
+});
+
+faceImagePicker.addEventListener('click', (event) => {
+  const hotspot = event.target.closest('.face-hotspot');
+  if (!hotspot) return;
+  const face = hotspot.dataset.face === 'right' ? 'right' : 'left';
+  commentFaceValue.value = face;
+  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Linke Person' : 'Ausgewählt: Rechte Person';
+  faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
+    button.dataset.selected = button.dataset.face === face ? 'true' : 'false';
+  });
 });
 
 load().catch((error) => {
