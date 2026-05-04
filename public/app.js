@@ -121,7 +121,7 @@ function renderChapterComments(briefingId, chapterKey) {
     <ul class="chapter-comments-list">
       ${filtered.map((comment) => `
         <li class="chapter-comment">
-          <span class="commenter-face-badge">${comment.commenter_face === 'left' ? '👤 Links' : '👤 Rechts'}</span>
+          <span class="commenter-face-badge">${comment.commenter_face === 'left' ? '👤 Schlufi' : '👤 Bünzli'}</span>
           <p>${escapeHtml(comment.comment_text)}</p>
           <small>${escapeHtml(formatDateTime(comment.created_at))}</small>
         </li>
@@ -336,7 +336,7 @@ function openCommentDialog(chapterElement) {
   commentText.value = '';
   commentStatus.textContent = '';
   commentFaceValue.value = 'left';
-  faceSelectionLabel.textContent = 'Ausgewählt: Bünzli';
+  faceSelectionLabel.textContent = 'Ausgewählt: Schlufi';
   faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
     button.dataset.selected = button.dataset.face === 'left' ? 'true' : 'false';
   });
@@ -389,7 +389,7 @@ faceImagePicker.addEventListener('click', (event) => {
   if (!hotspot) return;
   const face = hotspot.dataset.face === 'right' ? 'right' : 'left';
   commentFaceValue.value = face;
-  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Bünzli' : 'Ausgewählt: Schlufi';
+  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Schlufi' : 'Ausgewählt: Bünzli';
   faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
     button.dataset.selected = button.dataset.face === face ? 'true' : 'false';
   });
