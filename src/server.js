@@ -7,7 +7,20 @@ import { runDailyBriefing } from './jobs/dailyBriefing.js';
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('public', {
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    if (path.endsWith('/sw.js') || path.endsWith('\\sw.js')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+      return;
+    }
+
+    if (path.endsWith('/index.html') || path.endsWith('\\index.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
 function requireAdmin(req, res, next) {
   if (!config.adminToken) return next();
