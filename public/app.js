@@ -16,6 +16,9 @@ const commentStatus = document.querySelector('#commentStatus');
 const faceImagePicker = document.querySelector('#faceImagePicker');
 const faceSelectionLabel = document.querySelector('#faceSelectionLabel');
 const commentFaceValue = document.querySelector('#commentFaceValue');
+const readCommentDialog = document.querySelector('#readCommentDialog');
+const readCommentMeta = document.querySelector('#readCommentMeta');
+const readCommentBody = document.querySelector('#readCommentBody');
 let selectedCommentTarget = null;
 let commentsByBriefing = {};
 
@@ -113,20 +116,34 @@ function buildBriefingChapters(text = '') {
     })
 }
 
-function renderChapterComments(briefingId, chapterKey) {
+function commentFaceImage(commenterFace) {
+  return commenterFace === 'left' ? '/images/buenzli.png' : '/images/schlufi.png';
+}
+
+function commentFaceLabel(commenterFace) {
+  return commenterFace === 'left' ? 'Bünzli' : 'Schlufi';
+}
+
+function renderChapterCommentFaces(briefingId, chapterKey) {
   const comments = commentsByBriefing[briefingId] || [];
   const filtered = comments.filter((comment) => comment.chapter_key === chapterKey);
-  if (!filtered.length) return '<p class="chapter-comments-empty">Noch keine Kommentare.</p>';
+  if (!filtered.length) return '';
   return `
-    <ul class="chapter-comments-list">
-      ${filtered.map((comment) => `
-        <li class="chapter-comment">
-          <span class="commenter-face-badge">${comment.commenter_face === 'left' ? '👤 Bünzli' : '👤 Schlufi'}</span>
-          <p>${escapeHtml(comment.comment_text)}</p>
-          <small>${escapeHtml(formatDateTime(comment.created_at))}</small>
-        </li>
-      `).join('')}
-    </ul>
+    <aside class="chapter-comment-faces" aria-label="Kommentare zu diesem Abschnitt">
+      ${filtered.map((comment) => {
+        const payload = JSON.stringify({
+          text: comment.comment_text,
+          date: formatDateTime(comment.created_at),
+          commenter: commentFaceLabel(comment.commenter_face)
+        });
+        return `
+        <button type="button" class="chapter-comment-face"
+          aria-label="Kommentar von ${escapeHtml(commentFaceLabel(comment.commenter_face))} anzeigen"
+          data-comment-payload="${escapeHtml(payload)}">
+          <img src="${commentFaceImage(comment.commenter_face)}" alt="" width="64" height="64" loading="lazy">
+        </button>`;
+      }).join('')}
+    </aside>
   `;
 }
 
@@ -171,8 +188,6 @@ function renderBriefings(briefings) {
   briefingList.innerHTML = briefings.map((briefing) => {
     const isToday = briefing.briefing_date === todayKey;
     const chapters = buildBriefingChapters(briefing.summary);
-    const briefingComments = commentsByBriefing[briefing.id] || [];
-    const hasComments = briefingComments.length > 0;
     let activeHeadingTitle = '';
     const chapterMarkup = chapters.map((chapter) => {
       const isHeading = chapter.html.startsWith('<h4>') || chapter.html.startsWith('<h5>');
@@ -182,14 +197,17 @@ function renderBriefings(briefings) {
       }
 
       const chapterTitle = activeHeadingTitle || chapter.title;
+      const commentFacesHtml = renderChapterCommentFaces(briefing.id, chapter.key);
       return `
-        <section class="briefing-chapter" role="button" tabindex="0"
+        <section class="briefing-chapter${commentFacesHtml ? ' briefing-chapter-has-faces' : ''}" role="button" tabindex="0"
           data-briefing-id="${briefing.id}"
           data-briefing-title="${escapeHtml(briefing.title)}"
           data-chapter-key="${chapter.key}"
           data-chapter-title="${escapeHtml(chapterTitle)}">
-          <div class="chapter-main">${chapter.html}</div>
-          ${hasComments ? `<div class="chapter-comments">${renderChapterComments(briefing.id, chapter.key)}</div>` : ''}
+          <div class="chapter-content-row">
+            <div class="chapter-main">${chapter.html}</div>
+            ${commentFacesHtml}
+          </div>
         </section>
       `;
     }).join('');
@@ -356,9 +374,28 @@ function openCommentDialog(chapterElement) {
 }
 
 briefingList.addEventListener('click', (event) => {
+  const faceButton = event.target.closest('.chapter-comment-face');
+  if (faceButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    let payload;
+    try {
+      payload = JSON.parse(faceButton.dataset.commentPayload || '{}');
+    } catch {
+      return;
+    }
+    readCommentMeta.textContent = `${payload.commenter} · ${payload.date || ''}`.trim();
+    readCommentBody.textContent = payload.text || '';
+    readCommentDialog.showModal();
+    return;
+  }
   const chapterElement = event.target.closest('.briefing-chapter');
   if (!chapterElement) return;
   openCommentDialog(chapterElement);
+});
+
+document.querySelector('#closeReadComment').addEventListener('click', () => {
+  readCommentDialog.close();
 });
 
 briefingList.addEventListener('keydown', (event) => {
