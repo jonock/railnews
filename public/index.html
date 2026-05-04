@@ -86,6 +86,33 @@
       </form>
     </dialog>
 
+    <dialog id="commentDialog">
+      <form method="dialog" class="dialog-card comment-form">
+        <h2>Kapitel kommentieren</h2>
+        <p id="commentContext" class="comment-context"></p>
+        <label>
+          Kommentar
+          <textarea id="commentText" placeholder="Dein Kommentar zum Kapitel" required></textarea>
+        </label>
+        <fieldset class="face-chooser">
+          <legend>Wer kommentiert?</legend>
+          <label>
+            <input type="radio" name="commentFace" value="left" checked>
+            Linke Person
+          </label>
+          <label>
+            <input type="radio" name="commentFace" value="right">
+            Rechte Person
+          </label>
+        </fieldset>
+        <p id="commentStatus" class="form-status"></p>
+        <menu>
+          <button value="cancel" class="secondary" type="button" id="cancelComment">Abbrechen</button>
+          <button id="saveComment" value="default" type="submit">Senden</button>
+        </menu>
+      </form>
+    </dialog>
+
 
     <aside class="floating-badge" aria-label="Präsentiert von Trafikverket">
       <p>Präsentiert von</p>

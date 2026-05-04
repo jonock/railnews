@@ -9,6 +9,12 @@ const articleSearchForm = document.querySelector('#articleSearchForm');
 const articleSearchInput = document.querySelector('#articleSearchInput');
 const clearArticleSearchButton = document.querySelector('#clearArticleSearch');
 const articleSearchStatus = document.querySelector('#articleSearchStatus');
+const commentDialog = document.querySelector('#commentDialog');
+const commentContext = document.querySelector('#commentContext');
+const commentText = document.querySelector('#commentText');
+const commentStatus = document.querySelector('#commentStatus');
+let selectedCommentTarget = null;
+let commentsByBriefing = {};
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -58,18 +64,44 @@ function replaceLinksWithPills(text = '') {
   });
 }
 
-function renderBriefingBody(text = '') {
+function buildBriefingChapters(text = '') {
   const escaped = escapeHtml(text);
   return escaped
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean)
-    .map((block) => {
-      if (block.startsWith('## ')) return `<h4>${block.slice(3)}</h4>`;
-      if (block.startsWith('### ')) return `<h5>${block.slice(4)}</h5>`;
-      return `<p>${replaceLinksWithPills(block).replace(/\n/g, '<br>')}</p>`;
+    .map((block, index) => {
+      if (block.startsWith('## ')) {
+        const title = block.slice(3);
+        return { key: `chapter-${index}`, title, html: `<h4>${title}</h4>` };
+      }
+      if (block.startsWith('### ')) {
+        const title = block.slice(4);
+        return { key: `chapter-${index}`, title, html: `<h5>${title}</h5>` };
+      }
+      return {
+        key: `chapter-${index}`,
+        title: `Abschnitt ${index + 1}`,
+        html: `<p>${replaceLinksWithPills(block).replace(/\n/g, '<br>')}</p>`
+      };
     })
-    .join('');
+}
+
+function renderChapterComments(briefingId, chapterKey) {
+  const comments = commentsByBriefing[briefingId] || [];
+  const filtered = comments.filter((comment) => comment.chapter_key === chapterKey);
+  if (!filtered.length) return '<p class="chapter-comments-empty">Noch keine Kommentare.</p>';
+  return `
+    <ul class="chapter-comments-list">
+      ${filtered.map((comment) => `
+        <li class="chapter-comment">
+          <span class="commenter-face-badge">${comment.commenter_face === 'left' ? '👤 Links' : '👤 Rechts'}</span>
+          <p>${escapeHtml(comment.comment_text)}</p>
+          <small>${escapeHtml(formatDateTime(comment.created_at))}</small>
+        </li>
+      `).join('')}
+    </ul>
+  `;
 }
 
 async function api(path, options = {}) {
@@ -112,6 +144,7 @@ function renderBriefings(briefings) {
   const todayKey = todayBriefingKey();
   briefingList.innerHTML = briefings.map((briefing) => {
     const isToday = briefing.briefing_date === todayKey;
+    const chapters = buildBriefingChapters(briefing.summary);
     return `
       <article class="briefing-card">
         <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
@@ -121,7 +154,19 @@ function renderBriefings(briefings) {
             <p class="meta">Erstellt: ${escapeHtml(formatDateTime(briefing.created_at))}</p>
             ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
           </summary>
-          <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
+          <div class="briefing-body">
+            ${chapters.map((chapter) => `
+              <section class="briefing-chapter" role="button" tabindex="0"
+                data-briefing-id="${briefing.id}"
+                data-briefing-title="${escapeHtml(briefing.title)}"
+                data-chapter-key="${chapter.key}"
+                data-chapter-title="${escapeHtml(chapter.title)}">
+                <div class="chapter-main">${chapter.html}</div>
+                <button type="button" class="chapter-comment-button">Kommentieren</button>
+                <div class="chapter-comments">${renderChapterComments(briefing.id, chapter.key)}</div>
+              </section>
+            `).join('')}
+          </div>
         </details>
       </article>
     `;
@@ -181,6 +226,7 @@ function renderArticles(articles) {
 
 async function load() {
   const data = await api(`/api/public?t=${Date.now()}`);
+  commentsByBriefing = data.commentsByBriefing || {};
   renderBriefings(data.briefings);
   renderArticles(data.articles);
   articleSearchStatus.textContent = '';
@@ -251,6 +297,62 @@ clearArticleSearchButton.addEventListener('click', async () => {
     renderArticles(data.articles);
   } catch (error) {
     articleSearchStatus.textContent = error.message;
+  }
+});
+
+function openCommentDialog(chapterElement) {
+  selectedCommentTarget = {
+    briefingId: Number(chapterElement.dataset.briefingId),
+    briefingTitle: chapterElement.dataset.briefingTitle || '',
+    chapterKey: chapterElement.dataset.chapterKey || '',
+    chapterTitle: chapterElement.dataset.chapterTitle || ''
+  };
+  commentContext.textContent = `${selectedCommentTarget.briefingTitle} · ${selectedCommentTarget.chapterTitle}`;
+  commentText.value = '';
+  commentStatus.textContent = '';
+  const defaultFace = commentDialog.querySelector('input[name="commentFace"][value="left"]');
+  if (defaultFace) defaultFace.checked = true;
+  commentDialog.showModal();
+}
+
+briefingList.addEventListener('click', (event) => {
+  const chapterElement = event.target.closest('.briefing-chapter');
+  if (!chapterElement) return;
+  openCommentDialog(chapterElement);
+});
+
+briefingList.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const chapterElement = event.target.closest('.briefing-chapter');
+  if (!chapterElement) return;
+  event.preventDefault();
+  openCommentDialog(chapterElement);
+});
+
+document.querySelector('#cancelComment').addEventListener('click', () => {
+  commentDialog.close();
+});
+
+document.querySelector('.comment-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!selectedCommentTarget) return;
+  const selectedFace = commentDialog.querySelector('input[name="commentFace"]:checked')?.value || 'left';
+  commentStatus.textContent = 'Kommentar wird gespeichert...';
+  try {
+    await api(`/api/briefings/${selectedCommentTarget.briefingId}/comments`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        chapterKey: selectedCommentTarget.chapterKey,
+        chapterTitle: selectedCommentTarget.chapterTitle,
+        commentText: commentText.value,
+        commenterFace: selectedFace
+      })
+    });
+    commentDialog.close();
+    await load();
+  } catch (error) {
+    commentStatus.textContent = error.message;
   }
 });
 

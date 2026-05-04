@@ -54,6 +54,16 @@ db.exec(`
     error_message TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    briefing_id INTEGER NOT NULL REFERENCES briefings(id) ON DELETE CASCADE,
+    chapter_key TEXT NOT NULL,
+    chapter_title TEXT NOT NULL DEFAULT '',
+    comment_text TEXT NOT NULL,
+    commenter_face TEXT NOT NULL CHECK(commenter_face IN ('left', 'right')),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 const sourceColumns = db.prepare('PRAGMA table_info(sources)').all().map((column) => column.name);
@@ -240,4 +250,21 @@ export function latestCrawlFailures(limit = 30) {
     ORDER BY created_at DESC, id DESC
     LIMIT ?
   `).all(limit);
+}
+
+export function createBriefingComment({ briefingId, chapterKey, chapterTitle = '', commentText, commenterFace }) {
+  const result = db.prepare(`
+    INSERT INTO comments (briefing_id, chapter_key, chapter_title, comment_text, commenter_face)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(briefingId, chapterKey, chapterTitle, commentText, commenterFace);
+  return db.prepare('SELECT * FROM comments WHERE id = ?').get(result.lastInsertRowid);
+}
+
+export function listBriefingComments(briefingId) {
+  return db.prepare(`
+    SELECT id, briefing_id, chapter_key, chapter_title, comment_text, commenter_face, created_at
+    FROM comments
+    WHERE briefing_id = ?
+    ORDER BY created_at ASC, id ASC
+  `).all(briefingId);
 }

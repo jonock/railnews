@@ -696,6 +696,60 @@ h2 {
   color: #2d3832;
 }
 
+.briefing-chapter {
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 10px 12px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.briefing-chapter:hover,
+.briefing-chapter:focus-visible {
+  border-color: rgba(13, 95, 75, .25);
+  background: rgba(13, 95, 75, .04);
+  outline: none;
+}
+
+.chapter-comment-button {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: .78rem;
+  margin-bottom: 8px;
+}
+
+.chapter-comments-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+.chapter-comments-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.chapter-comment {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+
+.chapter-comment p {
+  margin: 4px 0;
+}
+
+.commenter-face-badge {
+  display: inline-flex;
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--spruce-dark);
+}
+
 .briefing-body h4,
 .briefing-body h5 {
   margin: 20px 0 8px;
@@ -914,6 +968,36 @@ dialog {
 
 .story-form {
   width: min(620px, 92vw);
+}
+
+.comment-form {
+  width: min(620px, 92vw);
+}
+
+.comment-context {
+  color: var(--muted);
+  font-size: .9rem;
+  margin-top: -6px;
+}
+
+.face-chooser {
+  margin: 0 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.face-chooser legend {
+  font-size: .86rem;
+  color: var(--muted);
+  padding: 0 6px;
+}
+
+.face-chooser label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
 }
 
 .form-status {
