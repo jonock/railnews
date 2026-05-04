@@ -313,7 +313,7 @@ function openCommentDialog(chapterElement) {
   commentText.value = '';
   commentStatus.textContent = '';
   commentFaceValue.value = 'left';
-  faceSelectionLabel.textContent = 'Ausgewählt: Linke Person';
+  faceSelectionLabel.textContent = 'Ausgewählt: Bünzli';
   faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
     button.dataset.selected = button.dataset.face === 'left' ? 'true' : 'false';
   });
@@ -366,7 +366,7 @@ faceImagePicker.addEventListener('click', (event) => {
   if (!hotspot) return;
   const face = hotspot.dataset.face === 'right' ? 'right' : 'left';
   commentFaceValue.value = face;
-  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Linke Person' : 'Ausgewählt: Rechte Person';
+  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Bünzli' : 'Ausgewählt: Schlufi';
   faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
     button.dataset.selected = button.dataset.face === face ? 'true' : 'false';
   });
