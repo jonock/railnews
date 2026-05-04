@@ -9,6 +9,15 @@ const articleSearchForm = document.querySelector('#articleSearchForm');
 const articleSearchInput = document.querySelector('#articleSearchInput');
 const clearArticleSearchButton = document.querySelector('#clearArticleSearch');
 const articleSearchStatus = document.querySelector('#articleSearchStatus');
+const commentDialog = document.querySelector('#commentDialog');
+const commentContext = document.querySelector('#commentContext');
+const commentText = document.querySelector('#commentText');
+const commentStatus = document.querySelector('#commentStatus');
+const faceImagePicker = document.querySelector('#faceImagePicker');
+const faceSelectionLabel = document.querySelector('#faceSelectionLabel');
+const commentFaceValue = document.querySelector('#commentFaceValue');
+let selectedCommentTarget = null;
+let commentsByBriefing = {};
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -58,18 +67,67 @@ function replaceLinksWithPills(text = '') {
   });
 }
 
-function renderBriefingBody(text = '') {
-  const escaped = escapeHtml(text);
-  return escaped
+function chapterSlug(value = '') {
+  return String(value)
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48) || 'chapter';
+}
+
+function hashString(value = '') {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function buildBriefingChapters(text = '') {
+  return String(text || '')
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean)
-    .map((block) => {
-      if (block.startsWith('## ')) return `<h4>${block.slice(3)}</h4>`;
-      if (block.startsWith('### ')) return `<h5>${block.slice(4)}</h5>`;
-      return `<p>${replaceLinksWithPills(block).replace(/\n/g, '<br>')}</p>`;
+    .map((block, index) => {
+      const escapedBlock = escapeHtml(block);
+      if (block.startsWith('## ')) {
+        const title = block.slice(3).trim();
+        const key = `${chapterSlug(title)}-${hashString(`h2:${title}`)}`;
+        return { key, title, html: `<h4>${escapeHtml(title)}</h4>` };
+      }
+      if (block.startsWith('### ')) {
+        const title = block.slice(4).trim();
+        const key = `${chapterSlug(title)}-${hashString(`h3:${title}`)}`;
+        return { key, title, html: `<h5>${escapeHtml(title)}</h5>` };
+      }
+      const title = `Abschnitt ${index + 1}`;
+      const key = `body-${hashString(`p:${block}`)}`;
+      return {
+        key,
+        title,
+        html: `<p>${replaceLinksWithPills(escapedBlock).replace(/\n/g, '<br>')}</p>`
+      };
     })
-    .join('');
+}
+
+function renderChapterComments(briefingId, chapterKey) {
+  const comments = commentsByBriefing[briefingId] || [];
+  const filtered = comments.filter((comment) => comment.chapter_key === chapterKey);
+  if (!filtered.length) return '<p class="chapter-comments-empty">Noch keine Kommentare.</p>';
+  return `
+    <ul class="chapter-comments-list">
+      ${filtered.map((comment) => `
+        <li class="chapter-comment">
+          <span class="commenter-face-badge">${comment.commenter_face === 'left' ? '👤 Schlufi' : '👤 Bünzli'}</span>
+          <p>${escapeHtml(comment.comment_text)}</p>
+          <small>${escapeHtml(formatDateTime(comment.created_at))}</small>
+        </li>
+      `).join('')}
+    </ul>
+  `;
 }
 
 async function api(path, options = {}) {
@@ -112,6 +170,7 @@ function renderBriefings(briefings) {
   const todayKey = todayBriefingKey();
   briefingList.innerHTML = briefings.map((briefing) => {
     const isToday = briefing.briefing_date === todayKey;
+    const chapters = buildBriefingChapters(briefing.summary);
     return `
       <article class="briefing-card">
         <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
@@ -121,7 +180,18 @@ function renderBriefings(briefings) {
             <p class="meta">Erstellt: ${escapeHtml(formatDateTime(briefing.created_at))}</p>
             ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
           </summary>
-          <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
+          <div class="briefing-body">
+            ${chapters.map((chapter) => `
+              <section class="briefing-chapter" role="button" tabindex="0"
+                data-briefing-id="${briefing.id}"
+                data-briefing-title="${escapeHtml(briefing.title)}"
+                data-chapter-key="${chapter.key}"
+                data-chapter-title="${escapeHtml(chapter.title)}">
+                <div class="chapter-main">${chapter.html}</div>
+                <div class="chapter-comments">${renderChapterComments(briefing.id, chapter.key)}</div>
+              </section>
+            `).join('')}
+          </div>
         </details>
       </article>
     `;
@@ -181,6 +251,7 @@ function renderArticles(articles) {
 
 async function load() {
   const data = await api(`/api/public?t=${Date.now()}`);
+  commentsByBriefing = data.commentsByBriefing || {};
   renderBriefings(data.briefings);
   renderArticles(data.articles);
   articleSearchStatus.textContent = '';
@@ -252,6 +323,76 @@ clearArticleSearchButton.addEventListener('click', async () => {
   } catch (error) {
     articleSearchStatus.textContent = error.message;
   }
+});
+
+function openCommentDialog(chapterElement) {
+  selectedCommentTarget = {
+    briefingId: Number(chapterElement.dataset.briefingId),
+    briefingTitle: chapterElement.dataset.briefingTitle || '',
+    chapterKey: chapterElement.dataset.chapterKey || '',
+    chapterTitle: chapterElement.dataset.chapterTitle || ''
+  };
+  commentContext.textContent = `${selectedCommentTarget.briefingTitle} · ${selectedCommentTarget.chapterTitle}`;
+  commentText.value = '';
+  commentStatus.textContent = '';
+  commentFaceValue.value = 'left';
+  faceSelectionLabel.textContent = 'Ausgewählt: Schlufi';
+  faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
+    button.dataset.selected = button.dataset.face === 'left' ? 'true' : 'false';
+  });
+  commentDialog.showModal();
+}
+
+briefingList.addEventListener('click', (event) => {
+  const chapterElement = event.target.closest('.briefing-chapter');
+  if (!chapterElement) return;
+  openCommentDialog(chapterElement);
+});
+
+briefingList.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const chapterElement = event.target.closest('.briefing-chapter');
+  if (!chapterElement) return;
+  event.preventDefault();
+  openCommentDialog(chapterElement);
+});
+
+document.querySelector('#cancelComment').addEventListener('click', () => {
+  commentDialog.close();
+});
+
+document.querySelector('.comment-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!selectedCommentTarget) return;
+  const selectedFace = commentFaceValue.value || 'left';
+  commentStatus.textContent = 'Kommentar wird gespeichert...';
+  try {
+    await api(`/api/briefings/${selectedCommentTarget.briefingId}/comments`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        chapterKey: selectedCommentTarget.chapterKey,
+        chapterTitle: selectedCommentTarget.chapterTitle,
+        commentText: commentText.value,
+        commenterFace: selectedFace
+      })
+    });
+    commentDialog.close();
+    await load();
+  } catch (error) {
+    commentStatus.textContent = error.message;
+  }
+});
+
+faceImagePicker.addEventListener('click', (event) => {
+  const hotspot = event.target.closest('.face-hotspot');
+  if (!hotspot) return;
+  const face = hotspot.dataset.face === 'right' ? 'right' : 'left';
+  commentFaceValue.value = face;
+  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Schlufi' : 'Ausgewählt: Bünzli';
+  faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
+    button.dataset.selected = button.dataset.face === face ? 'true' : 'false';
+  });
 });
 
 load().catch((error) => {

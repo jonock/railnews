@@ -1,7 +1,17 @@
 import express from 'express';
 import cron from 'node-cron';
 import { config } from './config.js';
-import { db, latestArticles, latestBriefings, latestCrawlFailures, listSources, listTopics, searchArticles } from './db.js';
+import {
+  createBriefingComment,
+  db,
+  latestArticles,
+  latestBriefings,
+  latestCrawlFailures,
+  listBriefingComments,
+  listSources,
+  listTopics,
+  searchArticles
+} from './db.js';
 import { backfillJarnvagarPublishedAt, backfillRailmarketPublishedAt, crawlSources } from './crawler.js';
 import { runDailyBriefing } from './jobs/dailyBriefing.js';
 
@@ -40,10 +50,54 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/api/public', (_req, res) => {
+  const briefings = latestBriefings();
+  const commentsByBriefing = Object.fromEntries(
+    briefings.map((briefing) => [briefing.id, listBriefingComments(briefing.id)])
+  );
   res.json({
-    briefings: latestBriefings(),
-    articles: latestArticles()
+    briefings,
+    articles: latestArticles(),
+    commentsByBriefing
   });
+});
+
+app.get('/api/briefings/:briefingId/comments', (req, res) => {
+  const briefingId = Number(req.params.briefingId);
+  if (!Number.isInteger(briefingId) || briefingId <= 0) {
+    return res.status(400).json({ error: 'Invalid briefing id' });
+  }
+  const briefing = db.prepare('SELECT id FROM briefings WHERE id = ?').get(briefingId);
+  if (!briefing) return res.status(404).json({ error: 'Briefing not found' });
+  res.json({ comments: listBriefingComments(briefingId) });
+});
+
+app.post('/api/briefings/:briefingId/comments', (req, res) => {
+  const briefingId = Number(req.params.briefingId);
+  if (!Number.isInteger(briefingId) || briefingId <= 0) {
+    return res.status(400).json({ error: 'Invalid briefing id' });
+  }
+  const briefing = db.prepare('SELECT id FROM briefings WHERE id = ?').get(briefingId);
+  if (!briefing) return res.status(404).json({ error: 'Briefing not found' });
+
+  const chapterKey = String(req.body.chapterKey || '').trim().slice(0, 140);
+  const chapterTitle = String(req.body.chapterTitle || '').trim().slice(0, 240);
+  const commentText = String(req.body.commentText || '').trim().slice(0, 1200);
+  const commenterFace = String(req.body.commenterFace || '').trim();
+
+  if (!chapterKey) return res.status(400).json({ error: 'chapterKey is required' });
+  if (!commentText) return res.status(400).json({ error: 'commentText is required' });
+  if (!['left', 'right'].includes(commenterFace)) {
+    return res.status(400).json({ error: "commenterFace must be 'left' or 'right'" });
+  }
+
+  const comment = createBriefingComment({
+    briefingId,
+    chapterKey,
+    chapterTitle,
+    commentText,
+    commenterFace
+  });
+  res.status(201).json({ ok: true, comment });
 });
 
 app.get('/api/articles/search', (req, res) => {
