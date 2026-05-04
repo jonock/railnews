@@ -254,6 +254,35 @@ function sourceImpliesFocus(source) {
   return source.url.includes('jarnvagar.nu') || source.url.includes('railmarket.com/eu/sweden');
 }
 
+function isLikelyPaywalledStub(article) {
+  const text = `${article.title} ${article.excerpt}`.toLowerCase();
+  return [
+    'subscribe',
+    'subscription',
+    'members only',
+    'premium',
+    'log in to read',
+    'login to read',
+    'sign in to read',
+    'read more',
+    'continue reading'
+  ].some((needle) => text.includes(needle));
+}
+
+function hasSufficientArticleInfo(article) {
+  const excerpt = cleanText(article.excerpt || '');
+  if (excerpt.length < 120) return false;
+  const words = excerpt.split(/\s+/).filter(Boolean);
+  return words.length >= 20;
+}
+
+function shouldIndexArticle(article, source) {
+  if (!source.url.includes('railcolornews.com')) return true;
+  if (!hasSufficientArticleInfo(article)) return false;
+  if (isLikelyPaywalledStub(article)) return false;
+  return true;
+}
+
 function extractLokReport($, source) {
   const articles = [];
   $('a').each((_, element) => {
@@ -374,6 +403,7 @@ export async function crawlSources() {
       for (const article of extracted) {
         if (seen.has(article.url)) continue;
         seen.add(article.url);
+        if (!shouldIndexArticle(article, source)) continue;
         if (!sourceImpliesFocus(source) && !matchesSourceKeywords(article, source)) continue;
         const matches = topicMatches(article, topics);
         insert.run({
