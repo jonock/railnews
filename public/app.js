@@ -401,7 +401,7 @@ faceImagePicker.addEventListener('click', (event) => {
   if (!hotspot) return;
   const face = hotspot.dataset.face === 'right' ? 'right' : 'left';
   commentFaceValue.value = face;
-  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Schlufi' : 'Ausgewählt: Bünzli';
+  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Bünzli' : 'Ausgewählt: Schlufi';
   faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
     button.dataset.selected = button.dataset.face === face ? 'true' : 'false';
   });
