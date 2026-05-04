@@ -140,7 +140,7 @@ function renderChapterCommentFaces(briefingId, chapterKey) {
         <button type="button" class="chapter-comment-face"
           aria-label="Kommentar von ${escapeHtml(commentFaceLabel(comment.commenter_face))} anzeigen"
           data-comment-payload="${escapeHtml(payload)}">
-          <img src="${commentFaceImage(comment.commenter_face)}" alt="" width="64" height="64" loading="lazy">
+          <img src="${commentFaceImage(comment.commenter_face)}" alt="" width="56" height="56" loading="lazy">
         </button>`;
       }).join('')}
     </aside>
@@ -199,13 +199,13 @@ function renderBriefings(briefings) {
       const chapterTitle = activeHeadingTitle || chapter.title;
       const commentFacesHtml = renderChapterCommentFaces(briefing.id, chapter.key);
       return `
-        <section class="briefing-chapter${commentFacesHtml ? ' briefing-chapter-has-faces' : ''}" role="button" tabindex="0"
+        <section class="briefing-chapter${commentFacesHtml ? ' briefing-chapter-has-faces' : ''}"
           data-briefing-id="${briefing.id}"
           data-briefing-title="${escapeHtml(briefing.title)}"
           data-chapter-key="${chapter.key}"
           data-chapter-title="${escapeHtml(chapterTitle)}">
           <div class="chapter-content-row">
-            <div class="chapter-main">${chapter.html}</div>
+            <div class="chapter-main" role="button" tabindex="0" aria-label="Diesen Abschnitt kommentieren">${chapter.html}</div>
             ${commentFacesHtml}
           </div>
         </section>
@@ -366,7 +366,7 @@ function openCommentDialog(chapterElement) {
   commentText.value = '';
   commentStatus.textContent = '';
   commentFaceValue.value = 'left';
-  faceSelectionLabel.textContent = 'Ausgewählt: Schlufi';
+  faceSelectionLabel.textContent = 'Ausgewählt: Bünzli';
   faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
     button.dataset.selected = button.dataset.face === 'left' ? 'true' : 'false';
   });
@@ -391,6 +391,8 @@ briefingList.addEventListener('click', (event) => {
   }
   const chapterElement = event.target.closest('.briefing-chapter');
   if (!chapterElement) return;
+  if (!event.target.closest('.chapter-main')) return;
+  if (event.target.closest('a')) return;
   openCommentDialog(chapterElement);
 });
 
@@ -400,7 +402,9 @@ document.querySelector('#closeReadComment').addEventListener('click', () => {
 
 briefingList.addEventListener('keydown', (event) => {
   if (event.key !== 'Enter' && event.key !== ' ') return;
-  const chapterElement = event.target.closest('.briefing-chapter');
+  const main = event.target.closest('.briefing-chapter .chapter-main');
+  if (!main) return;
+  const chapterElement = main.closest('.briefing-chapter');
   if (!chapterElement) return;
   event.preventDefault();
   openCommentDialog(chapterElement);
