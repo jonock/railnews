@@ -121,7 +121,7 @@ function renderChapterComments(briefingId, chapterKey) {
     <ul class="chapter-comments-list">
       ${filtered.map((comment) => `
         <li class="chapter-comment">
-          <span class="commenter-face-badge">${comment.commenter_face === 'left' ? '👤 Schlufi' : '👤 Bünzli'}</span>
+          <span class="commenter-face-badge">${comment.commenter_face === 'left' ? '👤 Bünzli' : '👤 Schlufi'}</span>
           <p>${escapeHtml(comment.comment_text)}</p>
           <small>${escapeHtml(formatDateTime(comment.created_at))}</small>
         </li>
@@ -171,6 +171,29 @@ function renderBriefings(briefings) {
   briefingList.innerHTML = briefings.map((briefing) => {
     const isToday = briefing.briefing_date === todayKey;
     const chapters = buildBriefingChapters(briefing.summary);
+    const briefingComments = commentsByBriefing[briefing.id] || [];
+    const hasComments = briefingComments.length > 0;
+    let activeHeadingTitle = '';
+    const chapterMarkup = chapters.map((chapter) => {
+      const isHeading = chapter.html.startsWith('<h4>') || chapter.html.startsWith('<h5>');
+      if (isHeading) {
+        activeHeadingTitle = chapter.title;
+        return `<div class="chapter-main">${chapter.html}</div>`;
+      }
+
+      const chapterTitle = activeHeadingTitle || chapter.title;
+      return `
+        <section class="briefing-chapter" role="button" tabindex="0"
+          data-briefing-id="${briefing.id}"
+          data-briefing-title="${escapeHtml(briefing.title)}"
+          data-chapter-key="${chapter.key}"
+          data-chapter-title="${escapeHtml(chapterTitle)}">
+          <div class="chapter-main">${chapter.html}</div>
+          ${hasComments ? `<div class="chapter-comments">${renderChapterComments(briefing.id, chapter.key)}</div>` : ''}
+        </section>
+      `;
+    }).join('');
+
     return `
       <article class="briefing-card">
         <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
@@ -180,18 +203,7 @@ function renderBriefings(briefings) {
             <p class="meta">Erstellt: ${escapeHtml(formatDateTime(briefing.created_at))}</p>
             ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
           </summary>
-          <div class="briefing-body">
-            ${chapters.map((chapter) => `
-              <section class="briefing-chapter" role="button" tabindex="0"
-                data-briefing-id="${briefing.id}"
-                data-briefing-title="${escapeHtml(briefing.title)}"
-                data-chapter-key="${chapter.key}"
-                data-chapter-title="${escapeHtml(chapter.title)}">
-                <div class="chapter-main">${chapter.html}</div>
-                <div class="chapter-comments">${renderChapterComments(briefing.id, chapter.key)}</div>
-              </section>
-            `).join('')}
-          </div>
+          <div class="briefing-body">${chapterMarkup}</div>
         </details>
       </article>
     `;
