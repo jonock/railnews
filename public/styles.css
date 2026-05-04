@@ -1018,8 +1018,8 @@ menu {
 
 .floating-badge img {
   display: block;
-  width: 132px;
-  height: 32px;
+  width: 32px;
+  height: 48px;
 }
 
 @media (max-width: 640px) {
@@ -1035,7 +1035,7 @@ menu {
   }
 
   .floating-badge img {
-    width: 114px;
-    height: 28px;
+    width: 28px;
+    height: 42px;
   }
 }
