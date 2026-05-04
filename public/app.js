@@ -86,6 +86,14 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(value));
 }
 
+function formatDateTime(value) {
+  if (!value) return '';
+  return new Intl.DateTimeFormat('de-DE', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(new Date(value));
+}
+
 function todayBriefingKey() {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Zurich',
@@ -110,6 +118,7 @@ function renderBriefings(briefings) {
           <summary class="briefing-summary">
             <p class="meta">${escapeHtml(briefing.briefing_date)}</p>
             <h3>${escapeHtml(briefing.title)}</h3>
+            <p class="meta">Erstellt: ${escapeHtml(formatDateTime(briefing.created_at))}</p>
             ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
           </summary>
           <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
