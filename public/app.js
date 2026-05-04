@@ -173,17 +173,26 @@ function renderBriefings(briefings) {
     const chapters = buildBriefingChapters(briefing.summary);
     const briefingComments = commentsByBriefing[briefing.id] || [];
     const hasComments = briefingComments.length > 0;
+    let activeHeadingTitle = '';
     const chapterMarkup = hasComments
-      ? chapters.map((chapter) => `
-          <section class="briefing-chapter" role="button" tabindex="0"
-            data-briefing-id="${briefing.id}"
-            data-briefing-title="${escapeHtml(briefing.title)}"
-            data-chapter-key="${chapter.key}"
-            data-chapter-title="${escapeHtml(chapter.title)}">
-            <div class="chapter-main">${chapter.html}</div>
-            <div class="chapter-comments">${renderChapterComments(briefing.id, chapter.key)}</div>
-          </section>
-        `).join('')
+      ? chapters.map((chapter) => {
+          const isHeading = chapter.html.startsWith('<h4>') || chapter.html.startsWith('<h5>');
+          if (isHeading) {
+            activeHeadingTitle = chapter.title;
+            return `<div class="chapter-main">${chapter.html}</div>`;
+          }
+          const chapterTitle = activeHeadingTitle || chapter.title;
+          return `
+            <section class="briefing-chapter" role="button" tabindex="0"
+              data-briefing-id="${briefing.id}"
+              data-briefing-title="${escapeHtml(briefing.title)}"
+              data-chapter-key="${chapter.key}"
+              data-chapter-title="${escapeHtml(chapterTitle)}">
+              <div class="chapter-main">${chapter.html}</div>
+              <div class="chapter-comments">${renderChapterComments(briefing.id, chapter.key)}</div>
+            </section>
+          `;
+        }).join('')
       : chapters.map((chapter) => `<div class="chapter-main">${chapter.html}</div>`).join('');
 
     return `
