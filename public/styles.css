@@ -767,9 +767,47 @@ h2 {
 }
 
 .read-comment-body {
+  display: grid;
+  gap: 10px;
   margin: 0 0 18px;
+  max-height: min(56vh, 520px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.read-comment-item {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+
+.read-comment-item.active {
+  border-color: rgba(13, 95, 75, .5);
+  background: rgba(13, 95, 75, .08);
+}
+
+.read-comment-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.read-comment-item-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: .84rem;
+}
+
+.read-comment-item-text {
+  margin: 6px 0 0;
   white-space: pre-wrap;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--ink);
 }
 

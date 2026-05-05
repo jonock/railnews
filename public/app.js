@@ -124,6 +124,10 @@ function commentFaceLabel(commenterFace) {
   return commenterFace === 'left' ? 'Bünzli' : 'Schlufi';
 }
 
+function commentId(comment) {
+  return hashString(`${comment.created_at || ''}|${comment.commenter_face || ''}|${comment.comment_text || ''}`);
+}
+
 function renderChapterCommentFaces(briefingId, chapterKey) {
   const comments = commentsByBriefing[briefingId] || [];
   const filtered = comments.filter((comment) => comment.chapter_key === chapterKey);
@@ -131,20 +135,43 @@ function renderChapterCommentFaces(briefingId, chapterKey) {
   return `
     <aside class="chapter-comment-faces" aria-label="Kommentare zu diesem Abschnitt">
       ${filtered.map((comment) => {
-        const payload = JSON.stringify({
-          text: comment.comment_text,
-          date: formatDateTime(comment.created_at),
-          commenter: commentFaceLabel(comment.commenter_face)
-        });
         return `
         <button type="button" class="chapter-comment-face"
           aria-label="Kommentar von ${escapeHtml(commentFaceLabel(comment.commenter_face))} anzeigen"
-          data-comment-payload="${escapeHtml(payload)}">
+          data-comment-id="${commentId(comment)}">
           <img src="${commentFaceImage(comment.commenter_face)}" alt="" width="56" height="56" loading="lazy">
         </button>`;
       }).join('')}
     </aside>
   `;
+}
+
+function renderReadCommentsList(comments, activeCommentId) {
+  return comments.map((comment) => {
+    const commenter = commentFaceLabel(comment.commenter_face);
+    const isActive = commentId(comment) === activeCommentId;
+    return `
+      <article class="read-comment-item${isActive ? ' active' : ''}">
+        <img src="${commentFaceImage(comment.commenter_face)}" alt="${escapeHtml(commenter)}" width="40" height="40" loading="lazy">
+        <div class="read-comment-content">
+          <p class="read-comment-item-meta">${escapeHtml(commenter)} · ${escapeHtml(formatDateTime(comment.created_at))}</p>
+          <p class="read-comment-item-text">${escapeHtml(comment.comment_text)}</p>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function openReadCommentDialog(chapterElement, activeCommentId) {
+  const briefingId = Number(chapterElement.dataset.briefingId);
+  const chapterKey = chapterElement.dataset.chapterKey || '';
+  const chapterTitle = chapterElement.dataset.chapterTitle || '';
+  const comments = (commentsByBriefing[briefingId] || []).filter((comment) => comment.chapter_key === chapterKey);
+  if (!comments.length) return;
+
+  readCommentMeta.textContent = `Abschnitt: ${chapterTitle}`;
+  readCommentBody.innerHTML = renderReadCommentsList(comments, activeCommentId);
+  readCommentDialog.showModal();
 }
 
 async function api(path, options = {}) {
@@ -378,15 +405,9 @@ briefingList.addEventListener('click', (event) => {
   if (faceButton) {
     event.preventDefault();
     event.stopPropagation();
-    let payload;
-    try {
-      payload = JSON.parse(faceButton.dataset.commentPayload || '{}');
-    } catch {
-      return;
-    }
-    readCommentMeta.textContent = `${payload.commenter} · ${payload.date || ''}`.trim();
-    readCommentBody.textContent = payload.text || '';
-    readCommentDialog.showModal();
+    const chapterElement = faceButton.closest('.briefing-chapter');
+    if (!chapterElement) return;
+    openReadCommentDialog(chapterElement, faceButton.dataset.commentId || '');
     return;
   }
   const chapterElement = event.target.closest('.briefing-chapter');
