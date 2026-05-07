@@ -19,8 +19,38 @@ const commentFaceValue = document.querySelector('#commentFaceValue');
 const readCommentDialog = document.querySelector('#readCommentDialog');
 const readCommentMeta = document.querySelector('#readCommentMeta');
 const readCommentBody = document.querySelector('#readCommentBody');
+const existingCommentsSection = document.querySelector('#existingCommentsSection');
+const existingCommentsBody = document.querySelector('#existingCommentsBody');
 let selectedCommentTarget = null;
 let commentsByBriefing = {};
+
+const COMMENTER_FACE_STORAGE_KEY = 'railnews:commenter-face';
+
+function readStoredCommenterFace() {
+  try {
+    const stored = localStorage.getItem(COMMENTER_FACE_STORAGE_KEY);
+    return stored === 'right' ? 'right' : 'left';
+  } catch {
+    return 'left';
+  }
+}
+
+function persistCommenterFace(face) {
+  try {
+    localStorage.setItem(COMMENTER_FACE_STORAGE_KEY, face === 'right' ? 'right' : 'left');
+  } catch {
+    // ignore storage errors (private mode, quota, etc.)
+  }
+}
+
+function applyCommenterFaceSelection(face) {
+  const normalized = face === 'right' ? 'right' : 'left';
+  commentFaceValue.value = normalized;
+  faceSelectionLabel.textContent = normalized === 'left' ? 'Ausgewählt: Bünzli' : 'Ausgewählt: Schlufi';
+  faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
+    button.dataset.selected = button.dataset.face === normalized ? 'true' : 'false';
+  });
+}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -382,6 +412,17 @@ clearArticleSearchButton.addEventListener('click', async () => {
   }
 });
 
+function renderExistingCommentsForChapter(briefingId, chapterKey) {
+  const comments = (commentsByBriefing[briefingId] || []).filter((comment) => comment.chapter_key === chapterKey);
+  if (!comments.length) {
+    existingCommentsSection.hidden = true;
+    existingCommentsBody.innerHTML = '';
+    return;
+  }
+  existingCommentsSection.hidden = false;
+  existingCommentsBody.innerHTML = renderReadCommentsList(comments, '');
+}
+
 function openCommentDialog(chapterElement) {
   selectedCommentTarget = {
     briefingId: Number(chapterElement.dataset.briefingId),
@@ -392,11 +433,8 @@ function openCommentDialog(chapterElement) {
   commentContext.textContent = `${selectedCommentTarget.briefingTitle} · ${selectedCommentTarget.chapterTitle}`;
   commentText.value = '';
   commentStatus.textContent = '';
-  commentFaceValue.value = 'left';
-  faceSelectionLabel.textContent = 'Ausgewählt: Bünzli';
-  faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
-    button.dataset.selected = button.dataset.face === 'left' ? 'true' : 'false';
-  });
+  applyCommenterFaceSelection(readStoredCommenterFace());
+  renderExistingCommentsForChapter(selectedCommentTarget.briefingId, selectedCommentTarget.chapterKey);
   commentDialog.showModal();
 }
 
@@ -462,11 +500,8 @@ faceImagePicker.addEventListener('click', (event) => {
   const hotspot = event.target.closest('.face-hotspot');
   if (!hotspot) return;
   const face = hotspot.dataset.face === 'right' ? 'right' : 'left';
-  commentFaceValue.value = face;
-  faceSelectionLabel.textContent = face === 'left' ? 'Ausgewählt: Bünzli' : 'Ausgewählt: Schlufi';
-  faceImagePicker.querySelectorAll('.face-hotspot').forEach((button) => {
-    button.dataset.selected = button.dataset.face === face ? 'true' : 'false';
-  });
+  applyCommenterFaceSelection(face);
+  persistCommenterFace(face);
 });
 
 load().catch((error) => {

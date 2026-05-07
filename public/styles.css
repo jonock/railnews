@@ -1041,6 +1041,35 @@ dialog {
   margin-top: -6px;
 }
 
+.existing-comments-section {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(13, 95, 75, .04);
+}
+
+.existing-comments-heading {
+  margin: 0 0 10px;
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.existing-comments-body {
+  display: grid;
+  gap: 8px;
+  max-height: min(34vh, 280px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.existing-comments-body .read-comment-item {
+  background: #fff;
+}
+
 .face-chooser {
   margin: 0 0 14px;
   border: 1px solid var(--line);
