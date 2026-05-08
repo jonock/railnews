@@ -1,4 +1,4 @@
-import { briefingTitle, formatDate, formatDateTime } from './dateTime.js';
+import { briefingTitle, formatDate, formatDateTime, formatLongDate, localDateKey } from './dateTime.js';
 
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');
@@ -215,20 +215,6 @@ async function api(path, options = {}) {
   return response.json();
 }
 
-function formatDate(value) {
-  if (!value) return '';
-  return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(value));
-}
-
-function formatDateTime(value) {
-  if (!value) return '';
-  return new Intl.DateTimeFormat('de-DE', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  }).format(new Date(value));
-}
-}
-
 function todayBriefingKey() {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Zurich',
@@ -276,9 +262,8 @@ function renderBriefings(briefings) {
       <article class="briefing-card">
         <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
           <summary class="briefing-summary">
-            <p class="meta">${escapeHtml(briefing.briefing_date)}</p>
-            <h3>${escapeHtml(briefing.title)}</h3>
-            <p class="meta">Erstellt: ${escapeHtml(formatDateTime(briefing.created_at))}</p>
+            <p class="meta">${escapeHtml(formatDate(briefing.briefing_date))}</p>
+            <h3>${escapeHtml(briefingTitle(briefing.title))}</h3>
             ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
           </summary>
           <div class="briefing-body">${chapterMarkup}</div>
@@ -296,12 +281,7 @@ function renderBriefings(briefings) {
 
 function formatDateGroup(value) {
   if (!value) return 'Ohne Datum';
-  return new Intl.DateTimeFormat('de-DE', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  }).format(new Date(value));
+  return formatLongDate(value);
 }
 
 function renderArticles(articles) {
@@ -313,7 +293,7 @@ function renderArticles(articles) {
   const grouped = new Map();
   for (const article of articles) {
     const date = article.published_at || article.created_at;
-    const groupKey = date ? new Date(date).toISOString().slice(0, 10) : 'undated';
+    const groupKey = localDateKey(date);
     if (!grouped.has(groupKey)) grouped.set(groupKey, { label: formatDateGroup(date), items: [] });
     grouped.get(groupKey).items.push(article);
   }
@@ -330,7 +310,7 @@ function renderArticles(articles) {
               <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
               <div class="tags">${tags.map((tag) => `<span class=\"tag\">${escapeHtml(tag)}</span>`).join('')}</div>
               <p>${escapeHtml(article.excerpt.slice(0, 240))}</p>
-              <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDate(date))}` : ''}</small>
+              <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDateTime(date))}` : ''}</small>
             </article>
           `;
         }).join('')}

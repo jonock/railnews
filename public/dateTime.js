@@ -26,6 +26,27 @@ export function formatDateTime(value) {
   }).format(date);
 }
 
+export function formatLongDate(value) {
+  const date = parseDate(value);
+  if (!date) return '';
+  return new Intl.DateTimeFormat('de-DE', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  }).format(date);
+}
+
+export function localDateKey(value) {
+  const date = parseDate(value);
+  if (!date) return 'undated';
+  return new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date);
+}
+
 export function briefingTitle(title = '') {
   return String(title).replace(titleDatePattern, '');
 }
