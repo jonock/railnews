@@ -1,9 +1,10 @@
-const CACHE_NAME = 'railnews-v3';
+const CACHE_NAME = 'railnews-v4';
 const APP_SHELL = [
   '/',
   '/index.html',
   '/styles.css',
   '/app.js',
+  '/dateTime.js',
   '/manifest.webmanifest',
   '/apple-touch-icon.png',
   '/icons/icon-192.png',
@@ -61,4 +62,3 @@ async function cacheFirst(request) {
   }
   return response;
 }
-

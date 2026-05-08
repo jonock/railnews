@@ -1,3 +1,5 @@
+import { briefingTitle, formatDate, formatDateTime } from './dateTime.js';
+
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');
 const storyDialog = document.querySelector('#storyDialog');
@@ -47,16 +49,11 @@ async function api(path, options = {}) {
   return response.json();
 }
 
-function formatDate(value) {
-  if (!value) return '';
-  return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(value));
-}
-
 function renderBriefings(briefings) {
   briefingList.innerHTML = briefings.length ? briefings.map((briefing) => `
     <article class="briefing-card">
-      <p class="meta">${escapeHtml(briefing.briefing_date)}</p>
-      <h3>${escapeHtml(briefing.title)}</h3>
+      <p class="meta">${escapeHtml(formatDate(briefing.briefing_date))}</p>
+      <h3>${escapeHtml(briefingTitle(briefing.title))}</h3>
       <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
     </article>
   `).join('') : '<p>Noch keine Briefings vorhanden.</p>';
@@ -71,7 +68,7 @@ function renderArticles(articles) {
         <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
         <div class="tags">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>
         <p>${escapeHtml(article.excerpt.slice(0, 240))}</p>
-        <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDate(date))}` : ''}</small>
+        <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDateTime(date))}` : ''}</small>
       </article>
     `;
   }).join('') : '<p>Noch keine passenden Meldungen gefunden.</p>';

@@ -1,3 +1,5 @@
+import { briefingTitle, formatDate, formatDateTime } from '../dateTime.js';
+
 const state = {
   token: localStorage.getItem('railnews.adminToken') || ''
 };
@@ -47,11 +49,6 @@ function renderBriefingBody(text = '') {
     .join('');
 }
 
-function formatDate(value) {
-  if (!value) return '';
-  return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(value));
-}
-
 function headers() {
   return {
     'content-type': 'application/json',
@@ -75,8 +72,8 @@ async function api(path, options = {}) {
 function renderBriefings(briefings) {
   briefingList.innerHTML = briefings.length ? briefings.map((briefing) => `
     <article class="briefing-card">
-      <p class="meta">${escapeHtml(briefing.briefing_date)}</p>
-      <h3>${escapeHtml(briefing.title)}</h3>
+      <p class="meta">${escapeHtml(formatDate(briefing.briefing_date))}</p>
+      <h3>${escapeHtml(briefingTitle(briefing.title))}</h3>
       <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
     </article>
   `).join('') : '<p>Noch keine Briefings vorhanden.</p>';
@@ -115,7 +112,7 @@ function renderArticles(articles) {
         <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
         <div class="tags">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>
         <p>${escapeHtml(article.excerpt.slice(0, 220))}</p>
-        <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDate(date))}` : ''}</small>
+        <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDateTime(date))}` : ''}</small>
       </article>
     `;
   }).join('') : '<p>Noch keine passenden Meldungen gefunden.</p>';
@@ -127,7 +124,7 @@ function renderCrawlFailures(failures) {
       <strong>${escapeHtml(item.source_name)}</strong>
       <small>${escapeHtml(item.source_url)}</small>
       <small>${escapeHtml(item.error_message)}</small>
-      <small>${escapeHtml(item.created_at)}</small>
+      <small>${escapeHtml(formatDateTime(item.created_at))}</small>
     </div>
   `).join('') : '<p>Keine Crawl-Fehler in den letzten Läufen.</p>';
 }
