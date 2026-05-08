@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v4';
+const CACHE_NAME = 'railnews-v6';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -48,6 +48,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  if (url.pathname === '/app.js' || url.pathname === '/styles.css' || url.pathname === '/manifest.webmanifest') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
   event.respondWith(cacheFirst(request));
 });
 
@@ -61,4 +71,19 @@ async function cacheFirst(request) {
     cache.put(request, response.clone());
   }
   return response;
+}
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request, { cache: 'no-store' });
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await caches.caches.match(request);
+    if (cached) return cached;
+    throw new Error('Network unavailable and no cached response.');
+  }
 }

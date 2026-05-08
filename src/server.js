@@ -1,13 +1,36 @@
 import express from 'express';
 import cron from 'node-cron';
 import { config } from './config.js';
-import { db, latestArticles, latestBriefings, latestCrawlFailures, listSources, listTopics } from './db.js';
+import {
+  createBriefingComment,
+  db,
+  latestArticles,
+  latestBriefings,
+  latestCrawlFailures,
+  listBriefingComments,
+  listSources,
+  listTopics,
+  searchArticles
+} from './db.js';
 import { backfillJarnvagarPublishedAt, backfillRailmarketPublishedAt, crawlSources } from './crawler.js';
 import { runDailyBriefing } from './jobs/dailyBriefing.js';
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('public', {
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    if (path.endsWith('/sw.js') || path.endsWith('\\sw.js')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+      return;
+    }
+
+    if (path.endsWith('/index.html') || path.endsWith('\\index.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
 function requireAdmin(req, res, next) {
   if (!config.adminToken) return next();
@@ -16,11 +39,78 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+
+app.get('/health', (_req, res) => {
+  try {
+    db.prepare('SELECT 1').get();
+    res.json({ status: 'ok' });
+  } catch (error) {
+    res.status(503).json({ status: 'error', error: error.message });
+  }
+});
+
 app.get('/api/public', (_req, res) => {
+  const briefings = latestBriefings();
+  const commentsByBriefing = Object.fromEntries(
+    briefings.map((briefing) => [briefing.id, listBriefingComments(briefing.id)])
+  );
   res.json({
-    briefings: latestBriefings(),
-    articles: latestArticles()
+    briefings,
+    articles: latestArticles(),
+    commentsByBriefing
   });
+});
+
+app.get('/api/briefings/:briefingId/comments', (req, res) => {
+  const briefingId = Number(req.params.briefingId);
+  if (!Number.isInteger(briefingId) || briefingId <= 0) {
+    return res.status(400).json({ error: 'Invalid briefing id' });
+  }
+  const briefing = db.prepare('SELECT id FROM briefings WHERE id = ?').get(briefingId);
+  if (!briefing) return res.status(404).json({ error: 'Briefing not found' });
+  res.json({ comments: listBriefingComments(briefingId) });
+});
+
+app.post('/api/briefings/:briefingId/comments', (req, res) => {
+  const briefingId = Number(req.params.briefingId);
+  if (!Number.isInteger(briefingId) || briefingId <= 0) {
+    return res.status(400).json({ error: 'Invalid briefing id' });
+  }
+  const briefing = db.prepare('SELECT id FROM briefings WHERE id = ?').get(briefingId);
+  if (!briefing) return res.status(404).json({ error: 'Briefing not found' });
+
+  const chapterKey = String(req.body.chapterKey || '').trim().slice(0, 140);
+  const chapterTitle = String(req.body.chapterTitle || '').trim().slice(0, 240);
+  const commentText = String(req.body.commentText || '').trim().slice(0, 1200);
+  const commenterFace = String(req.body.commenterFace || '').trim();
+
+  if (!chapterKey) return res.status(400).json({ error: 'chapterKey is required' });
+  if (!commentText) return res.status(400).json({ error: 'commentText is required' });
+  if (!['left', 'right'].includes(commenterFace)) {
+    return res.status(400).json({ error: "commenterFace must be 'left' or 'right'" });
+  }
+
+  const comment = createBriefingComment({
+    briefingId,
+    chapterKey,
+    chapterTitle,
+    commentText,
+    commenterFace
+  });
+  res.status(201).json({ ok: true, comment });
+});
+
+app.get('/api/articles/search', (req, res) => {
+  const query = String(req.query.q || '').trim();
+  if (!query) return res.status(400).json({ error: 'q query parameter is required' });
+
+  const rawLimit = req.query.limit;
+  const limit = rawLimit === undefined ? 50 : Number(rawLimit);
+  if (!Number.isInteger(limit) || limit <= 0) {
+    return res.status(400).json({ error: 'limit must be a positive integer' });
+  }
+
+  res.json({ query, articles: searchArticles(query, limit) });
 });
 
 app.get('/api/admin/state', requireAdmin, (_req, res) => {
@@ -131,7 +221,7 @@ app.patch('/api/topics/:id', requireAdmin, (req, res) => {
 
 app.post('/api/briefings/run', requireAdmin, async (_req, res, next) => {
   try {
-    res.json(await runDailyBriefing());
+    res.json(await runDailyBriefing(undefined, { crawl: false }));
   } catch (error) {
     next(error);
   }
@@ -208,6 +298,10 @@ app.use((error, _req, res, _next) => {
 
 cron.schedule(config.briefingCron, () => {
   runDailyBriefing().catch((error) => console.error('Scheduled briefing failed', error));
+}, { timezone: config.briefingTimezone });
+
+cron.schedule('30 12 * * *', () => {
+  crawlSources().catch((error) => console.error('Scheduled midday crawl failed', error));
 }, { timezone: config.briefingTimezone });
 
 app.listen(config.port, config.host, () => {

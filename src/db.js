@@ -54,6 +54,16 @@ db.exec(`
     error_message TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    briefing_id INTEGER NOT NULL REFERENCES briefings(id) ON DELETE CASCADE,
+    chapter_key TEXT NOT NULL,
+    chapter_title TEXT NOT NULL DEFAULT '',
+    comment_text TEXT NOT NULL,
+    commenter_face TEXT NOT NULL CHECK(commenter_face IN ('left', 'right')),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 const sourceColumns = db.prepare('PRAGMA table_info(sources)').all().map((column) => column.name);
@@ -65,6 +75,7 @@ const defaultSources = [
   ['LOK Report', 'https://www.lok-report.de/', 'Schweden,Norwegen,Dänemark,Finnland,Skandinavien,Trafikverket,Bane NOR,Banedanmark,DSB,SJ,VR', 1],
   ['Järnvägar.nu', 'https://jarnvagar.nu/', 'järnväg,tåg,spår,trafik,underhåll,Ostlänken,Malmbanan,X2000,SJ,Trafikverket,nationella planen,nattåg', 1],
   ['RAILMARKET Sweden', 'https://railmarket.com/eu/sweden/news', 'Sweden,Swedish,SJ,Trafikverket,Green Cargo,Transitio,Norrtåg,Stockholm,Gothenburg,Malmö,Kiruna', 1],
+  ['Rail Color News', 'https://railcolornews.com/', 'rail color news,sweden,norway,denmark,finland,scandinavia,nordic,sj,vr,dsb,bane nor,trafikverket', 1],
   ['Manuelle Meldungen', 'https://railnews.local/manual-stories', 'manuell,Einreichung,Story', 0]
 ];
 
@@ -188,6 +199,27 @@ export function latestArticles(limit = 50) {
   `).all(limit);
 }
 
+export function searchArticles(query, limit = 50) {
+  const normalizedQuery = String(query || '').trim();
+  if (!normalizedQuery) return [];
+
+  const escapedQuery = normalizedQuery.replace(/[%_\\]/g, '\\$&');
+  const searchPattern = `%${escapedQuery}%`;
+  const cappedLimit = Math.max(1, Math.min(Math.trunc(Number(limit) || 50), 100));
+
+  return db.prepare(`
+    SELECT articles.*, sources.name AS source_name
+    FROM articles
+    JOIN sources ON sources.id = articles.source_id
+    WHERE articles.title LIKE ? ESCAPE '\\'
+       OR articles.excerpt LIKE ? ESCAPE '\\'
+       OR articles.url LIKE ? ESCAPE '\\'
+       OR sources.name LIKE ? ESCAPE '\\'
+    ORDER BY COALESCE(articles.published_at, articles.created_at) DESC, articles.id DESC
+    LIMIT ?
+  `).all(searchPattern, searchPattern, searchPattern, searchPattern, cappedLimit);
+}
+
 export function logCrawlFailures(failures) {
   if (!Array.isArray(failures) || failures.length === 0) return;
   const insertFailure = db.prepare(`
@@ -218,4 +250,21 @@ export function latestCrawlFailures(limit = 30) {
     ORDER BY created_at DESC, id DESC
     LIMIT ?
   `).all(limit);
+}
+
+export function createBriefingComment({ briefingId, chapterKey, chapterTitle = '', commentText, commenterFace }) {
+  const result = db.prepare(`
+    INSERT INTO comments (briefing_id, chapter_key, chapter_title, comment_text, commenter_face)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(briefingId, chapterKey, chapterTitle, commentText, commenterFace);
+  return db.prepare('SELECT * FROM comments WHERE id = ?').get(result.lastInsertRowid);
+}
+
+export function listBriefingComments(briefingId) {
+  return db.prepare(`
+    SELECT id, briefing_id, chapter_key, chapter_title, comment_text, commenter_face, created_at
+    FROM comments
+    WHERE briefing_id = ?
+    ORDER BY created_at ASC, id ASC
+  `).all(briefingId);
 }

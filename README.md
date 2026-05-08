@@ -51,6 +51,8 @@ OPENAI_API_KEY=<optional>
 ```
 
 The app runs its own daily cron from `BRIEFING_CRON` and `BRIEFING_TIMEZONE`.
+For Coolify health checks, use `GET /health` (expects HTTP 200 with `{"status": "ok"}`).
+For Dockerfile deployments on Coolify, the image also includes a Docker `HEALTHCHECK` that probes `http://127.0.0.1:3000/health`.
 If you prefer Coolify scheduled tasks, run:
 
 ```bash
@@ -70,5 +72,6 @@ The app seeds these first sources and focuses on Scandinavian railway topics by 
 - `https://www.lok-report.de/`
 - `https://jarnvagar.nu/`
 - `https://railmarket.com/eu/sweden/news`
+- `https://railcolornews.com/`
 
 `FOCUS_KEYWORDS` acts as the region gate. The editable topics then classify or refine matching Scandinavian stories.

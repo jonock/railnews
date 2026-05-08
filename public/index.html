@@ -47,8 +47,15 @@
             <p class="section-kicker">Quellenlage</p>
             <h2>Gefundene Meldungen</h2>
           </div>
+          <form id="articleSearchForm" class="article-search" role="search">
+            <label for="articleSearchInput" class="sr-only">Meldungen durchsuchen</label>
+            <input id="articleSearchInput" type="search" placeholder="Suche nach Titel, Quelle oder Stichwort">
+            <button type="submit">Suchen</button>
+            <button type="button" id="clearArticleSearch" class="secondary">Zurücksetzen</button>
+          </form>
         </div>
-        <div id="articleList" class="article-grid"></div>
+        <p id="articleSearchStatus" class="search-status"></p>
+        <div id="articleList" class="article-groups"></div>
       </section>
     </main>
 
@@ -78,6 +85,52 @@
         </menu>
       </form>
     </dialog>
+
+    <dialog id="commentDialog">
+      <form method="dialog" class="dialog-card comment-form">
+        <h2>Kapitel kommentieren</h2>
+        <p id="commentContext" class="comment-context"></p>
+        <section id="existingCommentsSection" class="existing-comments-section" hidden>
+          <h3 class="existing-comments-heading">Bestehende Kommentare</h3>
+          <div id="existingCommentsBody" class="existing-comments-body"></div>
+        </section>
+        <label>
+          Kommentar
+          <textarea id="commentText" placeholder="Dein Kommentar zum Kapitel" required></textarea>
+        </label>
+        <fieldset class="face-chooser">
+          <legend>Wer kommentiert? (auf Gesicht klicken)</legend>
+          <div class="face-image-picker" id="faceImagePicker" role="radiogroup" aria-label="Kommentierende Person">
+            <img src="/images/header.png" alt="Zwei Personen">
+            <button type="button" class="face-hotspot left" data-face="left" aria-label="Bünzli auswählen"></button>
+            <button type="button" class="face-hotspot right" data-face="right" aria-label="Schlufi auswählen"></button>
+          </div>
+          <p id="faceSelectionLabel" class="face-selection-label">Ausgewählt: Bünzli</p>
+          <input id="commentFaceValue" type="hidden" value="left">
+        </fieldset>
+        <p id="commentStatus" class="form-status"></p>
+        <menu>
+          <button value="cancel" class="secondary" type="button" id="cancelComment">Abbrechen</button>
+          <button id="saveComment" value="default" type="submit">Senden</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="readCommentDialog" class="read-comment-dialog">
+      <div class="dialog-card read-comment-card">
+        <h2>Kommentare</h2>
+        <p id="readCommentMeta" class="comment-context"></p>
+        <div id="readCommentBody" class="read-comment-body"></div>
+        <menu>
+          <button type="button" class="secondary" id="closeReadComment">Schließen</button>
+        </menu>
+      </div>
+    </dialog>
+
+    <aside class="floating-badge" aria-label="Präsentiert von Trafikverket">
+      <p>Präsentiert von</p>
+      <img src="/images/Trafikverket_logo.svg" alt="Trafikverket Logo">
+    </aside>
 
     <script src="/app.js" type="module"></script>
   </body>
