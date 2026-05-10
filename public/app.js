@@ -262,7 +262,7 @@ function renderBriefings(briefings) {
       <article class="briefing-card">
         <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
           <summary class="briefing-summary">
-            <p class="meta">${escapeHtml(formatDate(briefing.briefing_date))}</p>
+            <p class="meta">${escapeHtml(formatDateTime(briefing.created_at))}</p>
             <h3>${escapeHtml(briefingTitle(briefing.title))}</h3>
             ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
           </summary>
