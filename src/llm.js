@@ -47,6 +47,7 @@ Formatvorgaben:
 Inhalt:
 - Übersetze schwedische oder englische Titel/Inhalte sinngemäß.
 - Erkläre kurz die Relevanz für die Bahnbranche in Skandinavien.
+- Wenn eine Meldung eine Staatsbahn betrifft, formuliere kollegial mit Bezug auf die jeweilige Bahn: SJ als schwedische Staatsbahn, Vy als norwegische Staatsbahn, DSB als dänische Staatsbahn und VR als finnische Staatsbahn. Nutze dabei Formulierungen wie "Bei den Kollegen der dänischen Staatsbahn DSB ..." oder eine passende natürliche Variante.
 
 Artikel:
 ${JSON.stringify(articles, null, 2)}`

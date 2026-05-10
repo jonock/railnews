@@ -304,6 +304,10 @@ cron.schedule('30 12 * * *', () => {
   crawlSources().catch((error) => console.error('Scheduled midday crawl failed', error));
 }, { timezone: config.briefingTimezone });
 
+cron.schedule('30 18 * * *', () => {
+  crawlSources().catch((error) => console.error('Scheduled evening crawl failed', error));
+}, { timezone: config.briefingTimezone });
+
 app.listen(config.port, config.host, () => {
   console.log(`Railnews listening on http://${config.host}:${config.port}`);
 });
