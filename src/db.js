@@ -71,6 +71,11 @@ if (!sourceColumns.includes('keywords')) {
   db.exec("ALTER TABLE sources ADD COLUMN keywords TEXT NOT NULL DEFAULT ''");
 }
 
+const briefingColumns = db.prepare('PRAGMA table_info(briefings)').all().map((column) => column.name);
+if (!briefingColumns.includes('briefing_type')) {
+  db.exec("ALTER TABLE briefings ADD COLUMN briefing_type TEXT NOT NULL DEFAULT 'daily'");
+}
+
 const defaultSources = [
   ['LOK Report', 'https://www.lok-report.de/', 'Schweden,Norwegen,Dänemark,Finnland,Skandinavien,Trafikverket,Bane NOR,Banedanmark,DSB,SJ,VR', 1],
   ['Järnvägar.nu', 'https://jarnvagar.nu/', 'järnväg,tåg,spår,trafik,underhåll,Ostlänken,Malmbanan,X2000,SJ,Trafikverket,nationella planen,nattåg', 1],
@@ -186,7 +191,7 @@ export function listTopics() {
 }
 
 export function latestBriefings(limit = 14) {
-  return db.prepare('SELECT * FROM briefings ORDER BY briefing_date DESC LIMIT ?').all(limit);
+  return db.prepare('SELECT * FROM briefings ORDER BY briefing_date DESC, created_at DESC LIMIT ?').all(limit);
 }
 
 export function latestArticles(limit = 50) {

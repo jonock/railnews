@@ -13,7 +13,7 @@ import {
   searchArticles
 } from './db.js';
 import { backfillJarnvagarPublishedAt, backfillRailmarketPublishedAt, crawlSources } from './crawler.js';
-import { runDailyBriefing } from './jobs/dailyBriefing.js';
+import { runDailyBriefing, runEveningBriefingIfNeeded } from './jobs/dailyBriefing.js';
 
 const app = express();
 app.use(express.json());
@@ -227,6 +227,14 @@ app.post('/api/briefings/run', requireAdmin, async (_req, res, next) => {
   }
 });
 
+app.post('/api/briefings/evening/run', requireAdmin, async (_req, res, next) => {
+  try {
+    res.json(await runEveningBriefingIfNeeded(undefined, { crawl: false }));
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post('/api/crawl/run', requireAdmin, async (_req, res, next) => {
   try {
     const results = await crawlSources();
@@ -305,7 +313,7 @@ cron.schedule('30 12 * * *', () => {
 }, { timezone: config.briefingTimezone });
 
 cron.schedule('30 18 * * *', () => {
-  crawlSources().catch((error) => console.error('Scheduled evening crawl failed', error));
+  runEveningBriefingIfNeeded().catch((error) => console.error('Scheduled evening briefing failed', error));
 }, { timezone: config.briefingTimezone });
 
 app.listen(config.port, config.host, () => {

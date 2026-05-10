@@ -82,6 +82,124 @@ ${JSON.stringify(articles, null, 2)}`
   }
 }
 
+export async function shouldCreateEveningBriefing({ morningBriefing, eveningArticles }) {
+  if (eveningArticles.length < 5) return false;
+  if (!config.openai.apiKey) return eveningArticles.length >= 7;
+
+  const input = [
+    {
+      role: 'system',
+      content: 'Du bewertest deutschsprachige Eisenbahn-Briefings nüchtern. Antworte ausschließlich mit kompaktem JSON.'
+    },
+    {
+      role: 'user',
+      content: `Entscheide, ob aus diesen neu gefundenen Abend-Artikeln ein zusätzliches Abend-Briefing entstehen soll.
+
+Erstelle es nur, wenn es gegenüber dem Morgen-Briefing große neue Entwicklungen, viele substanzielle Zusatzmeldungen oder klare Schwerpunktverschiebungen gibt.
+
+Antworte ausschließlich als JSON mit diesem Schema:
+{"create":true|false,"reason":"kurze deutsche Begründung"}
+
+Morgen-Briefing:
+${morningBriefing?.summary || 'Kein Morgen-Briefing vorhanden.'}
+
+Neue Abend-Artikel:
+${JSON.stringify(eveningArticles, null, 2)}`
+    }
+  ];
+
+  try {
+    const response = await fetch(`${config.openai.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${config.openai.apiKey}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: config.openai.model,
+        messages: input,
+        temperature: 0
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error(`Abend-Briefing-Evaluation fehlgeschlagen: ${response.status} ${error}`);
+      return eveningArticles.length >= 7;
+    }
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content?.trim() || '';
+    const parsed = JSON.parse(text);
+    return Boolean(parsed.create);
+  } catch (error) {
+    console.error('Abend-Briefing-Evaluation fehlgeschlagen:', error);
+    return eveningArticles.length >= 7;
+  }
+}
+
+export async function createEveningBriefingText({ morningBriefing, eveningArticles }) {
+  if (!config.openai.apiKey) {
+    return extractiveBriefing(eveningArticles);
+  }
+
+  const input = [
+    {
+      role: 'system',
+      content: 'Du schreibst ausschließlich auf Deutsch. Du erstellst ein kurzes Abend-Update zur Eisenbahnbranche in Skandinavien. Der Ton ist fachlich, aber lockerer und leicht humorvoll. Du darfst freundlich über dänische Sprache, norwegische Zurückhaltung oder schwedisches Laissez-faire scherzen, aber nie verletzend, stereotyp-abwertend oder respektlos. Quellenlinks bleiben unverändert.'
+    },
+    {
+      role: 'user',
+      content: `Erstelle ein zusätzliches Abend-Briefing aus den neuen Artikeln. Es soll klar als Abend-Update funktionieren und nicht das Morgen-Briefing wiederholen.
+
+Formatvorgaben:
+- Verwende nur Zwischentitel (Markdown "## ...") und darunter kurze Absätze.
+- KEINE nummerierten Listen.
+- KEINE Bullet-Listen.
+- Jeder Absatz muss mindestens eine konkrete Quellen-URL enthalten.
+- Beende mit einem kurzen Abschnitt "## Feierabend-Einordnung" als lockerer Fließtext.
+
+Inhalt:
+- Konzentriere dich auf das, was seit dem Morgen neu oder deutlich wichtiger geworden ist.
+- Formuliere etwas lockerer und pointierter als morgens.
+- Wenn eine Meldung eine Staatsbahn betrifft, formuliere kollegial mit Bezug auf die jeweilige Bahn: SJ als schwedische Staatsbahn, Vy als norwegische Staatsbahn, DSB als dänische Staatsbahn und VR als finnische Staatsbahn.
+
+Morgen-Briefing:
+${morningBriefing?.summary || 'Kein Morgen-Briefing vorhanden.'}
+
+Neue Abend-Artikel:
+${JSON.stringify(eveningArticles, null, 2)}`
+    }
+  ];
+
+  try {
+    const response = await fetch(`${config.openai.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${config.openai.apiKey}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: config.openai.model,
+        messages: input,
+        temperature: 0.45
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error(`Abend-Briefing-LLM-Anfrage fehlgeschlagen: ${response.status} ${error}`);
+      return extractiveBriefing(eveningArticles);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || extractiveBriefing(eveningArticles);
+  } catch (error) {
+    console.error('Abend-Briefing-LLM-Anfrage fehlgeschlagen:', error);
+    return extractiveBriefing(eveningArticles);
+  }
+}
+
 export function isLlmConfigured() {
   return Boolean(config.openai.apiKey);
 }

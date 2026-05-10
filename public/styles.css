@@ -650,6 +650,23 @@ h2 {
   line-height: 1.18;
 }
 
+.briefing-card-evening h3 {
+  display: inline;
+  padding: 2px 8px 4px;
+  border-radius: 6px;
+  background: #ffe0a6;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.briefing-card-evening .briefing-body {
+  margin-top: 14px;
+}
+
+.briefing-card-evening::before {
+  background: #f2a51f;
+}
+
 .briefing-details {
   padding-bottom: 2px;
 }

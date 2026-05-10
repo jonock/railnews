@@ -232,7 +232,7 @@ function renderBriefings(briefings) {
 
   const todayKey = todayBriefingKey();
   briefingList.innerHTML = briefings.map((briefing) => {
-    const isToday = briefing.briefing_date === todayKey;
+    const isToday = localDateKey(briefing.briefing_date || briefing.created_at) === todayKey;
     const chapters = buildBriefingChapters(briefing.summary);
     let activeHeadingTitle = '';
     const chapterMarkup = chapters.map((chapter) => {
@@ -258,8 +258,9 @@ function renderBriefings(briefings) {
       `;
     }).join('');
 
+    const briefingTypeClass = briefing.briefing_type === 'evening' ? ' briefing-card-evening' : '';
     return `
-      <article class="briefing-card">
+      <article class="briefing-card${briefingTypeClass}">
         <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
           <summary class="briefing-summary">
             <p class="meta">${escapeHtml(formatDateTime(briefing.created_at))}</p>

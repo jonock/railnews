@@ -101,7 +101,7 @@ async function api(path, options = {}) {
 
 function renderBriefings(briefings) {
   briefingList.innerHTML = briefings.length ? briefings.map((briefing) => `
-    <article class="briefing-card">
+    <article class="briefing-card${briefing.briefing_type === 'evening' ? ' briefing-card-evening' : ''}">
       <p class="meta">${escapeHtml(formatDateTime(briefing.created_at))}</p>
       <h3>${escapeHtml(briefingTitle(briefing.title))}</h3>
       <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
