@@ -114,6 +114,46 @@ function parseIsoCandidate(value) {
   return date.toISOString();
 }
 
+
+function decodeHtmlEntities(value) {
+  if (!value) return '';
+  return cheerio.load(`<body>${value}</body>`)('body').text();
+}
+
+function stripHtml(value) {
+  if (!value) return '';
+  return cleanText(cheerio.load(value).text());
+}
+
+function isFeedResponse(source, contentType, body) {
+  if (source.url.endsWith('/feed')) return true;
+  if (/\b(application|text)\/(rss\+xml|atom\+xml|xml)\b/i.test(contentType)) return true;
+  return /^\s*<(rss|feed)\b/i.test(body);
+}
+
+function extractFeedArticles(body, source) {
+  const $ = cheerio.load(body, { xmlMode: true });
+  const articles = [];
+
+  $('item, entry').each((_, element) => {
+    const node = $(element);
+    const url = absoluteUrl(node.find('link').first().text() || node.find('link').first().attr('href'), source.url);
+    const title = cleanText(decodeHtmlEntities(node.find('title').first().text()));
+    if (!url || title.length < 12) return;
+
+    const encodedContent = node.find('content\\:encoded, encoded').first().text();
+    const description = node.find('description, summary').first().text();
+    const excerpt = stripHtml(encodedContent || description).slice(0, 900);
+    const publishedAt = parseIsoCandidate(
+      node.find('pubDate, published, updated').first().text()
+    );
+
+    articles.push({ url, title, excerpt, publishedAt });
+  });
+
+  return articles;
+}
+
 async function parseJarnvagarPublishedAt(articleUrl) {
   try {
     const response = await fetch(articleUrl, {
@@ -389,8 +429,13 @@ export async function crawlSources() {
         throw new Error('Cloudflare challenge');
       }
 
-      const $ = cheerio.load(html);
-      const extracted = extractArticles($, source);
+      let extracted;
+      if (isFeedResponse(source, response.headers.get('content-type') || '', html)) {
+        extracted = extractFeedArticles(html, source);
+      } else {
+        const $ = cheerio.load(html);
+        extracted = extractArticles($, source);
+      }
       if (source.url.includes('jarnvagar.nu')) {
         await enrichJarnvagarPublishedAt(extracted);
       }
