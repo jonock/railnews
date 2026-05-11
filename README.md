@@ -73,5 +73,8 @@ The app seeds these first sources and focuses on Scandinavian railway topics by 
 - `https://jarnvagar.nu/`
 - `https://railmarket.com/eu/sweden/news`
 - `https://railcolornews.com/`
+- `https://www.therailagenda.com/feed`
+
+RSS/Atom feeds, including Substack feeds such as The Rail Agenda, are crawled directly when a source URL ends in `/feed` or returns feed XML.
 
 `FOCUS_KEYWORDS` acts as the region gate. The editable topics then classify or refine matching Scandinavian stories.
