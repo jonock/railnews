@@ -7,6 +7,39 @@ import {
   shouldCreateEveningBriefing
 } from '../llm.js';
 
+function parseArticleIds(value) {
+  try {
+    const parsed = JSON.parse(value || '[]');
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((id) => Number(id)).filter(Number.isFinite);
+  } catch {
+    return [];
+  }
+}
+
+function recentBriefingsBefore(date, limit = 5) {
+  return db.prepare(`
+    SELECT id, briefing_date, briefing_type, title, summary, article_ids
+    FROM briefings
+    WHERE briefing_date < ?
+    ORDER BY briefing_date DESC, created_at DESC
+    LIMIT ?
+  `).all(date, limit);
+}
+
+function articleIdsFromBriefings(briefings) {
+  return new Set(
+    briefings.flatMap((briefing) => parseArticleIds(briefing.article_ids))
+  );
+}
+
+function excludeRecentlyBriefedArticles(articles, recentBriefings, limit = 30) {
+  const recentlyBriefedArticleIds = articleIdsFromBriefings(recentBriefings);
+  return articles
+    .filter((article) => !recentlyBriefedArticleIds.has(article.id))
+    .slice(0, limit);
+}
+
 function todayKey() {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Zurich',
@@ -18,16 +51,18 @@ function todayKey() {
 
 export async function runDailyBriefing(date = todayKey(), options = {}) {
   const crawlResults = options.crawl === false ? [] : await crawlSources();
-  const articles = db.prepare(`
+  const recentBriefings = recentBriefingsBefore(date);
+  const candidateArticles = db.prepare(`
     SELECT articles.*, sources.name AS source_name
     FROM articles
     JOIN sources ON sources.id = articles.source_id
     WHERE date(COALESCE(articles.published_at, articles.created_at)) >= date(?, '-1 day')
     ORDER BY COALESCE(articles.published_at, articles.created_at) DESC
-    LIMIT 30
+    LIMIT 80
   `).all(date);
+  const articles = excludeRecentlyBriefedArticles(candidateArticles, recentBriefings);
 
-  const summary = await createBriefingText(articles);
+  const summary = await createBriefingText(articles, { recentBriefings });
   const title = `Skandinavien-Bahnbriefing - ${date}`;
   const articleIds = JSON.stringify(articles.map((article) => article.id));
 
