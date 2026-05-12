@@ -1,5 +1,25 @@
 import { config } from './config.js';
 
+function parseJsonArray(value) {
+  try {
+    const parsed = JSON.parse(value || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function compactRecentBriefings(recentBriefings = []) {
+  const briefings = Array.isArray(recentBriefings) ? recentBriefings : [];
+  return briefings.map((briefing) => ({
+    datum: briefing.briefing_date,
+    typ: briefing.briefing_type || 'daily',
+    titel: briefing.title,
+    zusammenfassung: String(briefing.summary || '').slice(0, 2500),
+    artikel_ids: parseJsonArray(briefing.article_ids)
+  }));
+}
+
 function extractiveBriefing(articles) {
   if (articles.length === 0) {
     return 'Heute wurden keine passenden Eisenbahnmeldungen aus Skandinavien gefunden.';
@@ -24,8 +44,10 @@ function extractiveBriefing(articles) {
   return `Automatisch erzeugtes deutschsprachiges Kurzbriefing auf Basis der gefundenen Quellenmeldungen.\n\n${sections}`;
 }
 
-export async function createBriefingText(articles) {
+export async function createBriefingText(articles, options = {}) {
   if (!config.openai.apiKey) return extractiveBriefing(articles);
+
+  const recentBriefings = compactRecentBriefings(options.recentBriefings);
 
   const input = [
     {
@@ -42,6 +64,9 @@ Formatvorgaben:
 - KEINE Bullet-Listen.
 - Jeder Absatz muss mindestens eine konkrete Quellen-URL enthalten.
 - Gruppiere zusammengehörige Meldungen pro Zwischentitel.
+- Wiederhole keine Artikel, URLs oder inhaltlich gleichen Meldungen aus den letzten Briefings.
+- Wenn ein Artikel nur eine bereits berichtete Meldung ohne substanzielle neue Entwicklung wiederholt, lasse ihn weg.
+- Falls es zu einem früher erwähnten Thema wirklich neue Fakten gibt, benenne nur die neue Entwicklung und formuliere sie klar als Update.
 - Beende mit einem kurzen Abschnitt "## Einordnung" als Fließtext.
 
 Inhalt:
@@ -49,7 +74,10 @@ Inhalt:
 - Erkläre kurz die Relevanz für die Bahnbranche in Skandinavien.
 - Wenn eine Meldung eine Staatsbahn betrifft, formuliere kollegial mit Bezug auf die jeweilige Bahn: SJ als schwedische Staatsbahn, Vy als norwegische Staatsbahn, DSB als dänische Staatsbahn und VR als finnische Staatsbahn. Nutze dabei Formulierungen wie "Bei den Kollegen der dänischen Staatsbahn DSB ..." oder eine passende natürliche Variante.
 
-Artikel:
+Letzte Briefings als Ausschluss-Kontext (nicht wiederholen):
+${JSON.stringify(recentBriefings, null, 2)}
+
+Neue Kandidatenartikel für dieses Tagesbriefing:
 ${JSON.stringify(articles, null, 2)}`
     }
   ];
