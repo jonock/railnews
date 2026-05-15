@@ -1338,7 +1338,7 @@ menu {
 
 .floating-badge img {
   display: block;
-  width: 120px;
+  width: auto;
   height: 39px;
 }
 
@@ -1355,7 +1355,7 @@ menu {
   }
 
   .floating-badge img {
-    width: 96px;
+    width: auto;
     height: 31px;
   }
 }
