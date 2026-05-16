@@ -352,7 +352,7 @@ document.querySelector('#cancelStory').addEventListener('click', () => {
 
 document.querySelector('.story-form').addEventListener('submit', async (event) => {
   event.preventDefault();
-  storyStatus.textContent = 'Meldung wird gespeichert und Briefing neu erstellt...';
+  storyStatus.textContent = 'Meldung wird gespeichert...';
 
   try {
     await api('/api/public/stories', {
@@ -370,7 +370,7 @@ document.querySelector('.story-form').addEventListener('submit', async (event) =
     storyExcerpt.value = '';
     storyDialog.close();
     await load();
-    document.querySelector('#briefing').scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.articles').scrollIntoView({ behavior: 'smooth' });
   } catch (error) {
     storyStatus.textContent = error.message;
   }

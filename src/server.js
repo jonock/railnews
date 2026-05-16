@@ -123,15 +123,6 @@ app.get('/api/admin/state', requireAdmin, (_req, res) => {
   });
 });
 
-function todayKey() {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Zurich',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).format(new Date());
-}
-
 function manualSourceId() {
   db.prepare(`
     INSERT OR IGNORE INTO sources (name, url, keywords, active)
@@ -140,7 +131,7 @@ function manualSourceId() {
   return db.prepare('SELECT id FROM sources WHERE url = ?').get('https://railnews.local/manual-stories').id;
 }
 
-app.post('/api/public/stories', async (req, res, next) => {
+app.post('/api/public/stories', (req, res, next) => {
   try {
     const { title, url, excerpt = '' } = req.body;
     if (!title || !url) return res.status(400).json({ error: 'title and url are required' });
@@ -168,13 +159,12 @@ app.post('/api/public/stories', async (req, res, next) => {
       manualSourceId(),
       normalizedUrl,
       cleanTitle,
-      cleanExcerpt || 'Manuell hinzugefügte Meldung für das heutige Briefing.',
+      cleanExcerpt || 'Manuell hinzugefügte Meldung.',
       new Date().toISOString(),
       JSON.stringify(['Manuell'])
     );
 
-    const briefing = await runDailyBriefing(todayKey(), { crawl: false });
-    res.status(201).json({ ok: true, briefing });
+    res.status(201).json({ ok: true });
   } catch (error) {
     next(error);
   }
