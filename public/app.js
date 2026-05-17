@@ -11,6 +11,8 @@ const articleSearchForm = document.querySelector('#articleSearchForm');
 const articleSearchInput = document.querySelector('#articleSearchInput');
 const clearArticleSearchButton = document.querySelector('#clearArticleSearch');
 const articleSearchStatus = document.querySelector('#articleSearchStatus');
+const floatingBadge = document.querySelector('#floatingBadge');
+const floatingBadgeLogo = document.querySelector('#floatingBadgeLogo');
 const commentDialog = document.querySelector('#commentDialog');
 const commentContext = document.querySelector('#commentContext');
 const commentText = document.querySelector('#commentText');
@@ -27,6 +29,20 @@ let selectedCommentTarget = null;
 let commentsByBriefing = {};
 
 const COMMENTER_FACE_STORAGE_KEY = 'railnews:commenter-face';
+const DAILY_LOGO_ROTATION = [
+  { name: 'Traficom', src: '/images/Traficom_logo.svg', alt: 'Traficom Logo' },
+  { name: 'Trafikverket', src: '/images/Trafikverket_logo.svg', alt: 'Trafikverket Logo' },
+  { name: 'Krösatågen', src: '/images/Krosatagen_logo.png', alt: 'Krösatågen Logo' },
+  { name: 'VR Sverige AB', src: '/images/VR_Sverige_logo.svg', alt: 'VR Sverige AB Logo' },
+  { name: 'GoAhead Nordic', src: '/images/GoAhead_Nordic_logo.png', alt: 'Go-Ahead Logo' },
+  { name: 'Vy Gruppen', src: '/images/Vy_Gruppen_logo.svg', alt: 'Vy Gruppen Logo' },
+  { name: 'Jönköpings Länstrafiken', src: '/images/Jonkopings_Lanstrafik_logo.svg', alt: 'Jönköpings Länstrafiken Logo' },
+  { name: 'SL', src: '/images/SL_logo.png', alt: 'Storstockholms Lokaltrafik Logo' },
+  { name: 'Nordea', src: '/images/Nordea_logo.svg', alt: 'Nordea Logo' },
+  { name: 'ICA Gruppen', src: '/images/ICA_Gruppen_logo.svg', alt: 'ICA Gruppen Logo' },
+  { name: 'Svenska Spel', src: '/images/Svenska_Spel_logo.png', alt: 'Svenska Spel Logo' },
+  { name: 'BILTEMA', src: '/images/BILTEMA_logo.png', alt: 'Biltema Logo' }
+];
 
 function readStoredCommenterFace() {
   try {
@@ -45,6 +61,30 @@ function persistCommenterFace(face) {
   }
 }
 
+function todayRotationKey() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Zurich',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+}
+
+function pickDailyLogo() {
+  const key = todayRotationKey();
+  const numericKey = Number(key.replaceAll('-', ''));
+  const index = Number.isFinite(numericKey) ? numericKey % DAILY_LOGO_ROTATION.length : 0;
+  return DAILY_LOGO_ROTATION[index];
+}
+
+function renderDailyLogo() {
+  if (!floatingBadge || !floatingBadgeLogo || !DAILY_LOGO_ROTATION.length) return;
+  const logo = pickDailyLogo();
+  floatingBadge.setAttribute('aria-label', `Präsentiert von ${logo.name}`);
+  floatingBadgeLogo.src = logo.src;
+  floatingBadgeLogo.alt = logo.alt;
+}
+
 function applyCommenterFaceSelection(face) {
   const normalized = face === 'right' ? 'right' : 'left';
   commentFaceValue.value = normalized;
@@ -61,6 +101,8 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+renderDailyLogo();
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
