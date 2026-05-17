@@ -38,16 +38,10 @@ const DAILY_LOGO_ROTATION = [
   { name: 'Vy Gruppen', src: '/images/Vy_Gruppen_logo.svg', alt: 'Vy Gruppen Logo' },
   { name: 'Jönköpings Länstrafiken', src: '/images/Jonkopings_Lanstrafik_logo.svg', alt: 'Jönköpings Länstrafiken Logo' },
   { name: 'SL', src: '/images/SL_logo.png', alt: 'Storstockholms Lokaltrafik Logo' },
-  { name: 'Mälartåg', src: '/images/Malartag_logo.svg', alt: 'Mälartåg Logo' },
-  { name: 'Trygg-Hansa', src: '/images/Trygg_Hansa_logo.svg', alt: 'Trygg-Hansa Logo' },
   { name: 'Nordea', src: '/images/Nordea_logo.svg', alt: 'Nordea Logo' },
-  { name: 'Hallon Företag', src: '/images/Hallon_Foretag_logo.svg', alt: 'Hallon Företag Logo' },
   { name: 'ICA Gruppen', src: '/images/ICA_Gruppen_logo.svg', alt: 'ICA Gruppen Logo' },
   { name: 'Svenska Spel', src: '/images/Svenska_Spel_logo.png', alt: 'Svenska Spel Logo' },
-  { name: 'BILTEMA', src: '/images/BILTEMA_logo.png', alt: 'Biltema Logo' },
-  { name: 'Hööks', src: '/images/Hooks_logo.svg', alt: 'Hööks Logo' },
-  { name: 'Granngården', src: '/images/Granngarden_logo.svg', alt: 'Granngården Logo' },
-  { name: 'Naturkompaniet', src: '/images/Naturkompaniet_logo.svg', alt: 'Naturkompaniet Logo' }
+  { name: 'BILTEMA', src: '/images/BILTEMA_logo.png', alt: 'Biltema Logo' }
 ];
 
 function readStoredCommenterFace() {
