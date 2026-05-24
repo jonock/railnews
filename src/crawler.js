@@ -373,13 +373,23 @@ function extractJarnvagar($, source) {
   return articles;
 }
 
+function isRailmarketArticleUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (!/(^|\.)railmarket\.com$/i.test(parsed.hostname)) return false;
+    return /^\/news\/[^/]+\/\d+-[^/]+\/?$/i.test(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
 function extractRailmarket($, source) {
   const articles = [];
   $('a[href]').each((_, element) => {
     const url = absoluteUrl($(element).attr('href'), source.url);
     const title = cleanText($(element).text());
     if (!url || title.length < 12) return;
-    if (!url.includes('railmarket.com/news/')) return;
+    if (!isRailmarketArticleUrl(url)) return;
 
     const container = $(element).closest('article, li, .card, div');
     articles.push({

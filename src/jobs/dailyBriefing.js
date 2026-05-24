@@ -7,16 +7,6 @@ import {
   shouldCreateEveningBriefing
 } from '../llm.js';
 
-function parseArticleIds(value) {
-  try {
-    const parsed = JSON.parse(value || '[]');
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map((id) => Number(id)).filter(Number.isFinite);
-  } catch {
-    return [];
-  }
-}
-
 function recentBriefingsBefore(date, limit = 5) {
   return db.prepare(`
     SELECT id, briefing_date, briefing_type, title, summary, article_ids
@@ -27,16 +17,20 @@ function recentBriefingsBefore(date, limit = 5) {
   `).all(date, limit);
 }
 
-function articleIdsFromBriefings(briefings) {
+function briefedArticleIdsBefore(date) {
   return new Set(
-    briefings.flatMap((briefing) => parseArticleIds(briefing.article_ids))
+    db.prepare(`
+      SELECT DISTINCT json_each.value AS article_id
+      FROM briefings,
+        json_each(CASE WHEN json_valid(briefings.article_ids) THEN briefings.article_ids ELSE '[]' END)
+      WHERE briefing_date < ?
+    `).all(date).map((row) => Number(row.article_id)).filter(Number.isFinite)
   );
 }
 
-function excludeRecentlyBriefedArticles(articles, recentBriefings, limit = 30) {
-  const recentlyBriefedArticleIds = articleIdsFromBriefings(recentBriefings);
+function excludeBriefedArticles(articles, briefedArticleIds, limit = 30) {
   return articles
-    .filter((article) => !recentlyBriefedArticleIds.has(article.id))
+    .filter((article) => !briefedArticleIds.has(article.id))
     .slice(0, limit);
 }
 
@@ -52,6 +46,7 @@ function todayKey() {
 export async function runDailyBriefing(date = todayKey(), options = {}) {
   const crawlResults = options.crawl === false ? [] : await crawlSources();
   const recentBriefings = recentBriefingsBefore(date);
+  const previouslyBriefedArticleIds = briefedArticleIdsBefore(date);
   const candidateArticles = db.prepare(`
     SELECT articles.*, sources.name AS source_name
     FROM articles
@@ -60,7 +55,7 @@ export async function runDailyBriefing(date = todayKey(), options = {}) {
     ORDER BY COALESCE(articles.published_at, articles.created_at) DESC
     LIMIT 80
   `).all(date);
-  const articles = excludeRecentlyBriefedArticles(candidateArticles, recentBriefings);
+  const articles = excludeBriefedArticles(candidateArticles, previouslyBriefedArticleIds);
 
   const summary = await createBriefingText(articles, { recentBriefings });
   const title = `Skandinavien-Bahnbriefing - ${date}`;
