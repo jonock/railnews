@@ -41,7 +41,10 @@ const DAILY_LOGO_ROTATION = [
   { name: 'Nordea', src: '/images/Nordea_logo.svg', alt: 'Nordea Logo' },
   { name: 'ICA Gruppen', src: '/images/ICA_Gruppen_logo.svg', alt: 'ICA Gruppen Logo' },
   { name: 'Svenska Spel', src: '/images/Svenska_Spel_logo.png', alt: 'Svenska Spel Logo' },
-  { name: 'BILTEMA', src: '/images/BILTEMA_logo.png', alt: 'Biltema Logo' }
+  { name: 'BILTEMA', src: '/images/BILTEMA_logo.png', alt: 'Biltema Logo' },
+  { name: 'Lieblingsplatz', src: '/images/lieblingsplatz.avif', alt: 'Lieblingsplatz Logo' },
+  { name: 'Gekås', src: '/images/Gekas_Logo.svg', alt: 'Gekås Logo' },
+  { name: 'Scandic', src: '/images/Scandic.svg', alt: 'Scandic Logo' }
 ];
 
 function readStoredCommenterFace() {
