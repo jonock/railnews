@@ -57,6 +57,16 @@ export async function runDailyBriefing(date = todayKey(), options = {}) {
   `).all(date);
   const articles = excludeBriefedArticles(candidateArticles, previouslyBriefedArticleIds);
 
+  if (articles.length === 0) {
+    return {
+      date,
+      crawlResults,
+      created: false,
+      articleCount: 0,
+      reason: 'Keine neuen Artikel für ein Tagesbriefing.'
+    };
+  }
+
   const summary = await createBriefingText(articles, { recentBriefings });
   const title = `Skandinavien-Bahnbriefing - ${date}`;
   const articleIds = JSON.stringify(articles.map((article) => article.id));
@@ -72,7 +82,7 @@ export async function runDailyBriefing(date = todayKey(), options = {}) {
       created_at = CURRENT_TIMESTAMP
   `).run(date, title, summary, articleIds);
 
-  return { date, crawlResults, articleCount: articles.length, llmConfigured: isLlmConfigured() };
+  return { date, crawlResults, created: true, articleCount: articles.length, llmConfigured: isLlmConfigured() };
 }
 
 export async function runEveningBriefingIfNeeded(date = todayKey(), options = {}) {

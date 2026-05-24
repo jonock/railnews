@@ -366,6 +366,7 @@ function extractJarnvagar($, source) {
     const url = absoluteUrl(link.attr('href'), source.url);
     const title = cleanText(link.text());
     if (!url || title.length < 12) return;
+    if (!/^https:\/\/jarnvagar\.nu\/[^/]+\/?$/i.test(url)) return;
 
     const excerpt = cleanText($(element).find('.post-content, .entry-summary, p').text() || $(element).text()).slice(0, 900);
     articles.push({ url, title, excerpt, publishedAt: null });
