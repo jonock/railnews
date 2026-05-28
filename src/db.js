@@ -82,6 +82,7 @@ const defaultSources = [
   ['RAILMARKET Sweden', 'https://railmarket.com/eu/sweden/news', 'Sweden,Swedish,SJ,Trafikverket,Green Cargo,Transitio,Norrtåg,Stockholm,Gothenburg,Malmö,Kiruna', 1],
   ['Rail Color News', 'https://railcolornews.com/', 'rail color news,sweden,norway,denmark,finland,scandinavia,nordic,sj,vr,dsb,bane nor,trafikverket', 1],
   ['The Rail Agenda', 'https://www.therailagenda.com/feed', 'Sweden,Swedish,Norway,Norwegian,Denmark,Danish,Finland,Finnish,Scandinavia,Nordic,SJ,DSB,VR,Trafikverket,Bane NOR,Banedanmark,Väylävirasto,ERTMS,ETCS,night train,freight', 1],
+  ['SVT Nyheter', 'https://www.svt.se/', 'järnväg,tåg,tågtrafik,tågstopp,tågförsening,pendeltåg,fjärrtåg,nattåg,malmbanan,ostlänken,sj,green cargo,trafikverket,ertms,etcs,bane nor,banedanmark,banarbete,spårfel,signalfel', 1],
   ['Manuelle Meldungen', 'https://railnews.local/manual-stories', 'manuell,Einreichung,Story', 0]
 ];
 

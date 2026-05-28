@@ -317,10 +317,59 @@ function hasSufficientArticleInfo(article) {
 }
 
 function shouldIndexArticle(article, source) {
+  if (source.url.includes('svt.se')) {
+    return isRelevantSvtRailArticle(article);
+  }
   if (!source.url.includes('railcolornews.com')) return true;
   if (!hasSufficientArticleInfo(article)) return false;
   if (isLikelyPaywalledStub(article)) return false;
   return true;
+}
+
+function isRelevantSvtRailArticle(article) {
+  const text = `${article.title} ${article.excerpt}`.toLowerCase();
+
+  const strongRailSignals = [
+    /\bjärnväg(?:en|ar|arna|s)?\b/u,
+    /\btåg(?:et|en|ens|ens)?\b/u,
+    /\btågstopp\b/u,
+    /\btågtrafik\b/u,
+    /\btågförsening(?:ar)?\b/u,
+    /\bpendeltåg\b/u,
+    /\bfjärrtåg\b/u,
+    /\bnattåg\b/u,
+    /\bmalmbanan\b/u,
+    /\bostlänken\b/u,
+    /\bsj\b/u,
+    /\bgreen cargo\b/u,
+    /\btrafikverket\b/u,
+    /\bertms\b/u,
+    /\betcs\b/u,
+    /\bbane nor\b/u,
+    /\bbanedanmark\b/u,
+    /\bbanarbete\b/u,
+    /\bspårfel\b/u,
+    /\bspårbyte\b/u,
+    /\bsignal(?:fel|problem|system)?\b/u
+  ];
+
+  const noisyContexts = [
+    /\btrav\b/u,
+    /\btravet\b/u,
+    /\bgalopp\b/u,
+    /\bfotboll\b/u,
+    /\bhockey\b/u,
+    /\beurovision\b/u,
+    /\bmelodifestival\w*\b/u,
+    /\bbörsen\b/u,
+    /\baktie\w*\b/u,
+    /\bväder\b/u,
+    /\bstorm\b/u,
+    /\bbrand\b/u
+  ];
+
+  if (noisyContexts.some((pattern) => pattern.test(text))) return false;
+  return strongRailSignals.some((pattern) => pattern.test(text));
 }
 
 function extractLokReport($, source) {
