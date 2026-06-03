@@ -125,6 +125,19 @@ function stripHtml(value) {
   return cleanText(cheerio.load(value).text());
 }
 
+function normalizeCrawledText(value, maxLength) {
+  const cleaned = stripHtml(decodeHtmlEntities(value || ''));
+  return typeof maxLength === 'number' ? cleaned.slice(0, maxLength) : cleaned;
+}
+
+function normalizeArticle(article) {
+  return {
+    ...article,
+    title: normalizeCrawledText(article.title),
+    excerpt: normalizeCrawledText(article.excerpt, 900)
+  };
+}
+
 function isFeedResponse(source, contentType, body) {
   if (source.url.endsWith('/feed')) return true;
   if (/\b(application|text)\/(rss\+xml|atom\+xml|xml)\b/i.test(contentType)) return true;
@@ -138,12 +151,12 @@ function extractFeedArticles(body, source) {
   $('item, entry').each((_, element) => {
     const node = $(element);
     const url = absoluteUrl(node.find('link').first().text() || node.find('link').first().attr('href'), source.url);
-    const title = cleanText(decodeHtmlEntities(node.find('title').first().text()));
+    const title = normalizeCrawledText(node.find('title').first().text());
     if (!url || title.length < 12) return;
 
     const encodedContent = node.find('content\\:encoded, encoded').first().text();
     const description = node.find('description, summary').first().text();
-    const excerpt = stripHtml(encodedContent || description).slice(0, 900);
+    const excerpt = normalizeCrawledText(encodedContent || description, 900);
     const publishedAt = parseIsoCandidate(
       node.find('pubDate, published, updated').first().text()
     );
@@ -505,9 +518,11 @@ export async function crawlSources() {
       const seen = new Set();
       let saved = 0;
 
-      for (const article of extracted) {
+      for (const extractedArticle of extracted) {
+        const article = normalizeArticle(extractedArticle);
         if (seen.has(article.url)) continue;
         seen.add(article.url);
+        if (article.title.length < 12) continue;
         if (!shouldIndexArticle(article, source)) continue;
         if (!sourceImpliesFocus(source) && !matchesSourceKeywords(article, source)) continue;
         const matches = topicMatches(article, topics);

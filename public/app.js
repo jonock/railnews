@@ -117,6 +117,16 @@ function escapeHtml(value = '') {
   })[character]);
 }
 
+function normalizeDisplayText(value = '', maxLength) {
+  const decoder = document.createElement('textarea');
+  decoder.innerHTML = String(value);
+  const decoded = decoder.value;
+  const template = document.createElement('template');
+  template.innerHTML = decoded;
+  const cleaned = (template.content.textContent || decoded).replace(/\s+/g, ' ').trim();
+  return typeof maxLength === 'number' ? cleaned.slice(0, maxLength) : cleaned;
+}
+
 
 function publicationNameFromUrl(url) {
   try {
@@ -351,11 +361,13 @@ function renderArticles(articles) {
         ${group.items.map((article) => {
           const tags = JSON.parse(article.matched_topics || '[]');
           const date = article.published_at || article.created_at;
+          const title = normalizeDisplayText(article.title);
+          const excerpt = normalizeDisplayText(article.excerpt, 240);
           return `
             <article class="article-card">
-              <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
+              <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(title)}</a>
               <div class="tags">${tags.map((tag) => `<span class=\"tag\">${escapeHtml(tag)}</span>`).join('')}</div>
-              <p>${escapeHtml(article.excerpt.slice(0, 240))}</p>
+              <p>${escapeHtml(excerpt)}</p>
               <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDateTime(date))}` : ''}</small>
             </article>
           `;
