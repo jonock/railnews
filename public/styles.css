@@ -956,6 +956,7 @@ textarea {
 
 .article-card {
   position: relative;
+  min-width: 0;
   min-height: 220px;
   display: grid;
   align-content: start;
@@ -983,6 +984,8 @@ textarea {
 
 .article-card a {
   color: var(--spruce-dark);
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-size: 1.05rem;
   font-weight: 850;
   line-height: 1.25;
@@ -995,12 +998,16 @@ textarea {
 
 .article-card p {
   margin-bottom: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   color: var(--muted);
   line-height: 1.5;
 }
 
 .article-card small {
   color: var(--rail);
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-weight: 700;
 }
 
