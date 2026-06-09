@@ -1,4 +1,4 @@
-import { briefingTitle, formatDate, formatDateTime, formatLongDate, localDateKey } from './dateTime.js';
+import { briefingTitle, formatDateTime, formatLongDate, localDateKey } from './dateTime.js';
 
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');
@@ -270,24 +270,15 @@ async function api(path, options = {}) {
   return response.json();
 }
 
-function todayBriefingKey() {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Zurich',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).format(new Date());
-}
-
 function renderBriefings(briefings) {
   if (!briefings.length) {
     briefingList.innerHTML = '<p>Noch keine Briefings vorhanden.</p>';
     return;
   }
 
-  const todayKey = todayBriefingKey();
+  const latestBriefingId = briefings[0]?.id;
   briefingList.innerHTML = briefings.map((briefing) => {
-    const isToday = localDateKey(briefing.briefing_date || briefing.created_at) === todayKey;
+    const isLatest = briefing.id === latestBriefingId;
     const chapters = buildBriefingChapters(briefing.summary);
     let activeHeadingTitle = '';
     const chapterMarkup = chapters.map((chapter) => {
@@ -316,11 +307,11 @@ function renderBriefings(briefings) {
     const briefingTypeClass = briefing.briefing_type === 'evening' ? ' briefing-card-evening' : '';
     return `
       <article class="briefing-card${briefingTypeClass}">
-        <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
+        <details class="briefing-details"${isLatest ? ' open data-lock-open="true"' : ''}>
           <summary class="briefing-summary">
             <p class="meta">${escapeHtml(formatDateTime(briefing.created_at))}</p>
             <h3>${escapeHtml(briefingTitle(briefing.title))}</h3>
-            ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
+            ${isLatest ? '' : '<span class="briefing-toggle-label">Briefing öffnen</span>'}
           </summary>
           <div class="briefing-body">${chapterMarkup}</div>
         </details>
