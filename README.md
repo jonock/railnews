@@ -75,7 +75,8 @@ The app seeds these first sources and focuses on Scandinavian railway topics by 
 - `https://railcolornews.com/`
 - `https://www.therailagenda.com/feed`
 - `https://www.svt.se/` (with strict railway-focused filtering)
+- `https://vaunut.org/` (Finnish railway enthusiast photo-series entries)
 
-RSS/Atom feeds, including Substack feeds such as The Rail Agenda, are crawled directly when a source URL ends in `/feed` or returns feed XML.
+RSS/Atom feeds, including Substack feeds such as The Rail Agenda, are crawled directly when a source URL ends in `/feed` or returns feed XML. Vaunut.org is parsed with a dedicated extractor because its homepage presents loosely structured Finnish photo-series entries rather than semantic article cards.
 
 `FOCUS_KEYWORDS` acts as the region gate. The editable topics then classify or refine matching Scandinavian stories.
