@@ -19,6 +19,12 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -879,6 +885,8 @@ h2 {
 input,
 textarea {
   width: 100%;
+  min-width: 0;
+  font-size: 1rem;
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 13px 15px;
@@ -1027,6 +1035,7 @@ textarea {
 }
 
 dialog {
+  max-width: calc(100vw - 24px);
   border: 0;
   border-radius: 18px;
   padding: 0;
@@ -1035,6 +1044,7 @@ dialog {
 
 .dialog-card {
   width: min(420px, 90vw);
+  max-width: 100%;
   padding: 22px;
 }
 
@@ -1057,6 +1067,8 @@ dialog {
 
 .comment-form {
   width: min(620px, 92vw);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .comment-context {
@@ -1095,6 +1107,8 @@ dialog {
 }
 
 .face-chooser {
+  min-width: 0;
+  max-width: 100%;
   margin: 0 0 12px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -1116,6 +1130,7 @@ dialog {
 
 .face-image-picker {
   position: relative;
+  width: 100%;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1246,11 +1261,13 @@ menu {
   }
 
   dialog {
+    max-width: calc(100vw - 16px);
     border-radius: 14px;
   }
 
   .dialog-card {
     width: min(94vw, 620px);
+    max-width: 100%;
     padding: 18px;
   }
 
