@@ -67,7 +67,7 @@ Formatvorgaben:
 - Wiederhole keine Artikel, URLs oder inhaltlich gleichen Meldungen aus den letzten Briefings.
 - Wenn ein Artikel nur eine bereits berichtete Meldung ohne substanzielle neue Entwicklung wiederholt, lasse ihn weg.
 - Falls es zu einem früher erwähnten Thema wirklich neue Fakten gibt, benenne nur die neue Entwicklung und formuliere sie klar als Update.
-- Beende mit einem kurzen Abschnitt "## Einordnung" als Fließtext.
+- Beende mit einem kurzen Abschnitt "## Einordnung" als Fließtext: maximal 2–3 kurze Sätze, nur die wesentlichen Punkte. Dort darfst du einen kleinen, harmlosen Witz machen, wenn er zur Meldung passt.
 
 Inhalt:
 - Übersetze schwedische oder englische Titel/Inhalte sinngemäß.
@@ -185,7 +185,7 @@ Formatvorgaben:
 - KEINE nummerierten Listen.
 - KEINE Bullet-Listen.
 - Jeder Absatz muss mindestens eine konkrete Quellen-URL enthalten.
-- Beende mit einem kurzen Abschnitt "## Feierabend-Einordnung" als lockerer Fließtext.
+- Beende mit einem kurzen Abschnitt "## Feierabend-Einordnung" als lockerer Fließtext: maximal 2–3 kurze Sätze, nur die wesentlichen Punkte. Dort darfst du einen kleinen, harmlosen Witz machen, wenn er zur Meldung passt.
 
 Inhalt:
 - Konzentriere dich auf das, was seit dem Morgen neu oder deutlich wichtiger geworden ist.
