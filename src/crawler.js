@@ -49,6 +49,22 @@ function toIsoDateTime(year, month, day) {
   return `${y}-${m}-${d}T00:00:00Z`;
 }
 
+
+function parseVaunutDate(text, now = new Date()) {
+  const normalized = cleanText(text || '');
+  const matches = [...normalized.matchAll(/\b(\d{1,2})\.(\d{1,2})\.?(?:\s+(?:kello\s+)?(\d{1,2}):(\d{2}))?/giu)];
+  if (matches.length === 0) return null;
+
+  const [, day, month, hour = '00', minute = '00'] = matches[matches.length - 1];
+  let year = now.getUTCFullYear();
+  const candidate = new Date(Date.UTC(year, Number(month) - 1, Number(day), Number(hour), Number(minute)));
+  if (candidate.getTime() - now.getTime() > 31 * 24 * 60 * 60 * 1000) {
+    year -= 1;
+  }
+
+  return toIsoDateTime(year, month, day)?.replace('T00:00:00Z', `T${String(hour).padStart(2, '0')}:${minute}:00+02:00`) || null;
+}
+
 function parseRailmarketDateFromText(text) {
   const normalized = cleanText(text);
   if (!normalized) return null;
@@ -304,7 +320,9 @@ function matchesSourceKeywords(article, source) {
 }
 
 function sourceImpliesFocus(source) {
-  return source.url.includes('jarnvagar.nu') || source.url.includes('railmarket.com/eu/sweden');
+  return source.url.includes('jarnvagar.nu')
+    || source.url.includes('railmarket.com/eu/sweden')
+    || source.url.includes('vaunut.org');
 }
 
 function isLikelyPaywalledStub(article) {
@@ -465,10 +483,44 @@ function extractRailmarket($, source) {
   return articles;
 }
 
+
+function isVaunutSeriesUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (!/(^|\.)vaunut\.org$/i.test(parsed.hostname)) return false;
+    return /^\/sarja\/\d+\/?$/i.test(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
+function extractVaunut($, source) {
+  const articles = [];
+  $('a[href]').each((_, element) => {
+    const url = absoluteUrl($(element).attr('href'), source.url);
+    const title = cleanText($(element).text());
+    if (!url || title.length < 4) return;
+    if (!isVaunutSeriesUrl(url)) return;
+
+    const container = $(element).closest('article, li, tr, .item, .kuvasarja, div');
+    const excerpt = cleanText(container.text()).slice(0, 900);
+    if (!excerpt || /^\d+\s+kuvaa/i.test(title)) return;
+
+    articles.push({
+      url,
+      title,
+      excerpt,
+      publishedAt: parseVaunutDate(excerpt)
+    });
+  });
+  return articles;
+}
+
 function extractArticles($, source) {
   if (source.url.includes('lok-report.de')) return extractLokReport($, source);
   if (source.url.includes('jarnvagar.nu')) return extractJarnvagar($, source);
   if (source.url.includes('railmarket.com')) return extractRailmarket($, source);
+  if (source.url.includes('vaunut.org')) return extractVaunut($, source);
   return extractGeneric($, source);
 }
 
