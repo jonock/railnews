@@ -304,7 +304,9 @@ function matchesSourceKeywords(article, source) {
 }
 
 function sourceImpliesFocus(source) {
-  return source.url.includes('jarnvagar.nu') || source.url.includes('railmarket.com/eu/sweden');
+  return source.url.includes('jarnvagar.nu')
+    || source.url.includes('railmarket.com/eu/sweden')
+    || source.url.includes('schwedenreis.li/reisen');
 }
 
 function isLikelyPaywalledStub(article) {

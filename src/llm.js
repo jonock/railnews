@@ -66,6 +66,7 @@ Formatvorgaben:
 - Gruppiere zusammengehörige Meldungen pro Zwischentitel.
 - Wiederhole keine Artikel, URLs oder inhaltlich gleichen Meldungen aus den letzten Briefings.
 - Wenn ein Artikel nur eine bereits berichtete Meldung ohne substanzielle neue Entwicklung wiederholt, lasse ihn weg.
+- Reiseberichte von Schwedenreisli sind immer relevant: Nimm neue Artikel dieser Quelle immer mit auf, solange sie nicht bereits in den letzten Briefings behandelt wurden.
 - Falls es zu einem früher erwähnten Thema wirklich neue Fakten gibt, benenne nur die neue Entwicklung und formuliere sie klar als Update.
 - Beende mit einem kurzen Abschnitt "## Einordnung" als Fließtext: maximal 2–3 kurze Sätze, nur die wesentlichen Punkte. Dort darfst du einen kleinen, harmlosen Witz machen, wenn er zur Meldung passt.
 
@@ -189,6 +190,7 @@ Formatvorgaben:
 
 Inhalt:
 - Konzentriere dich auf das, was seit dem Morgen neu oder deutlich wichtiger geworden ist.
+- Reiseberichte von Schwedenreisli sind immer relevant: Nimm neue Artikel dieser Quelle immer mit auf, solange sie nicht bereits im Morgen-Briefing behandelt wurden.
 - Formuliere etwas lockerer und pointierter als morgens.
 - Wenn eine Meldung eine Staatsbahn betrifft, formuliere kollegial mit Bezug auf die jeweilige Bahn: SJ als schwedische Staatsbahn, Vy als norwegische Staatsbahn, DSB als dänische Staatsbahn und VR als finnische Staatsbahn.
 
