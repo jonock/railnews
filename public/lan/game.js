@@ -525,9 +525,7 @@ function handleRoundComplete() {
 
 function startNewRound() {
   if (!isReady) return;
-  roundComplete = false;
-  playedIds = [];
-  roundCorrect = 0;
+  resetSessionState();
   nextQuestion();
 }
 
@@ -562,11 +560,13 @@ function nextQuestion() {
 }
 
 function resetSessionState() {
+  clearNextQuestionTimer();
   stats = defaultStats();
   saveStats();
   playedIds = [];
   roundCorrect = 0;
   roundComplete = false;
+  currentCounty = null;
 }
 
 function requestDirectionChange(mode) {
