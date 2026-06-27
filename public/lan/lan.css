@@ -135,7 +135,6 @@
 .lan-map-wrap .lan-path.is-clickable:not(.is-disabled):hover {
   fill: #3d8a74;
 }
-
 .lan-score-row {
   display: flex;
   align-items: center;
@@ -179,6 +178,12 @@
   background: var(--spruce);
   color: #fff;
   box-shadow: 0 8px 18px rgba(13, 95, 75, .22);
+}
+
+.lan-diff-btn:disabled,
+.lan-reset-btn:disabled {
+  cursor: not-allowed;
+  opacity: .55;
 }
 
 .lan-map-card {
@@ -253,6 +258,43 @@
 .lan-map-wrap .lan-path.is-reveal {
   fill: var(--coral);
   opacity: 1;
+}
+
+.lan-map-wrap .lan-path.is-clickable {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .lan-map-wrap .lan-path.is-clickable:not(.is-disabled) {
+    stroke: rgba(13, 95, 75, .001);
+    stroke-width: 18;
+    paint-order: stroke fill markers;
+  }
+
+  .lan-map-wrap .lan-path.is-clickable:not(.is-disabled):active {
+    fill: #3d8a74;
+  }
+}
+
+.lan-map-wrap .lan-path.is-disabled {
+  pointer-events: none;
+  opacity: .34;
+}
+
+.lan-map-wrap .lan-path.is-option {
+  fill: #c8ddd2;
+  opacity: 1;
+}
+
+.lan-map-wrap .lan-path.is-wrong-pick {
+  fill: #b94a34;
+  opacity: 1;
+}
+
+.lan-map-wrap .lan-path.is-clickable:not(.is-disabled):hover {
+  fill: #3d8a74;
 }
 
 .lan-prompt h2 {
@@ -442,7 +484,6 @@
   cursor: not-allowed;
   opacity: .55;
 }
-
 .lan-actions {
   margin: 0;
 }

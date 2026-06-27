@@ -150,16 +150,20 @@ function shuffle(items) {
 
 function getRoundCompleteMessage(correct) {
   if (correct >= 21) {
-    return { tier: 'perfect', text: null };
+    return { tier: 'perfect' };
   }
+
   if (correct <= 10) {
     return {
       tier: 'start',
-      text: 'Ein guter Start! Vielleicht hilft dir eine Zimtschnecke um noch etwas besser zu werden.',
+      title: 'Hast du die Schweiz und Schweden verwechselt?',
+      text: 'Kein Problem, der Wille zählt! Vielleicht hilft dir eine Zimtschnecke, um noch etwas besser zu werden.',
     };
   }
+
   return {
     tier: 'good',
+    title: 'Bra!',
     text: 'Du kennst Schweden schon richtig gut, wann startest du dein nächstes Schwedenreisli?',
   };
 }
@@ -263,7 +267,10 @@ function updateRoundCompleteUi() {
       </p>
     `;
   } else {
-    roundCompleteFeedback.textContent = message.text;
+    roundCompleteFeedback.innerHTML = `
+      <p class="lan-perfect-lead">${message.title}</p>
+      <p class="lan-perfect-copy">${message.text}</p>
+    `;
   }
 
   roundCompleteHint.hidden = false;
