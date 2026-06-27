@@ -17,15 +17,25 @@ Standard commands live in `README.md` and `package.json`.
   separate prod build / watcher).
 - Health check: `GET /health` returns `{"status":"ok"}`.
 
+### Seed data (real-world dump)
+
+- A real-world SQLite dump lives at `seed/*.sqlite` (committed, e.g.
+  `seed/railnews-20260524-101709.sqlite`; ~270 articles, ~31 briefings, ~110 comments).
+- The startup script copies the newest `seed/*.sqlite` to `data/railnews.sqlite` only
+  when that file does not already exist, so a fresh VM boots with real data. To reload
+  it manually: stop the server, `rm -f data/railnews.sqlite*`, then
+  `cp "$(ls -t seed/*.sqlite | head -1)" data/railnews.sqlite`, and restart.
+- The app's own `seedStarterContent()` (`src/db.js`) only injects sample rows when the
+  `articles` table is empty, so it leaves the real dump untouched.
+
 ### Non-obvious caveats
 
 - There are no automated tests and no lint script in `package.json`; "lint/test" is
   limited to `node --check` syntax checks. Don't expect a test runner.
 - The server has no hot reload — restart `node src/server.js` after code changes.
-- The SQLite schema is auto-created on startup and the DB is seeded with default
-  sources/topics plus a sample briefing, so `/` and `/api/public` show data immediately
-  on a fresh DB. DB file lives at `DATABASE_PATH` (default `./data/railnews.sqlite`,
-  gitignored under `data/`).
+- The SQLite schema is auto-created on startup. DB file lives at `DATABASE_PATH`
+  (default `./data/railnews.sqlite`, gitignored under `data/`). On a DB with no
+  seed/dump present, startup auto-creates default sources/topics plus a sample briefing.
 - Admin write endpoints (`/api/sources`, `/api/briefings/run`, `/api/crawl/run`, etc.)
   require header `x-admin-token: <ADMIN_TOKEN>` (or `?token=`). With the default
   `.env`, `ADMIN_TOKEN=change-me`. If `ADMIN_TOKEN` is unset, admin auth is bypassed.
