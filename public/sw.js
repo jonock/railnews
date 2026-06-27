@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v7';
+const CACHE_NAME = 'railnews-v12';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -10,7 +10,13 @@ const APP_SHELL = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/images/header.png',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/lan/',
+  '/lan/index.html',
+  '/lan/lan.css',
+  '/lan/game.js',
+  '/lan/map.svg',
+  '/lan/counties.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -53,7 +59,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (url.pathname === '/app.js' || url.pathname === '/styles.css' || url.pathname === '/manifest.webmanifest') {
+  if (url.pathname === '/app.js' || url.pathname === '/styles.css' || url.pathname === '/manifest.webmanifest' || url.pathname.startsWith('/lan/')) {
     event.respondWith(networkFirst(request));
     return;
   }

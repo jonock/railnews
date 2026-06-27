@@ -1,0 +1,23 @@
+[
+  { "id": "AB", "slug": "stockholm", "name": "Stockholms län", "shortName": "Stockholm", "aliases": ["stockholm", "stockholms lan", "stockholms län"] },
+  { "id": "C", "slug": "uppsala", "name": "Uppsala län", "shortName": "Uppsala", "aliases": ["uppsala", "uppsala lan", "uppsala län"] },
+  { "id": "D", "slug": "sodermanland", "name": "Södermanlands län", "shortName": "Södermanland", "aliases": ["sodermanland", "södermanland", "sodermanlands lan", "södermanlands län"] },
+  { "id": "E", "slug": "ostergotland", "name": "Östergötlands län", "shortName": "Östergötland", "aliases": ["ostergotland", "östergötland", "ostergotlands lan", "östergötlands län"] },
+  { "id": "F", "slug": "jonkoping", "name": "Jönköpings län", "shortName": "Jönköping", "aliases": ["jonkoping", "jönköping", "jonkopings lan", "jönköpings län"] },
+  { "id": "G", "slug": "kronoberg", "name": "Kronobergs län", "shortName": "Kronoberg", "aliases": ["kronoberg", "kronobergs lan", "kronobergs län"] },
+  { "id": "H", "slug": "kalmar", "name": "Kalmar län", "shortName": "Kalmar", "aliases": ["kalmar", "kalmar lan", "kalmar län"] },
+  { "id": "I", "slug": "gotland", "name": "Gotlands län", "shortName": "Gotland", "aliases": ["gotland", "gotlands lan", "gotlands län"] },
+  { "id": "K", "slug": "blekinge", "name": "Blekinge län", "shortName": "Blekinge", "aliases": ["blekinge", "blekinge lan", "blekinge län"] },
+  { "id": "M", "slug": "skane", "name": "Skåne län", "shortName": "Skåne", "aliases": ["skane", "skåne", "skane lan", "skåne län"] },
+  { "id": "N", "slug": "halland", "name": "Hallands län", "shortName": "Halland", "aliases": ["halland", "hallands lan", "hallands län"] },
+  { "id": "O", "slug": "vastra-gotaland", "name": "Västra Götalands län", "shortName": "Västra Götaland", "aliases": ["vastra gotaland", "västra götaland", "vastra gotalands lan", "västra götalands län"] },
+  { "id": "S", "slug": "varmland", "name": "Värmlands län", "shortName": "Värmland", "aliases": ["varmland", "värmland", "varmlands lan", "värmlands län"] },
+  { "id": "T", "slug": "orebro", "name": "Örebro län", "shortName": "Örebro", "aliases": ["orebro", "örebro", "orebro lan", "örebro län"] },
+  { "id": "U", "slug": "vastmanland", "name": "Västmanlands län", "shortName": "Västmanland", "aliases": ["vastmanland", "västmanland", "vastmanlands lan", "västmanlands län"] },
+  { "id": "W", "slug": "dalarna", "name": "Dalarnas län", "shortName": "Dalarna", "aliases": ["dalarna", "dalarnas lan", "dalarnas län"] },
+  { "id": "X", "slug": "gavleborg", "name": "Gävleborgs län", "shortName": "Gävleborg", "aliases": ["gavleborg", "gävleborg", "gavleborgs lan", "gävleborgs län"] },
+  { "id": "Y", "slug": "vasternorrland", "name": "Västernorrlands län", "shortName": "Västernorrland", "aliases": ["vasternorrland", "västernorrland", "vasternorrlands lan", "västernorrlands län"] },
+  { "id": "Z", "slug": "jamtland", "name": "Jämtlands län", "shortName": "Jämtland", "aliases": ["jamtland", "jämtland", "jamtlands lan", "jämtlands län"] },
+  { "id": "AC", "slug": "vasterbotten", "name": "Västerbottens län", "shortName": "Västerbotten", "aliases": ["vasterbotten", "västerbotten", "vasterbottens lan", "västerbottens län"] },
+  { "id": "BD", "slug": "norrbotten", "name": "Norrbottens län", "shortName": "Norrbotten", "aliases": ["norrbotten", "norrbottens lan", "norrbottens län"] }
+]

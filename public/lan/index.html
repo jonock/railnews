@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0d5f4b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Län-Quiz">
+    <title>Län-Quiz – Railnews</title>
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/lan/lan.css">
+  </head>
+  <body class="public-page lan-page">
+    <header class="lan-header">
+      <nav class="lan-nav">
+        <a class="lan-back" href="/">← Railnews</a>
+        <p class="section-kicker">Schweden</p>
+      </nav>
+      <h1 class="lan-title">Län-Quiz</h1>
+      <p class="lan-subtitle" id="pageSubtitle">Benenne markierte Län oder finde sie auf der Karte.</p>
+    </header>
+
+    <main class="lan-layout">
+      <section class="lan-panel" aria-live="polite">
+        <div class="lan-toolbar">
+          <div class="lan-score-row">
+            <p class="lan-score" id="scoreLabel">Punkte: 0 / 0</p>
+            <button type="button" class="secondary lan-reset-btn" id="resetBtn">Neues Spiel</button>
+          </div>
+          <div class="lan-mode-controls">
+            <div class="lan-difficulty lan-direction" role="tablist" aria-label="Spielmodus">
+              <button type="button" class="lan-diff-btn is-active" data-direction="name" role="tab" aria-selected="true">Benennen</button>
+              <button type="button" class="lan-diff-btn" data-direction="locate" role="tab" aria-selected="false">Finden</button>
+            </div>
+            <div class="lan-difficulty" role="tablist" aria-label="Schwierigkeit">
+              <button type="button" class="lan-diff-btn is-active" data-difficulty="easy" role="tab" aria-selected="true">Leicht</button>
+              <button type="button" class="lan-diff-btn" data-difficulty="hard" role="tab" aria-selected="false">Schwer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lan-map-card" id="mapCard">
+          <div class="lan-map-wrap" id="mapHost" aria-hidden="false"></div>
+        </div>
+
+        <div class="lan-prompt">
+          <h2 id="promptHeading">Welches Län ist markiert?</h2>
+          <p class="lan-prompt-hint" id="locateHint" hidden>Tippe auf eine der hervorgehobenen Regionen.</p>
+        </div>
+
+        <div class="lan-answer-block">
+          <div class="lan-answers" id="easyAnswers" hidden>
+            <div class="lan-choices" id="choiceList"></div>
+          </div>
+
+          <form class="lan-answers lan-hard-form" id="hardAnswers" hidden>
+            <label class="sr-only" for="answerInput">Name des Läns</label>
+            <input id="answerInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Län eingeben…">
+            <button type="submit">Prüfen</button>
+          </form>
+
+          <p class="lan-feedback" id="feedback" hidden></p>
+
+          <div class="lan-actions">
+            <button type="button" class="secondary lan-next-btn" id="nextBtn" hidden>Nächste Frage</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/lan/game.js" type="module"></script>
+  </body>
+</html>
