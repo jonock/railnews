@@ -125,6 +125,19 @@ function stripHtml(value) {
   return cleanText(cheerio.load(value).text());
 }
 
+function normalizeCrawledText(value, maxLength) {
+  const cleaned = stripHtml(decodeHtmlEntities(value || ''));
+  return typeof maxLength === 'number' ? cleaned.slice(0, maxLength) : cleaned;
+}
+
+function normalizeArticle(article) {
+  return {
+    ...article,
+    title: normalizeCrawledText(article.title),
+    excerpt: normalizeCrawledText(article.excerpt, 900)
+  };
+}
+
 function isFeedResponse(source, contentType, body) {
   if (source.url.endsWith('/feed')) return true;
   if (/\b(application|text)\/(rss\+xml|atom\+xml|xml)\b/i.test(contentType)) return true;
@@ -138,12 +151,12 @@ function extractFeedArticles(body, source) {
   $('item, entry').each((_, element) => {
     const node = $(element);
     const url = absoluteUrl(node.find('link').first().text() || node.find('link').first().attr('href'), source.url);
-    const title = cleanText(decodeHtmlEntities(node.find('title').first().text()));
+    const title = normalizeCrawledText(node.find('title').first().text());
     if (!url || title.length < 12) return;
 
     const encodedContent = node.find('content\\:encoded, encoded').first().text();
     const description = node.find('description, summary').first().text();
-    const excerpt = stripHtml(encodedContent || description).slice(0, 900);
+    const excerpt = normalizeCrawledText(encodedContent || description, 900);
     const publishedAt = parseIsoCandidate(
       node.find('pubDate, published, updated').first().text()
     );
@@ -291,7 +304,9 @@ function matchesSourceKeywords(article, source) {
 }
 
 function sourceImpliesFocus(source) {
-  return source.url.includes('jarnvagar.nu') || source.url.includes('railmarket.com/eu/sweden');
+  return source.url.includes('jarnvagar.nu')
+    || source.url.includes('railmarket.com/eu/sweden')
+    || source.url.includes('schwedenreis.li/reisen');
 }
 
 function isLikelyPaywalledStub(article) {
@@ -317,10 +332,59 @@ function hasSufficientArticleInfo(article) {
 }
 
 function shouldIndexArticle(article, source) {
+  if (source.url.includes('svt.se')) {
+    return isRelevantSvtRailArticle(article);
+  }
   if (!source.url.includes('railcolornews.com')) return true;
   if (!hasSufficientArticleInfo(article)) return false;
   if (isLikelyPaywalledStub(article)) return false;
   return true;
+}
+
+function isRelevantSvtRailArticle(article) {
+  const text = `${article.title} ${article.excerpt}`.toLowerCase();
+
+  const strongRailSignals = [
+    /\bjärnväg(?:en|ar|arna|s)?\b/u,
+    /\btåg(?:et|en|ens|ens)?\b/u,
+    /\btågstopp\b/u,
+    /\btågtrafik\b/u,
+    /\btågförsening(?:ar)?\b/u,
+    /\bpendeltåg\b/u,
+    /\bfjärrtåg\b/u,
+    /\bnattåg\b/u,
+    /\bmalmbanan\b/u,
+    /\bostlänken\b/u,
+    /\bsj\b/u,
+    /\bgreen cargo\b/u,
+    /\btrafikverket\b/u,
+    /\bertms\b/u,
+    /\betcs\b/u,
+    /\bbane nor\b/u,
+    /\bbanedanmark\b/u,
+    /\bbanarbete\b/u,
+    /\bspårfel\b/u,
+    /\bspårbyte\b/u,
+    /\bsignal(?:fel|problem|system)?\b/u
+  ];
+
+  const noisyContexts = [
+    /\btrav\b/u,
+    /\btravet\b/u,
+    /\bgalopp\b/u,
+    /\bfotboll\b/u,
+    /\bhockey\b/u,
+    /\beurovision\b/u,
+    /\bmelodifestival\w*\b/u,
+    /\bbörsen\b/u,
+    /\baktie\w*\b/u,
+    /\bväder\b/u,
+    /\bstorm\b/u,
+    /\bbrand\b/u
+  ];
+
+  if (noisyContexts.some((pattern) => pattern.test(text))) return false;
+  return strongRailSignals.some((pattern) => pattern.test(text));
 }
 
 function extractLokReport($, source) {
@@ -456,9 +520,11 @@ export async function crawlSources() {
       const seen = new Set();
       let saved = 0;
 
-      for (const article of extracted) {
+      for (const extractedArticle of extracted) {
+        const article = normalizeArticle(extractedArticle);
         if (seen.has(article.url)) continue;
         seen.add(article.url);
+        if (article.title.length < 12) continue;
         if (!shouldIndexArticle(article, source)) continue;
         if (!sourceImpliesFocus(source) && !matchesSourceKeywords(article, source)) continue;
         const matches = topicMatches(article, topics);

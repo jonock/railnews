@@ -1,4 +1,4 @@
-import { briefingTitle, formatDate, formatDateTime, formatLongDate, localDateKey } from './dateTime.js';
+import { briefingTitle, formatDateTime, formatLongDate, localDateKey } from './dateTime.js';
 
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');
@@ -115,6 +115,16 @@ function escapeHtml(value = '') {
     '"': '&quot;',
     "'": '&#39;'
   })[character]);
+}
+
+function normalizeDisplayText(value = '', maxLength) {
+  const decoder = document.createElement('textarea');
+  decoder.innerHTML = String(value);
+  const decoded = decoder.value;
+  const template = document.createElement('template');
+  template.innerHTML = decoded;
+  const cleaned = (template.content.textContent || decoded).replace(/\s+/g, ' ').trim();
+  return typeof maxLength === 'number' ? cleaned.slice(0, maxLength) : cleaned;
 }
 
 
@@ -260,24 +270,15 @@ async function api(path, options = {}) {
   return response.json();
 }
 
-function todayBriefingKey() {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Zurich',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).format(new Date());
-}
-
 function renderBriefings(briefings) {
   if (!briefings.length) {
     briefingList.innerHTML = '<p>Noch keine Briefings vorhanden.</p>';
     return;
   }
 
-  const todayKey = todayBriefingKey();
+  const latestBriefingId = briefings[0]?.id;
   briefingList.innerHTML = briefings.map((briefing) => {
-    const isToday = localDateKey(briefing.briefing_date || briefing.created_at) === todayKey;
+    const isLatest = briefing.id === latestBriefingId;
     const chapters = buildBriefingChapters(briefing.summary);
     let activeHeadingTitle = '';
     const chapterMarkup = chapters.map((chapter) => {
@@ -306,11 +307,11 @@ function renderBriefings(briefings) {
     const briefingTypeClass = briefing.briefing_type === 'evening' ? ' briefing-card-evening' : '';
     return `
       <article class="briefing-card${briefingTypeClass}">
-        <details class="briefing-details"${isToday ? ' open data-lock-open="true"' : ''}>
+        <details class="briefing-details"${isLatest ? ' open data-lock-open="true"' : ''}>
           <summary class="briefing-summary">
             <p class="meta">${escapeHtml(formatDateTime(briefing.created_at))}</p>
             <h3>${escapeHtml(briefingTitle(briefing.title))}</h3>
-            ${isToday ? '' : '<span class="briefing-toggle-label">Vergangenes Briefing öffnen</span>'}
+            ${isLatest ? '' : '<span class="briefing-toggle-label">Briefing öffnen</span>'}
           </summary>
           <div class="briefing-body">${chapterMarkup}</div>
         </details>
@@ -351,11 +352,13 @@ function renderArticles(articles) {
         ${group.items.map((article) => {
           const tags = JSON.parse(article.matched_topics || '[]');
           const date = article.published_at || article.created_at;
+          const title = normalizeDisplayText(article.title);
+          const excerpt = normalizeDisplayText(article.excerpt, 240);
           return `
             <article class="article-card">
-              <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a>
+              <a href="${escapeHtml(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(title)}</a>
               <div class="tags">${tags.map((tag) => `<span class=\"tag\">${escapeHtml(tag)}</span>`).join('')}</div>
-              <p>${escapeHtml(article.excerpt.slice(0, 240))}</p>
+              <p>${escapeHtml(excerpt)}</p>
               <small>${escapeHtml(article.source_name)}${date ? ` · ${escapeHtml(formatDateTime(date))}` : ''}</small>
             </article>
           `;

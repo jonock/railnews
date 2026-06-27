@@ -74,6 +74,8 @@ The app seeds these first sources and focuses on Scandinavian railway topics by 
 - `https://railmarket.com/eu/sweden/news`
 - `https://railcolornews.com/`
 - `https://www.therailagenda.com/feed`
+- `https://www.svt.se/` (with strict railway-focused filtering)
+- `https://www.schwedenreis.li/reisen` (travel reports are always considered relevant)
 
 RSS/Atom feeds, including Substack feeds such as The Rail Agenda, are crawled directly when a source URL ends in `/feed` or returns feed XML.
 
