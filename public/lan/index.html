@@ -7,6 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Län-Quiz">
+    <meta name="description" content="Lerne die 21 schwedischen Län (Provinzen) interaktiv: benennen oder auf der Karte finden.">
     <title>Län-Quiz – Railnews</title>
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -20,38 +21,66 @@
         <p class="section-kicker">Schweden</p>
       </nav>
       <h1 class="lan-title">Län-Quiz</h1>
-      <p class="lan-subtitle" id="pageSubtitle">Benenne markierte Län oder finde sie auf der Karte.</p>
+      <p class="lan-subtitle">
+        Lerne die schwedischen Län — benenne markierte Regionen oder finde sie auf der Karte.
+      </p>
+      <p class="lan-intro">
+        Ein <strong>Län</strong> ist eine schwedische Provinz.
+        Schweden hat 21 Län — vergleichbar mit einem Bundesland oder einem Kanton, nur etwas kleiner.
+      </p>
     </header>
 
     <main class="lan-layout">
-      <section class="lan-panel" aria-live="polite">
+      <section class="lan-panel" aria-live="polite" aria-busy="true" id="quizPanel">
         <div class="lan-toolbar">
           <div class="lan-score-row">
-            <p class="lan-score" id="scoreLabel">Punkte: 0 / 0</p>
-            <button type="button" class="secondary lan-reset-btn" id="resetBtn">Neues Spiel</button>
+            <p class="lan-score" id="scoreLabel">Frage 0/21 · Punkte: 0 / 0</p>
+            <button type="button" class="secondary lan-reset-btn" id="resetBtn" disabled>Neues Spiel</button>
           </div>
           <div class="lan-mode-controls">
             <div class="lan-difficulty lan-direction" role="tablist" aria-label="Spielmodus">
-              <button type="button" class="lan-diff-btn is-active" data-direction="name" role="tab" aria-selected="true">Benennen</button>
-              <button type="button" class="lan-diff-btn" data-direction="locate" role="tab" aria-selected="false">Finden</button>
+              <button type="button" class="lan-diff-btn is-active" data-direction="name" role="tab" aria-selected="true" disabled>Benennen</button>
+              <button type="button" class="lan-diff-btn" data-direction="locate" role="tab" aria-selected="false" disabled>Finden</button>
             </div>
             <div class="lan-difficulty" role="tablist" aria-label="Schwierigkeit">
-              <button type="button" class="lan-diff-btn is-active" data-difficulty="easy" role="tab" aria-selected="true">Leicht</button>
-              <button type="button" class="lan-diff-btn" data-difficulty="hard" role="tab" aria-selected="false">Schwer</button>
+              <button type="button" class="lan-diff-btn is-active" data-difficulty="easy" role="tab" aria-selected="true" disabled>Leicht</button>
+              <button type="button" class="lan-diff-btn" data-difficulty="hard" role="tab" aria-selected="false" disabled>Schwer</button>
             </div>
+          </div>
+        </div>
+
+        <div id="modeResetPrompt" class="lan-reset-prompt" role="alertdialog" aria-labelledby="modeResetTitle" aria-describedby="modeResetDesc" hidden>
+          <p id="modeResetTitle" class="lan-reset-prompt-title">Modus wechseln?</p>
+          <p id="modeResetDesc" class="lan-reset-prompt-desc">Beim Wechsel geht dein Spielstand verloren.</p>
+          <div class="lan-reset-prompt-actions">
+            <button type="button" class="lan-confirm-reset" id="confirmModeReset">Javisst, neu starten.</button>
+            <button type="button" class="secondary lan-cancel-reset" id="cancelModeReset">Abbrechen</button>
           </div>
         </div>
 
         <div class="lan-map-card" id="mapCard">
-          <div class="lan-map-wrap" id="mapHost" aria-hidden="false"></div>
+          <div
+            class="lan-map-wrap"
+            id="mapHost"
+            aria-hidden="false"
+          ></div>
         </div>
 
         <div class="lan-prompt">
+          <h2 id="roundCompleteHeading" hidden>Runde geschafft!</h2>
           <h2 id="promptHeading">Welches Län ist markiert?</h2>
           <p class="lan-prompt-hint" id="locateHint" hidden>Tippe auf eine der hervorgehobenen Regionen.</p>
         </div>
 
         <div class="lan-answer-block">
+          <div id="roundCompleteBlock" hidden>
+            <div class="lan-feedback is-perfect" id="roundCompleteFeedback" hidden></div>
+            <p class="lan-round-hint" id="roundCompleteHint">
+              Alle 21 Län waren in dieser Runde dran. Starte eine neue Runde oder setze das Spiel zurück.
+            </p>
+            <button type="button" class="lan-next-round-btn" id="nextRoundBtn">Nächste Runde</button>
+          </div>
+
           <div class="lan-answers" id="easyAnswers" hidden>
             <div class="lan-choices" id="choiceList"></div>
           </div>
@@ -63,6 +92,7 @@
           </form>
 
           <p class="lan-feedback" id="feedback" hidden></p>
+          <p class="lan-loading" id="loadStatus">Quiz wird geladen…</p>
 
           <div class="lan-actions">
             <button type="button" class="secondary lan-next-btn" id="nextBtn" hidden>Nächste Frage</button>

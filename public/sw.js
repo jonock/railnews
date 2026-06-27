@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v12';
+const CACHE_NAME = 'railnews-v13';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -15,6 +15,7 @@ const APP_SHELL = [
   '/lan/index.html',
   '/lan/lan.css',
   '/lan/game.js',
+  '/lan/analytics.js',
   '/lan/map.svg',
   '/lan/counties.json'
 ];
