@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js",
-    "briefing": "node src/jobs/dailyBriefing.js"
+    "briefing": "node src/jobs/dailyBriefing.js",
+    "test": "node --test"
   },
   "dependencies": {
     "better-sqlite3": "^11.9.1",
