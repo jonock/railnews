@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v13';
+const CACHE_NAME = 'railnews-v14';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -17,7 +17,11 @@ const APP_SHELL = [
   '/lan/game.js',
   '/lan/analytics.js',
   '/lan/map.svg',
-  '/lan/counties.json'
+  '/lan/counties.json',
+  '/fordon/',
+  '/fordon/index.html',
+  '/fordon/fordon.css',
+  '/fordon/fordon.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -60,7 +64,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (url.pathname === '/app.js' || url.pathname === '/styles.css' || url.pathname === '/manifest.webmanifest' || url.pathname.startsWith('/lan/')) {
+  if (url.pathname === '/app.js' || url.pathname === '/styles.css' || url.pathname === '/manifest.webmanifest' || url.pathname.startsWith('/lan/') || url.pathname.startsWith('/fordon/')) {
     event.respondWith(networkFirst(request));
     return;
   }

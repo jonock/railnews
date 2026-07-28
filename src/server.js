@@ -14,6 +14,12 @@ import {
 } from './db.js';
 import { backfillJarnvagarPublishedAt, backfillRailmarketPublishedAt, crawlSources } from './crawler.js';
 import { runDailyBriefing, runEveningBriefingIfNeeded } from './jobs/dailyBriefing.js';
+import {
+  getRelatedArticlesForVehicle,
+  getRollingStockCatalog,
+  getVehicleBySlug,
+  rollingStockDb
+} from './rollingStockDb.js';
 
 const app = express();
 app.use(express.json());
@@ -43,10 +49,33 @@ function requireAdmin(req, res, next) {
 app.get('/health', (_req, res) => {
   try {
     db.prepare('SELECT 1').get();
+    rollingStockDb.prepare('SELECT 1').get();
     res.json({ status: 'ok' });
   } catch (error) {
     res.status(503).json({ status: 'error', error: error.message });
   }
+});
+
+app.get('/api/fordon/catalog', (_req, res) => {
+  res.json(getRollingStockCatalog());
+});
+
+app.get('/api/fordon/:slug/articles', (req, res) => {
+  const rawLimit = req.query.limit;
+  const limit = rawLimit === undefined ? 8 : Number(rawLimit);
+  if (!Number.isInteger(limit) || limit <= 0) {
+    return res.status(400).json({ error: 'limit must be a positive integer' });
+  }
+
+  const result = getRelatedArticlesForVehicle(req.params.slug, limit);
+  if (!result.vehicle) return res.status(404).json({ error: 'Vehicle not found' });
+  res.json(result);
+});
+
+app.get('/api/fordon/:slug', (req, res) => {
+  const vehicle = getVehicleBySlug(req.params.slug);
+  if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
+  res.json({ vehicle });
 });
 
 app.get('/api/public', (_req, res) => {

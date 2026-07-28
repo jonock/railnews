@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0d5f4b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fahrzeuge">
+    <meta name="description" content="Schwedische Triebfahrzeuge und Wagen: Lok & Wagen, Motorvagnståg und mehr — zweisprachig DE/SV.">
+    <title>Fahrzeuge – Railnews</title>
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/fordon/fordon.css">
+  </head>
+  <body class="public-page fordon-page">
+    <header class="fordon-header">
+      <nav class="fordon-nav">
+        <a class="fordon-back" href="/">← Railnews</a>
+        <p class="section-kicker">Sverige / Schweden</p>
+      </nav>
+      <h1 class="fordon-title">Fahrzeuge</h1>
+      <p class="fordon-subtitle">
+        <span lang="de">Schwedische Triebfahrzeuge und Wagen</span>
+        <span class="fordon-subtitle-sep" aria-hidden="true">·</span>
+        <span lang="sv">Svenska järnvägsfordon</span>
+      </p>
+      <p class="fordon-intro">
+        Referenzkatalog zu Lokomotiven, Triebzügen und Sonderfahrzeugen im schwedischen Schienenverkehr.
+        Wähle eine Kategorie, filtere nach Betreiber und entdecke passende Meldungen aus der Railnews-Quellenlage.
+      </p>
+    </header>
+
+    <main class="fordon-layout" aria-busy="true" id="fordonMain">
+      <div class="fordon-toolbar">
+        <div class="fordon-categories" role="tablist" aria-label="Fahrzeugkategorie">
+          <button type="button" class="fordon-tab" data-category="lok_wagen" role="tab" aria-selected="false" disabled>Lok &amp; Wagen</button>
+          <button type="button" class="fordon-tab is-active" data-category="triebzuege" role="tab" aria-selected="true" disabled>Triebzüge</button>
+          <button type="button" class="fordon-tab" data-category="sonstiges" role="tab" aria-selected="false" disabled>Sonstiges</button>
+        </div>
+        <div class="fordon-operators" id="operatorChips" aria-label="Betreiberfilter"></div>
+      </div>
+
+      <div class="fordon-split">
+        <section class="fordon-list-panel" aria-label="Fahrzeugliste">
+          <p class="fordon-list-count" id="listCount"></p>
+          <div class="fordon-list" id="vehicleList"></div>
+        </section>
+
+        <section class="fordon-detail-panel" aria-live="polite" id="detailPanel">
+          <div class="fordon-detail-placeholder" id="detailPlaceholder">
+            <p>Wähle ein Fahrzeug aus der Liste.</p>
+          </div>
+          <article class="fordon-detail" id="vehicleDetail" hidden>
+            <header class="fordon-detail-header">
+              <p class="fordon-detail-kicker" id="detailCategory"></p>
+              <h2 class="fordon-detail-title" id="detailTitleDe"></h2>
+              <p class="fordon-detail-title-sv" id="detailTitleSv" lang="sv"></p>
+              <div class="fordon-detail-badges">
+                <span class="fordon-designation" id="detailDesignation"></span>
+                <span class="fordon-status" id="detailStatus"></span>
+              </div>
+            </header>
+
+            <dl class="fordon-spec-grid" id="detailSpecs"></dl>
+
+            <div class="fordon-narrative">
+              <p id="detailSummaryDe"></p>
+              <p class="fordon-summary-sv" id="detailSummarySv" lang="sv"></p>
+            </div>
+
+            <section class="fordon-articles" id="relatedArticlesSection" hidden>
+              <h3>Passende Meldungen</h3>
+              <p class="fordon-articles-status" id="articlesStatus"></p>
+              <div class="article-grid" id="relatedArticles"></div>
+            </section>
+          </article>
+        </section>
+      </div>
+    </main>
+
+    <script type="module" src="/fordon/fordon.js"></script>
+  </body>
+</html>
