@@ -1388,3 +1388,112 @@ menu {
     max-width: min(42vw, 168px);
   }
 }
+
+.route-page .topbar {
+  min-height: 560px;
+}
+
+.route-page h1 {
+  max-width: 980px;
+  font-size: clamp(3.8rem, 10vw, 9.5rem);
+}
+
+.route-hero .hero-grid {
+  min-height: 440px;
+}
+
+.route-layout {
+  gap: 28px;
+}
+
+.route-jump-section,
+.route-detail-card {
+  border: 0;
+  border-radius: 26px;
+  background: #fffaf0;
+  padding: clamp(20px, 3vw, 32px);
+}
+
+.route-jump-section .section-head {
+  align-items: end;
+}
+
+.route-jump-intro {
+  max-width: 420px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.route-jump-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.route-jump-card {
+  min-height: 158px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid rgba(255, 63, 31, .18);
+  border-radius: 22px;
+  background: #fff;
+  padding: 18px;
+  text-decoration: none;
+  box-shadow: 0 10px 26px rgba(17, 35, 29, .06);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.route-jump-card:hover,
+.route-jump-card:focus-visible {
+  border-color: rgba(255, 63, 31, .52);
+  box-shadow: 0 16px 34px rgba(17, 35, 29, .1);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.route-country {
+  color: var(--coral);
+  font-size: .72rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.route-jump-card strong {
+  color: #111;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.route-jump-card small,
+.route-detail-card p:last-child {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.route-detail-list {
+  display: grid;
+  gap: 16px;
+}
+
+.route-detail-card {
+  scroll-margin-top: 20px;
+}
+
+.route-detail-card h2 {
+  color: #ff3f1f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-weight: 500;
+}
+
+@media (max-width: 760px) {
+  .route-jump-section .section-head {
+    align-items: flex-start;
+  }
+}
