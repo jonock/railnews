@@ -75,3 +75,20 @@ for (const status of [200, 500]) {
     });
   });
 }
+
+for (const [description, responseBody] of [
+  ['a null response root', 'null'],
+  ['non-string message content', '{"choices":[{"message":{"content":{"text":"unexpected"}}}]}']
+]) {
+  test(`reports ${description} as a structured no-text error`, async () => {
+    await withOpenAi({
+      fetch: async () => new Response(responseBody, { status: 200 })
+    }, async () => {
+      await assert.rejects(
+        createBriefingText(articles),
+        (error) => error instanceof LlmRequestError
+          && /OpenAI lieferte keinen Text/.test(error.message)
+      );
+    });
+  });
+}

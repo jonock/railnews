@@ -98,7 +98,10 @@ async function requestChatCompletion(messages, { temperature, operation }) {
     throw new LlmRequestError(`${operation}: OpenAI lieferte kein gültiges JSON.`, { cause: error });
   }
 
-  const content = data.choices?.[0]?.message?.content?.trim();
+  const rawContent = data && typeof data === 'object'
+    ? data.choices?.[0]?.message?.content
+    : undefined;
+  const content = typeof rawContent === 'string' ? rawContent.trim() : '';
   if (!content) {
     throw new LlmRequestError(`${operation}: OpenAI lieferte keinen Text.`);
   }
