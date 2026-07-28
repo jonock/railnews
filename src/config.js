@@ -41,6 +41,7 @@ export const config = {
   openai: {
     apiKey: process.env.OPENAI_API_KEY || '',
     baseUrl: (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, ''),
-    model: process.env.OPENAI_MODEL || 'gpt-4.1-mini'
+    model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
+    timeoutMs: Number(process.env.OPENAI_TIMEOUT_MS || 60000)
   }
 };

@@ -44,6 +44,67 @@ function extractiveBriefing(articles) {
   return `Automatisch erzeugtes deutschsprachiges Kurzbriefing auf Basis der gefundenen Quellenmeldungen.\n\n${sections}`;
 }
 
+export class LlmRequestError extends Error {
+  constructor(message, options = {}) {
+    super(message, options);
+    this.name = 'LlmRequestError';
+  }
+}
+
+function openAiConnectionError(operation, error) {
+  const detail = error.name === 'TimeoutError' || error.name === 'AbortError'
+    ? `Zeitüberschreitung nach ${config.openai.timeoutMs} ms`
+    : error.message;
+  return new LlmRequestError(`${operation}: OpenAI ist nicht erreichbar (${detail}).`, { cause: error });
+}
+
+async function requestChatCompletion(messages, { temperature, operation }) {
+  let response;
+  try {
+    response = await fetch(`${config.openai.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${config.openai.apiKey}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ model: config.openai.model, messages, temperature }),
+      signal: AbortSignal.timeout(config.openai.timeoutMs)
+    });
+  } catch (error) {
+    throw openAiConnectionError(operation, error);
+  }
+
+  let body;
+  try {
+    // The timeout signal remains active while the response body is streamed.
+    // Read it before status/JSON handling so stalled bodies get the same useful
+    // connection error as a fetch that stalls before receiving its headers.
+    body = await response.text();
+  } catch (error) {
+    throw openAiConnectionError(operation, error);
+  }
+
+  if (!response.ok) {
+    const errorBody = body.slice(0, 1000);
+    throw new LlmRequestError(
+      `${operation}: OpenAI antwortete mit HTTP ${response.status}${errorBody ? `: ${errorBody}` : ''}`
+    );
+  }
+
+  let data;
+  try {
+    data = JSON.parse(body);
+  } catch (error) {
+    throw new LlmRequestError(`${operation}: OpenAI lieferte kein gültiges JSON.`, { cause: error });
+  }
+
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) {
+    throw new LlmRequestError(`${operation}: OpenAI lieferte keinen Text.`);
+  }
+  return content;
+}
+
 export async function createBriefingText(articles, options = {}) {
   if (!config.openai.apiKey) return extractiveBriefing(articles);
 
@@ -83,32 +144,10 @@ ${JSON.stringify(articles, null, 2)}`
     }
   ];
 
-  try {
-    const response = await fetch(`${config.openai.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${config.openai.apiKey}`,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: config.openai.model,
-        messages: input,
-        temperature: 0.2
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error(`Briefing-LLM-Anfrage fehlgeschlagen: ${response.status} ${error}`);
-      return extractiveBriefing(articles);
-    }
-
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content?.trim() || extractiveBriefing(articles);
-  } catch (error) {
-    console.error('Briefing-LLM-Anfrage fehlgeschlagen:', error);
-    return extractiveBriefing(articles);
-  }
+  return requestChatCompletion(input, {
+    temperature: 0.2,
+    operation: 'Briefing konnte nicht erstellt werden'
+  });
 }
 
 export async function shouldCreateEveningBriefing({ morningBriefing, eveningArticles }) {
@@ -138,32 +177,15 @@ ${JSON.stringify(eveningArticles, null, 2)}`
   ];
 
   try {
-    const response = await fetch(`${config.openai.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${config.openai.apiKey}`,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: config.openai.model,
-        messages: input,
-        temperature: 0
-      })
+    const text = await requestChatCompletion(input, {
+      temperature: 0,
+      operation: 'Abend-Briefing konnte nicht bewertet werden'
     });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error(`Abend-Briefing-Evaluation fehlgeschlagen: ${response.status} ${error}`);
-      return eveningArticles.length >= 7;
-    }
-
-    const data = await response.json();
-    const text = data.choices?.[0]?.message?.content?.trim() || '';
     const parsed = JSON.parse(text);
     return Boolean(parsed.create);
   } catch (error) {
-    console.error('Abend-Briefing-Evaluation fehlgeschlagen:', error);
-    return eveningArticles.length >= 7;
+    if (error instanceof LlmRequestError) throw error;
+    throw new LlmRequestError('Abend-Briefing-Bewertung enthielt kein gültiges JSON.', { cause: error });
   }
 }
 
@@ -202,32 +224,10 @@ ${JSON.stringify(eveningArticles, null, 2)}`
     }
   ];
 
-  try {
-    const response = await fetch(`${config.openai.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${config.openai.apiKey}`,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: config.openai.model,
-        messages: input,
-        temperature: 0.45
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error(`Abend-Briefing-LLM-Anfrage fehlgeschlagen: ${response.status} ${error}`);
-      return extractiveBriefing(eveningArticles);
-    }
-
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content?.trim() || extractiveBriefing(eveningArticles);
-  } catch (error) {
-    console.error('Abend-Briefing-LLM-Anfrage fehlgeschlagen:', error);
-    return extractiveBriefing(eveningArticles);
-  }
+  return requestChatCompletion(input, {
+    temperature: 0.45,
+    operation: 'Abend-Briefing konnte nicht erstellt werden'
+  });
 }
 
 export function isLlmConfigured() {

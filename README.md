@@ -48,6 +48,7 @@ Set at least these environment variables:
 ADMIN_TOKEN=<long random string>
 CRON_SECRET=<long random string>
 OPENAI_API_KEY=<optional>
+OPENAI_TIMEOUT_MS=60000
 ```
 
 The app runs its own daily cron from `BRIEFING_CRON` and `BRIEFING_TIMEZONE`.
