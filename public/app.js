@@ -11,6 +11,7 @@ const articleSearchForm = document.querySelector('#articleSearchForm');
 const articleSearchInput = document.querySelector('#articleSearchInput');
 const clearArticleSearchButton = document.querySelector('#clearArticleSearch');
 const articleSearchStatus = document.querySelector('#articleSearchStatus');
+const belgienCountdownDays = document.querySelector('#belgienCountdownDays');
 const floatingBadge = document.querySelector('#floatingBadge');
 const floatingBadgeLogo = document.querySelector('#floatingBadgeLogo');
 const commentDialog = document.querySelector('#commentDialog');
@@ -29,6 +30,8 @@ let selectedCommentTarget = null;
 let commentsByBriefing = {};
 
 const COMMENTER_FACE_STORAGE_KEY = 'railnews:commenter-face';
+const BELGIENREISLI_DATE = '2026-09-10';
+const BELGIENREISLI_TIME_ZONE = 'Europe/Zurich';
 const DAILY_LOGO_ROTATION = [
   { name: 'Traficom', src: '/images/Traficom_logo.svg', alt: 'Traficom Logo' },
   { name: 'Trafikverket', src: '/images/Trafikverket_logo.svg', alt: 'Trafikverket Logo' },
@@ -73,6 +76,25 @@ function todayRotationKey() {
   }).format(new Date());
 }
 
+function calendarDaysUntil(dateKey, now = new Date()) {
+  const [targetYear, targetMonth, targetDay] = dateKey.split('-').map(Number);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: BELGIENREISLI_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  const target = Date.UTC(targetYear, targetMonth - 1, targetDay);
+  const today = Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day));
+  return Math.max(0, Math.round((target - today) / 86_400_000));
+}
+
+function updateBelgienCountdown() {
+  if (!belgienCountdownDays) return;
+  belgienCountdownDays.textContent = calendarDaysUntil(BELGIENREISLI_DATE);
+}
+
 function pickDailyLogo() {
   const key = todayRotationKey();
   const numericKey = Number(key.replaceAll('-', ''));
@@ -106,6 +128,8 @@ if ('serviceWorker' in navigator) {
 }
 
 renderDailyLogo();
+updateBelgienCountdown();
+window.setInterval(updateBelgienCountdown, 60_000);
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
