@@ -47,6 +47,22 @@ export function localDateKey(value) {
   }).format(date);
 }
 
+export function calendarDaysUntil(dateKey, timeZone, now = new Date()) {
+  const targetParts = dateOnlyPattern.exec(dateKey);
+  if (!targetParts) return null;
+
+  const todayParts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(now);
+  const today = Object.fromEntries(todayParts.map(({ type, value }) => [type, value]));
+  const targetTimestamp = Date.UTC(Number(targetParts[1]), Number(targetParts[2]) - 1, Number(targetParts[3]));
+  const todayTimestamp = Date.UTC(Number(today.year), Number(today.month) - 1, Number(today.day));
+  return Math.round((targetTimestamp - todayTimestamp) / 86_400_000);
+}
+
 export function briefingTitle(title = '') {
   return String(title).replace(titleDatePattern, '');
 }

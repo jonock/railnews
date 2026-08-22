@@ -335,6 +335,7 @@ h2 {
 
 .belgien-countdown {
   position: relative;
+  display: block;
   width: min(100%, 560px);
   margin-top: 30px;
   padding: 24px 30px 22px;
@@ -342,8 +343,28 @@ h2 {
   border: 1px solid rgba(17, 17, 17, .08);
   border-radius: 24px;
   background: #fff9e8;
+  color: #171411;
   box-shadow: 0 18px 50px rgba(73, 52, 24, .13);
   text-align: left;
+  cursor: default;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.belgien-countdown:hover,
+.belgien-countdown:disabled {
+  opacity: 1;
+  transform: none;
+  box-shadow: 0 18px 50px rgba(73, 52, 24, .13);
+}
+
+.belgien-countdown[data-mode="trip"] {
+  cursor: pointer;
+}
+
+.belgien-countdown[data-mode="trip"]:hover {
+  transform: translateY(-2px) rotate(-.25deg);
+  background: #fff5d6;
+  box-shadow: 0 24px 58px rgba(73, 52, 24, .18);
 }
 
 .belgien-countdown::after {
@@ -401,6 +422,60 @@ h2 {
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
+}
+
+.belgien-countdown [hidden] {
+  display: none;
+}
+
+.belgien-countdown__fact {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 9px;
+}
+
+.belgien-countdown__fact-kicker,
+.belgien-countdown__fact-action {
+  color: #746d62;
+  font-size: .7rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.belgien-countdown__fact strong {
+  max-width: 450px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.18rem, 2.5vw, 1.55rem);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.belgien-countdown__fact strong.is-changing {
+  animation: belgien-fact-reveal .32s ease-out;
+}
+
+.belgien-countdown__fact-action {
+  color: #ff3f1f;
+}
+
+@keyframes belgien-fact-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .belgien-countdown__fact strong.is-changing {
+    animation: none;
+  }
 }
 
 .hero-cta {
