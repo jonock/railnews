@@ -1,4 +1,4 @@
-import { briefingTitle, formatDateTime, formatLongDate, localDateKey } from './dateTime.js';
+import { briefingTitle, calendarDaysUntil, formatDateTime, formatLongDate, localDateKey } from './dateTime.js';
 
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');
@@ -11,6 +11,12 @@ const articleSearchForm = document.querySelector('#articleSearchForm');
 const articleSearchInput = document.querySelector('#articleSearchInput');
 const clearArticleSearchButton = document.querySelector('#clearArticleSearch');
 const articleSearchStatus = document.querySelector('#articleSearchStatus');
+const belgienCountdown = document.querySelector('#belgienCountdown');
+const belgienCountdownDays = document.querySelector('#belgienCountdownDays');
+const belgienCountdownLabel = document.querySelector('#belgienCountdownLabel');
+const belgienCountdownDate = document.querySelector('#belgienCountdownDate');
+const belgienCountdownFact = document.querySelector('#belgienCountdownFact');
+const belgienCountdownFactText = document.querySelector('#belgienCountdownFactText');
 const floatingBadge = document.querySelector('#floatingBadge');
 const floatingBadgeLogo = document.querySelector('#floatingBadgeLogo');
 const commentDialog = document.querySelector('#commentDialog');
@@ -29,6 +35,22 @@ let selectedCommentTarget = null;
 let commentsByBriefing = {};
 
 const COMMENTER_FACE_STORAGE_KEY = 'railnews:commenter-face';
+const BELGIENREISLI_DATE = '2026-09-10';
+const BELGIENREISLI_END_DATE = '2026-09-13';
+const BELGIENREISLI_TIME_ZONE = 'Europe/Zurich';
+const BELGIENREISLI_FACTS = [
+  'Am 5. Mai 1835 fuhr zwischen Brüssel und Mechelen die erste Eisenbahn auf dem europäischen Festland.',
+  'Brüssel war die erste Hauptstadt der Welt, die mit der Eisenbahn erreichbar war.',
+  'In nur 40 Jahren entstanden in Belgien fast 3.400 Kilometer Bahnstrecken – eines der dichtesten Netze der Welt.',
+  'Die belgische Industrie baute zwischen 1835 und 1939 mehr als 16.000 Dampflokomotiven; über 10.000 davon gingen in den Export.',
+  'Die SNCB-NMBS wurde 1926 gegründet und feiert 2026 ihr hundertjähriges Bestehen.',
+  '1935 nahm zwischen Brüssel und Antwerpen die erste elektrifizierte Strecke der SNCB-NMBS den Betrieb auf.',
+  'Das berühmte ovale B-Logo entwarf Jean De Roy. Ab 1938 wurde es allgemein verwendet.',
+  '1966 fuhr zwischen Ath und Denderleeuw der letzte kommerzielle Dampfzug der SNCB-NMBS.',
+  'Seit dem IC-IR-Plan von 1984 fahren belgische Züge nach festen Fahrplänen.',
+  '2009 war Belgien das erste europäische Land mit einem vollständig fertiggestellten Hochgeschwindigkeitsnetz.'
+];
+let belgienFactIndex = -1;
 const DAILY_LOGO_ROTATION = [
   { name: 'Traficom', src: '/images/Traficom_logo.svg', alt: 'Traficom Logo' },
   { name: 'Trafikverket', src: '/images/Trafikverket_logo.svg', alt: 'Trafikverket Logo' },
@@ -73,6 +95,44 @@ function todayRotationKey() {
   }).format(new Date());
 }
 
+function updateBelgienCountdown() {
+  if (!belgienCountdown || !belgienCountdownDays || !belgienCountdownLabel
+    || !belgienCountdownDate || !belgienCountdownFact || !belgienCountdownFactText) return;
+
+  const daysUntilStart = calendarDaysUntil(BELGIENREISLI_DATE, BELGIENREISLI_TIME_ZONE);
+  const daysUntilEnd = calendarDaysUntil(BELGIENREISLI_END_DATE, BELGIENREISLI_TIME_ZONE);
+  const tripIsActive = daysUntilStart !== null && daysUntilEnd !== null
+    && daysUntilStart <= 0 && daysUntilEnd >= 0;
+
+  belgienCountdown.hidden = daysUntilStart === null || daysUntilEnd === null || daysUntilEnd < 0;
+  if (belgienCountdown.hidden) return;
+
+  belgienCountdown.disabled = !tripIsActive;
+  belgienCountdown.dataset.mode = tripIsActive ? 'trip' : 'countdown';
+  belgienCountdownLabel.hidden = tripIsActive;
+  belgienCountdownDate.hidden = tripIsActive;
+  belgienCountdownFact.hidden = !tripIsActive;
+
+  if (tripIsActive) {
+    belgienCountdown.setAttribute('aria-label', 'Belgischer Bahnfakt. Klicken für den nächsten Fakt.');
+    if (belgienFactIndex < 0) showNextBelgienFact();
+  } else {
+    belgienCountdown.setAttribute('aria-label', `${daysUntilStart} Tage bis zum Belgienreisli`);
+    belgienCountdownDays.textContent = daysUntilStart;
+  }
+}
+
+function showNextBelgienFact() {
+  if (!belgienCountdownFactText || !BELGIENREISLI_FACTS.length) return;
+  belgienFactIndex = belgienFactIndex < 0
+    ? Math.floor(Math.random() * BELGIENREISLI_FACTS.length)
+    : (belgienFactIndex + 1) % BELGIENREISLI_FACTS.length;
+  belgienCountdownFactText.textContent = BELGIENREISLI_FACTS[belgienFactIndex];
+  belgienCountdownFactText.classList.remove('is-changing');
+  void belgienCountdownFactText.offsetWidth;
+  belgienCountdownFactText.classList.add('is-changing');
+}
+
 function pickDailyLogo() {
   const key = todayRotationKey();
   const numericKey = Number(key.replaceAll('-', ''));
@@ -106,6 +166,12 @@ if ('serviceWorker' in navigator) {
 }
 
 renderDailyLogo();
+updateBelgienCountdown();
+window.setInterval(updateBelgienCountdown, 60_000);
+
+belgienCountdown?.addEventListener('click', () => {
+  if (belgienCountdown.dataset.mode === 'trip') showNextBelgienFact();
+});
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
