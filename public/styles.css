@@ -1544,3 +1544,842 @@ menu {
     max-width: min(42vw, 168px);
   }
 }
+
+/* Belgienreisli Special: active only when app.js adds the body class. */
+.hero-title-lockup {
+  position: relative;
+}
+
+.belgien-special-sticker {
+  display: none;
+}
+
+.public-page.belgien-special {
+  --belgien-ink: #15120d;
+  --belgien-paper: #f5eedc;
+  --belgien-paper-deep: #e8d9b8;
+  --belgien-yellow: #f4bb19;
+  --belgien-red: #d93629;
+  --belgien-blue: #174f9b;
+  --belgien-shadow: 8px 10px 0 rgba(21, 18, 13, .14);
+  background:
+    radial-gradient(circle at 14% 7%, rgba(244, 187, 25, .94) 0 8%, transparent 8.2%),
+    linear-gradient(118deg, transparent 0 72%, rgba(217, 54, 41, .95) 72% 74%, transparent 74%),
+    var(--belgien-paper);
+  color: var(--belgien-ink);
+  font-family: "Arial Narrow", "Roboto Condensed", Impact, ui-sans-serif, system-ui, sans-serif;
+}
+
+.public-page.belgien-special::before {
+  display: block;
+  z-index: 0;
+  background:
+    url("/images/belgien-special-map.svg") center top / min(1300px, 112vw) auto no-repeat,
+    radial-gradient(rgba(21, 18, 13, .15) .7px, transparent .8px) 0 0 / 5px 5px;
+  opacity: .42;
+  mask-image: linear-gradient(180deg, #000 0 72%, transparent 96%);
+}
+
+.public-page.belgien-special::after {
+  content: "";
+  position: fixed;
+  z-index: 30;
+  inset: 7px;
+  border: 2px solid rgba(21, 18, 13, .82);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.belgien-special .public-hero {
+  min-height: 770px;
+  padding: 44px clamp(22px, 5vw, 74px) 66px;
+}
+
+.belgien-special .public-hero::before {
+  content: "VOIE\A SPOOR  7";
+  position: absolute;
+  z-index: 2;
+  top: 32px;
+  left: clamp(28px, 5vw, 78px);
+  width: 170px;
+  color: var(--belgien-ink);
+  font-size: clamp(1.1rem, 2.1vw, 1.7rem);
+  font-weight: 950;
+  line-height: .96;
+  white-space: pre;
+  text-align: left;
+  transform: rotate(-2deg);
+}
+
+.belgien-special .public-hero::after {
+  content: "18·05·81  BRUXELLES";
+  display: block;
+  position: absolute;
+  z-index: 2;
+  top: 470px;
+  right: clamp(20px, 4vw, 64px);
+  height: auto;
+  border: 4px double var(--belgien-red);
+  padding: 8px 12px;
+  color: var(--belgien-red);
+  font-size: .8rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  opacity: .75;
+  transform: rotate(7deg);
+}
+
+.belgien-special .hero-grid {
+  min-height: 650px;
+}
+
+.belgien-special .hero-center {
+  padding-top: 16px;
+}
+
+.belgien-special .hero-image,
+.belgien-special .hero-region {
+  display: none;
+}
+
+.belgien-special .hero-title-lockup {
+  z-index: 3;
+  width: min(100%, 1260px);
+  padding-inline: clamp(0px, 3vw, 30px);
+}
+
+.public-page.belgien-special h1 {
+  color: var(--belgien-red);
+  font-size: clamp(6rem, 16vw, 14rem);
+  line-height: .76;
+  text-shadow:
+    1px 1px 0 #a52620,
+    2px 2px 0 rgba(21, 18, 13, .13);
+  filter: saturate(.92);
+}
+
+.belgien-special .belgien-special-sticker {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  z-index: 4;
+  top: -5%;
+  right: -1.5%;
+  width: clamp(178px, 18vw, 260px);
+  min-height: clamp(96px, 10vw, 140px);
+  margin: 0;
+  border: 8px double var(--belgien-ink);
+  border-radius: 22px 12px 24px 14px;
+  padding: 12px 18px 20px;
+  background:
+    linear-gradient(180deg, transparent 0 78%, var(--belgien-red) 78% 84%, var(--belgien-yellow) 84% 90%, var(--belgien-ink) 90%),
+    #f8f0dc;
+  color: var(--belgien-ink);
+  box-shadow: 7px 9px 0 rgba(21, 18, 13, .2);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.3rem, 2.5vw, 2.1rem);
+  font-weight: 800;
+  line-height: .95;
+  text-align: center;
+  transform: rotate(6deg);
+}
+
+.belgien-special .belgien-special-sticker::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 42px;
+  height: 40px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .88) 0 47%, rgba(21, 18, 13, .22) 48% 52%, transparent 53%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.belgien-special .hero-copy {
+  position: relative;
+  z-index: 3;
+  max-width: 720px;
+  margin-top: 40px;
+  color: var(--belgien-ink);
+  font-size: clamp(1rem, 1.6vw, 1.32rem);
+  font-weight: 750;
+}
+
+.belgien-special .belgien-countdown {
+  isolation: isolate;
+  width: min(100%, 900px);
+  min-height: 210px;
+  margin-top: 34px;
+  border: 2px solid rgba(21, 18, 13, .8);
+  border-radius: 2px;
+  padding: 34px 180px 30px 168px;
+  background:
+    linear-gradient(90deg, transparent 0 17%, rgba(217, 54, 41, .62) 17% 17.25%, transparent 17.25% 82%, rgba(21, 18, 13, .35) 82% 82.25%, transparent 82.25%),
+    radial-gradient(rgba(21, 18, 13, .14) .7px, transparent .8px) 0 0 / 4px 4px,
+    #eadcbf;
+  box-shadow: var(--belgien-shadow);
+  clip-path: polygon(1.4% 0, 98.4% 0, 100% 8%, 99% 16%, 100% 24%, 99% 32%, 100% 40%, 99% 48%, 100% 56%, 99% 64%, 100% 72%, 99% 80%, 100% 88%, 98.5% 100%, 1.5% 100%, 0 92%, 1% 84%, 0 76%, 1% 68%, 0 60%, 1% 52%, 0 44%, 1% 36%, 0 28%, 1% 20%, 0 12%);
+}
+
+.belgien-special .belgien-countdown::before {
+  content: "BE  02857\A BRUX · ANTWERPEN C.";
+  position: absolute;
+  z-index: 2;
+  top: 25px;
+  bottom: 25px;
+  left: 34px;
+  width: 105px;
+  display: grid;
+  align-content: center;
+  border-right: 1px dashed rgba(21, 18, 13, .6);
+  padding-right: 18px;
+  color: var(--belgien-ink);
+  font-size: .78rem;
+  font-weight: 950;
+  line-height: 2.2;
+  letter-spacing: .08em;
+  white-space: pre;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.belgien-special .belgien-countdown::after {
+  content: "";
+  z-index: -1;
+  inset: 0 0 0 auto;
+  width: 190px;
+  height: auto;
+  border-radius: 0;
+  background: url("/images/belgien-special-map.svg") 73% 48% / 520px auto no-repeat;
+  opacity: .62;
+}
+
+.belgien-special .belgien-countdown__flag {
+  width: 12px;
+}
+
+.belgien-special .belgien-countdown__fact {
+  gap: 12px;
+}
+
+.belgien-special .belgien-countdown__fact-kicker,
+.belgien-special .belgien-countdown__fact-action,
+.belgien-special .belgien-countdown time {
+  color: var(--belgien-red);
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.belgien-special .belgien-countdown__fact strong {
+  max-width: 550px;
+  color: var(--belgien-ink);
+  font-size: clamp(1.38rem, 2.5vw, 2rem);
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+.belgien-special .belgien-countdown__label strong {
+  color: var(--belgien-red);
+}
+
+.belgien-special .belgien-countdown__label span {
+  color: var(--belgien-ink);
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.belgien-special .belgien-countdown[data-mode="trip"]:hover {
+  background-color: #f2e0b9;
+  transform: translateY(-3px) rotate(-.35deg);
+  box-shadow: 11px 14px 0 rgba(21, 18, 13, .17);
+}
+
+.belgien-special .hero-actions {
+  position: relative;
+  z-index: 3;
+  gap: 18px;
+  margin-top: 2px;
+}
+
+.belgien-special .hero-cta,
+.belgien-special .hero-actions button {
+  min-height: 54px;
+  border: 3px double #e7d09b;
+  border-radius: 5px;
+  padding: 0 26px;
+  background: var(--belgien-ink);
+  color: #fff6d8;
+  box-shadow: 4px 5px 0 rgba(21, 18, 13, .2);
+  font-size: .82rem;
+  letter-spacing: .08em;
+  transform: rotate(-.4deg);
+}
+
+.belgien-special .hero-cta:nth-child(2) {
+  background: var(--belgien-blue);
+  transform: rotate(.7deg);
+}
+
+.belgien-special .hero-cta:nth-child(3) {
+  background: var(--belgien-red);
+  transform: rotate(-.5deg);
+}
+
+.belgien-special .hero-cta:hover,
+.belgien-special .hero-actions button:hover {
+  transform: translateY(-2px) rotate(0);
+  filter: brightness(1.08);
+}
+
+.belgien-special .hero-cta:focus-visible,
+.belgien-special .belgien-countdown:focus-visible,
+.belgien-special button:focus-visible,
+.belgien-special a:focus-visible {
+  outline: 4px solid var(--belgien-blue);
+  outline-offset: 4px;
+}
+
+.belgien-special .public-layout {
+  max-width: 1400px;
+  gap: 34px;
+  padding-top: 26px;
+}
+
+.belgien-special .briefings,
+.belgien-special .articles {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--belgien-ink);
+  border-radius: 3px;
+  background:
+    linear-gradient(rgba(21, 18, 13, .08) 1px, transparent 1px) 0 0 / 100% 38px,
+    radial-gradient(rgba(21, 18, 13, .12) .6px, transparent .7px) 0 0 / 5px 5px,
+    rgba(248, 240, 220, .97);
+  box-shadow: var(--belgien-shadow);
+}
+
+.belgien-special .briefings::after,
+.belgien-special .articles::after {
+  content: "GÜLTIG FÜR HEUTE";
+  position: absolute;
+  top: 22px;
+  right: 28px;
+  color: var(--belgien-red);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .1em;
+  transform: rotate(2deg);
+}
+
+.belgien-special .section-head {
+  position: relative;
+  z-index: 1;
+  border-bottom: 4px double var(--belgien-ink);
+  padding-bottom: 22px;
+}
+
+.belgien-special .section-kicker {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: var(--belgien-red);
+  color: #fff8e8;
+  font-size: .8rem;
+  letter-spacing: .12em;
+}
+
+.belgien-special h2 {
+  margin: 0;
+  color: var(--belgien-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.2rem, 5.5vw, 5.3rem);
+  font-weight: 600;
+  line-height: .92;
+}
+
+.belgien-special .briefing-card {
+  border-top: 2px solid var(--belgien-ink);
+  padding: 28px 12px 6px 40px;
+}
+
+.belgien-special .briefing-card:first-child {
+  border-top: 0;
+}
+
+.belgien-special .briefing-card::before {
+  top: 30px;
+  bottom: 6px;
+  width: 10px;
+  border-radius: 0;
+  background: linear-gradient(180deg, var(--belgien-ink) 0 33%, var(--belgien-yellow) 33% 66%, var(--belgien-red) 66%);
+}
+
+.belgien-special .briefing-card:first-child::before {
+  top: 4px;
+}
+
+.belgien-special .briefing-card h3,
+.belgien-special .briefing-body h4,
+.belgien-special .briefing-body h5 {
+  color: var(--belgien-ink);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.belgien-special .briefing-card h3 {
+  font-size: clamp(1.5rem, 2.7vw, 2.5rem);
+}
+
+.belgien-special .meta,
+.belgien-special .briefing-toggle-label {
+  color: var(--belgien-red);
+  font-weight: 950;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.belgien-special .briefing-body,
+.belgien-special .briefing-card pre {
+  color: #272018;
+}
+
+.belgien-special .briefing-chapter {
+  border-radius: 0;
+  border-left: 1px dashed transparent;
+}
+
+.belgien-special .briefing-chapter:hover,
+.belgien-special .briefing-chapter:focus-visible {
+  border-color: var(--belgien-blue);
+  background: rgba(23, 79, 155, .07);
+}
+
+.belgien-special .briefing-body .source-pill,
+.belgien-special .tag {
+  border: 1px solid var(--belgien-ink);
+  border-radius: 2px;
+  background: var(--belgien-yellow);
+  color: var(--belgien-ink);
+  box-shadow: 2px 2px 0 rgba(21, 18, 13, .15);
+  font-weight: 900;
+}
+
+.belgien-special .article-search {
+  max-width: 620px;
+}
+
+.belgien-special input,
+.belgien-special textarea {
+  border: 2px solid var(--belgien-ink);
+  border-radius: 3px;
+  background: #fff9e9;
+  color: var(--belgien-ink);
+  box-shadow: inset 3px 3px 0 rgba(21, 18, 13, .06);
+}
+
+.belgien-special input:focus,
+.belgien-special textarea:focus {
+  border-color: var(--belgien-blue);
+  box-shadow: 0 0 0 4px rgba(23, 79, 155, .2);
+}
+
+.belgien-special .article-search button,
+.belgien-special dialog button {
+  min-height: 44px;
+  border: 2px solid var(--belgien-ink);
+  border-radius: 3px;
+  background: var(--belgien-blue);
+  color: #fff;
+  box-shadow: 3px 3px 0 rgba(21, 18, 13, .2);
+  text-transform: uppercase;
+}
+
+.belgien-special .article-search button.secondary,
+.belgien-special dialog button.secondary {
+  background: var(--belgien-yellow);
+  color: var(--belgien-ink);
+}
+
+.belgien-special .search-status {
+  color: var(--belgien-red);
+  font-weight: 800;
+}
+
+.belgien-special .article-date-group {
+  border-top: 4px double var(--belgien-ink);
+  padding-top: 18px;
+}
+
+.belgien-special .article-date-heading {
+  color: var(--belgien-ink);
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.belgien-special .article-grid {
+  counter-reset: article-ticket;
+  gap: 20px;
+}
+
+.belgien-special .article-card {
+  counter-increment: article-ticket;
+  min-height: 250px;
+  overflow: hidden;
+  border: 2px solid var(--belgien-ink);
+  border-radius: 2px;
+  padding: 52px 22px 22px;
+  background:
+    linear-gradient(90deg, var(--belgien-red) 0 9px, transparent 9px),
+    radial-gradient(rgba(21, 18, 13, .1) .6px, transparent .7px) 0 0 / 4px 4px,
+    #f7edcf;
+  box-shadow: 5px 6px 0 rgba(21, 18, 13, .14);
+}
+
+.belgien-special .article-card::before {
+  content: "B-" counter(article-ticket, decimal-leading-zero) "  /  RAILNEWS";
+  position: absolute;
+  top: 0;
+  left: 9px;
+  right: 0;
+  border-bottom: 1px dashed var(--belgien-ink);
+  padding: 10px 14px 8px;
+  color: var(--belgien-red);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+
+.belgien-special .article-card:nth-child(3n + 2) {
+  background-color: #f1deb6;
+  transform: rotate(.25deg);
+}
+
+.belgien-special .article-card:nth-child(3n) {
+  background-color: #f8e7df;
+  transform: rotate(-.2deg);
+}
+
+.belgien-special .article-card:hover {
+  border-color: var(--belgien-blue);
+  box-shadow: 8px 9px 0 rgba(21, 18, 13, .17);
+  transform: translateY(-3px) rotate(0);
+}
+
+.belgien-special .article-card a {
+  color: var(--belgien-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.2rem;
+}
+
+.belgien-special .article-card a:hover {
+  color: var(--belgien-red);
+}
+
+.belgien-special .article-card p {
+  color: #53483a;
+}
+
+.belgien-special .article-card small {
+  color: var(--belgien-blue);
+  font-weight: 950;
+}
+
+.belgien-special dialog {
+  border: 3px solid var(--belgien-ink);
+  border-radius: 3px;
+  background: var(--belgien-paper);
+  color: var(--belgien-ink);
+  box-shadow: 10px 12px 0 rgba(21, 18, 13, .28);
+}
+
+.belgien-special dialog::backdrop {
+  background:
+    radial-gradient(rgba(244, 187, 25, .45) 1px, rgba(21, 18, 13, .78) 1px) 0 0 / 6px 6px;
+}
+
+.belgien-special .dialog-card {
+  background:
+    linear-gradient(rgba(21, 18, 13, .08) 1px, transparent 1px) 0 0 / 100% 34px,
+    var(--belgien-paper);
+}
+
+.belgien-special .dialog-card h2 {
+  border-bottom: 4px double var(--belgien-ink);
+  padding-bottom: 14px;
+  font-size: clamp(2rem, 7vw, 3.4rem);
+}
+
+.belgien-special .read-comment-item,
+.belgien-special .existing-comments-section,
+.belgien-special .face-chooser {
+  border-color: var(--belgien-ink);
+  border-radius: 2px;
+  background: rgba(255, 249, 233, .88);
+}
+
+.belgien-special .public-footer .admin-link {
+  border: 3px double var(--belgien-yellow);
+  border-radius: 3px;
+  padding: 10px 20px;
+  background: var(--belgien-ink);
+  color: #fff5d4;
+  font-size: .78rem;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.belgien-special .floating-badge {
+  border: 2px solid var(--belgien-ink);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, var(--belgien-yellow) 0 9px, #fff9e8 9px);
+  box-shadow: 5px 6px 0 rgba(21, 18, 13, .2);
+  backdrop-filter: none;
+  transform: rotate(-1deg);
+}
+
+.belgien-special .floating-badge p {
+  color: var(--belgien-ink);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+@media (max-width: 920px) {
+  .belgien-special .belgien-special-sticker {
+    right: 1%;
+    width: 180px;
+    min-height: 96px;
+    border-width: 6px;
+    font-size: 1.35rem;
+  }
+
+  .belgien-special .belgien-countdown {
+    padding-right: 130px;
+  }
+
+  .belgien-special .briefings::after,
+  .belgien-special .articles::after {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .public-page.belgien-special::before {
+    background:
+      url("/images/belgien-special-map.svg") 61% 20px / 730px auto no-repeat,
+      radial-gradient(rgba(21, 18, 13, .1) .6px, transparent .7px) 0 0 / 6px 6px;
+    opacity: .26;
+  }
+
+  .public-page.belgien-special::after {
+    inset: 4px;
+    border-width: 1px;
+  }
+
+  .belgien-special .public-hero {
+    min-height: auto;
+    padding: 84px 16px 44px;
+  }
+
+  .belgien-special .public-hero::before {
+    top: 22px;
+    left: 22px;
+    font-size: .92rem;
+  }
+
+  .belgien-special .public-hero::after {
+    display: none;
+  }
+
+  .belgien-special .hero-grid {
+    min-height: auto;
+  }
+
+  .belgien-special .hero-title-lockup {
+    padding: 0 0 72px;
+  }
+
+  .public-page.belgien-special h1 {
+    font-size: clamp(4.4rem, 23vw, 7.4rem);
+    line-height: .82;
+  }
+
+  .belgien-special .belgien-special-sticker {
+    top: auto;
+    right: 2%;
+    bottom: 0;
+    width: min(56vw, 190px);
+    min-height: 72px;
+    border-width: 5px;
+    border-radius: 12px 7px 14px 8px;
+    padding: 8px 12px 14px;
+    font-size: clamp(1rem, 5vw, 1.3rem);
+    box-shadow: 4px 5px 0 rgba(21, 18, 13, .2);
+    transform: rotate(4deg);
+  }
+
+  .belgien-special .hero-copy {
+    margin-top: 20px;
+    padding-inline: 8px;
+    font-size: .96rem;
+    line-height: 1.45;
+  }
+
+  .belgien-special .belgien-countdown {
+    width: 100%;
+    min-height: 0;
+    margin-top: 26px;
+    padding: 72px 26px 26px;
+    clip-path: polygon(2% 0, 98% 0, 100% 6%, 99% 12%, 100% 18%, 99% 24%, 100% 30%, 99% 36%, 100% 42%, 99% 48%, 100% 54%, 99% 60%, 100% 66%, 99% 72%, 100% 78%, 99% 84%, 100% 90%, 98% 100%, 2% 100%, 0 94%, 1% 88%, 0 82%, 1% 76%, 0 70%, 1% 64%, 0 58%, 1% 52%, 0 46%, 1% 40%, 0 34%, 1% 28%, 0 22%, 1% 16%, 0 10%);
+  }
+
+  .belgien-special .belgien-countdown::before {
+    content: "BE 02857  ·  BRUX / ANTWERPEN C.";
+    top: 20px;
+    right: 28px;
+    bottom: auto;
+    left: 28px;
+    width: auto;
+    border-right: 0;
+    border-bottom: 1px dashed rgba(21, 18, 13, .55);
+    padding: 0 0 10px;
+    font-size: .66rem;
+    line-height: 1;
+    white-space: normal;
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .belgien-special .belgien-countdown::after {
+    width: 120px;
+    background-size: 380px auto;
+    opacity: .3;
+  }
+
+  .belgien-special .belgien-countdown__fact strong {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: clamp(1.2rem, 6vw, 1.55rem);
+  }
+
+  .belgien-special .belgien-countdown__label {
+    align-items: flex-start;
+  }
+
+  .belgien-special .belgien-countdown__label strong {
+    flex: 0 0 auto;
+    font-size: 3.2rem;
+  }
+
+  .belgien-special .hero-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .belgien-special .hero-actions .hero-cta {
+    width: 100%;
+    min-height: 50px;
+    margin-top: 0;
+    transform: none;
+  }
+
+  .belgien-special .public-layout {
+    gap: 24px;
+    padding: 14px 7px 44px;
+  }
+
+  .belgien-special .briefings,
+  .belgien-special .articles {
+    border-width: 1px;
+    padding: 18px 12px 22px;
+    box-shadow: 4px 5px 0 rgba(21, 18, 13, .13);
+  }
+
+  .belgien-special .section-head {
+    padding-inline: 0;
+    padding-bottom: 16px;
+  }
+
+  .belgien-special h2 {
+    font-size: clamp(2.3rem, 13vw, 3.8rem);
+  }
+
+  .belgien-special .article-search,
+  .belgien-special .article-search input,
+  .belgien-special .article-search button {
+    width: 100%;
+  }
+
+  .belgien-special .briefing-card {
+    padding: 22px 0 4px 18px;
+  }
+
+  .belgien-special .briefing-card::before {
+    left: 0;
+    width: 6px;
+  }
+
+  .belgien-special .briefing-card h3 {
+    font-size: 1.45rem;
+  }
+
+  .belgien-special .briefing-chapter {
+    padding-inline: 6px;
+  }
+
+  .belgien-special .chapter-comment-face img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .belgien-special .article-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .belgien-special .article-card,
+  .belgien-special .article-card:nth-child(n) {
+    min-height: 0;
+    padding: 48px 18px 18px;
+    transform: none;
+  }
+
+  .belgien-special dialog {
+    width: calc(100vw - 18px);
+    max-width: calc(100vw - 18px);
+    max-height: calc(100dvh - 18px);
+    overflow-y: auto;
+    box-shadow: 5px 6px 0 rgba(21, 18, 13, .25);
+  }
+
+  .belgien-special .dialog-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .belgien-special .floating-badge {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: max-content;
+    margin: 0 10px 14px auto;
+    max-width: calc(100vw - 20px);
+    border-width: 1px;
+    box-shadow: 3px 4px 0 rgba(21, 18, 13, .18);
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .belgien-special .article-card,
+  .belgien-special .hero-cta,
+  .belgien-special .belgien-countdown {
+    transition: none;
+  }
+}
