@@ -1618,6 +1618,9 @@ menu {
   z-index: 2;
   top: 470px;
   right: clamp(20px, 4vw, 64px);
+  bottom: auto;
+  left: auto;
+  width: auto;
   height: auto;
   border: 4px double var(--belgien-red);
   padding: 8px 12px;
