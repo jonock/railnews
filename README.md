@@ -11,15 +11,35 @@ Daily Scandinavian railway news briefings from configurable web sources.
 
 ## Local setup
 
+The project uses [mise](https://mise.jdx.dev/getting-started.html) to keep the
+Node.js version and common commands consistent across computers. After cloning
+the repository and installing mise, run:
+
 ```bash
-npm install
-cp .env.example .env
-npm run dev
+mise install
+mise run setup
+mise run dev
 ```
 
 Then open `http://localhost:3000`.
 
-The app loads `.env` on startup. Restart the server after changing values such as `OPENAI_API_KEY`.
+`mise run setup` installs the exact dependencies from `package-lock.json` and
+creates `.env` from `.env.example` only when `.env` does not exist. The app
+loads `.env` on startup; restart the server after changing values such as
+`OPENAI_API_KEY`. The file stays local and is not committed.
+
+Useful project commands:
+
+```bash
+mise run dev       # start the local server
+mise run test      # run the test suite
+mise run briefing  # generate a briefing
+mise tasks         # list all available tasks
+```
+
+With mise activated in your shell, `node` and `npm` automatically use the
+project's pinned runtime. Without shell activation, `mise run ...` and
+`mise exec -- node --version` work on every supported shell.
 
 The public German website is available at `/`.
 The German backend for sources, topics, and manual briefing runs is available at `/admin/`.
@@ -27,7 +47,7 @@ The German backend for sources, topics, and manual briefing runs is available at
 Create a briefing manually:
 
 ```bash
-npm run briefing
+mise run briefing
 ```
 
 The command output includes `llmConfigured`. If it is `false`, the app did not receive `OPENAI_API_KEY` and will use the German fallback briefing.

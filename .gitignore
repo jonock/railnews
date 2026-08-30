@@ -1,5 +1,6 @@
 node_modules
 .env
+mise.local.toml
 .DS_Store
 data/*.sqlite
 data/*.sqlite-*

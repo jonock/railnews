@@ -1,0 +1,28 @@
+[tools]
+# Pin the development runtime so native dependencies such as better-sqlite3 are
+# built and tested with the same Node.js release on every computer.
+node = "22.23.0"
+
+[tasks.setup]
+description = "Install dependencies and create a local .env when needed"
+sources = ["mise.toml", "package.json", "package-lock.json", ".env.example"]
+outputs = ["node_modules/.package-lock.json", ".env"]
+run = [
+  '''node -e "const fs = require('node:fs'); if (!fs.existsSync('.env')) fs.copyFileSync('.env.example', '.env')"''',
+  "npm ci",
+]
+
+[tasks.dev]
+description = "Start the development server"
+depends = ["setup"]
+run = "npm run dev"
+
+[tasks.test]
+description = "Run the Node.js test suite"
+depends = ["setup"]
+run = "npm test"
+
+[tasks.briefing]
+description = "Generate a briefing using the local configuration"
+depends = ["setup"]
+run = "npm run briefing"
