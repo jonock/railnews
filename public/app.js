@@ -11,6 +11,7 @@ const articleSearchForm = document.querySelector('#articleSearchForm');
 const articleSearchInput = document.querySelector('#articleSearchInput');
 const clearArticleSearchButton = document.querySelector('#clearArticleSearch');
 const articleSearchStatus = document.querySelector('#articleSearchStatus');
+const themeColor = document.querySelector('#themeColor');
 const belgienCountdown = document.querySelector('#belgienCountdown');
 const belgienCountdownDays = document.querySelector('#belgienCountdownDays');
 const belgienCountdownLabel = document.querySelector('#belgienCountdownLabel');
@@ -38,6 +39,12 @@ const COMMENTER_FACE_STORAGE_KEY = 'railnews:commenter-face';
 const BELGIENREISLI_DATE = '2026-09-10';
 const BELGIENREISLI_END_DATE = '2026-09-13';
 const BELGIENREISLI_TIME_ZONE = 'Europe/Zurich';
+const BELGIENREISLI_THEME_COLOR = '#f4bb19';
+const DEFAULT_THEME_COLOR = '#0d5f4b';
+const belgienSpecialOverrideValue = new URLSearchParams(window.location.search).get('belgien-special');
+const belgienSpecialOverride = belgienSpecialOverrideValue === '1'
+  ? true
+  : belgienSpecialOverrideValue === '0' ? false : null;
 const BELGIENREISLI_FACTS = [
   'Am 5. Mai 1835 fuhr zwischen Brüssel und Mechelen die erste Eisenbahn auf dem europäischen Festland.',
   'Brüssel war die erste Hauptstadt der Welt, die mit der Eisenbahn erreichbar war.',
@@ -140,17 +147,24 @@ function updateBelgienCountdown() {
   const daysUntilEnd = calendarDaysUntil(BELGIENREISLI_END_DATE, BELGIENREISLI_TIME_ZONE);
   const tripIsActive = daysUntilStart !== null && daysUntilEnd !== null
     && daysUntilStart <= 0 && daysUntilEnd >= 0;
+  const factModeIsActive = tripIsActive || belgienSpecialOverride === true;
+  const specialThemeIsActive = belgienSpecialOverride === true
+    || (belgienSpecialOverride !== false && tripIsActive);
 
-  belgienCountdown.hidden = daysUntilStart === null || daysUntilEnd === null || daysUntilEnd < 0;
+  document.body.classList.toggle('belgien-special', specialThemeIsActive);
+  themeColor?.setAttribute('content', specialThemeIsActive ? BELGIENREISLI_THEME_COLOR : DEFAULT_THEME_COLOR);
+
+  belgienCountdown.hidden = belgienSpecialOverride !== true
+    && (daysUntilStart === null || daysUntilEnd === null || daysUntilEnd < 0);
   if (belgienCountdown.hidden) return;
 
-  belgienCountdown.disabled = !tripIsActive;
-  belgienCountdown.dataset.mode = tripIsActive ? 'trip' : 'countdown';
-  belgienCountdownLabel.hidden = tripIsActive;
-  belgienCountdownDate.hidden = tripIsActive;
-  belgienCountdownFact.hidden = !tripIsActive;
+  belgienCountdown.disabled = !factModeIsActive;
+  belgienCountdown.dataset.mode = factModeIsActive ? 'trip' : 'countdown';
+  belgienCountdownLabel.hidden = factModeIsActive;
+  belgienCountdownDate.hidden = factModeIsActive;
+  belgienCountdownFact.hidden = !factModeIsActive;
 
-  if (tripIsActive) {
+  if (factModeIsActive) {
     belgienCountdown.setAttribute('aria-label', 'Belgischer Bahnfakt. Klicken für den nächsten Fakt.');
     if (belgienFactIndex < 0) showNextBelgienFact();
   } else {

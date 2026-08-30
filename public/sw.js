@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v16';
+const CACHE_NAME = 'railnews-v17';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -10,6 +10,7 @@ const APP_SHELL = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/images/header.png',
+  '/images/belgien-special-map.svg',
   '/favicon.ico',
   '/lan/',
   '/lan/index.html',
