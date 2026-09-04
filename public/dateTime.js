@@ -63,6 +63,11 @@ export function calendarDaysUntil(dateKey, timeZone, now = new Date()) {
   return Math.round((targetTimestamp - todayTimestamp) / 86_400_000);
 }
 
+export function hasDateTimePassed(dateTime, now = new Date()) {
+  const target = parseDate(dateTime);
+  return target !== null && now.getTime() >= target.getTime();
+}
+
 export function briefingTitle(title = '') {
   return String(title).replace(titleDatePattern, '');
 }
