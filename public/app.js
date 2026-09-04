@@ -1,4 +1,11 @@
-import { briefingTitle, calendarDaysUntil, formatDateTime, formatLongDate, localDateKey } from './dateTime.js';
+import {
+  briefingTitle,
+  calendarDaysUntil,
+  formatDateTime,
+  formatLongDate,
+  hasDateTimePassed,
+  localDateKey
+} from './dateTime.js';
 
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');
@@ -37,6 +44,8 @@ let commentsByBriefing = {};
 
 const COMMENTER_FACE_STORAGE_KEY = 'railnews:commenter-face';
 const BELGIENREISLI_DATE = '2026-09-10';
+// 17:00 in Zurich is UTC+02:00 while daylight-saving time is in effect.
+const BELGIENREISLI_START_AT = '2026-09-10T17:00:00+02:00';
 const BELGIENREISLI_END_DATE = '2026-09-13';
 const BELGIENREISLI_TIME_ZONE = 'Europe/Zurich';
 const BELGIENREISLI_THEME_COLOR = '#f4bb19';
@@ -143,10 +152,11 @@ function updateBelgienCountdown() {
   if (!belgienCountdown || !belgienCountdownDays || !belgienCountdownLabel
     || !belgienCountdownDate || !belgienCountdownFact || !belgienCountdownFactText) return;
 
-  const daysUntilStart = calendarDaysUntil(BELGIENREISLI_DATE, BELGIENREISLI_TIME_ZONE);
-  const daysUntilEnd = calendarDaysUntil(BELGIENREISLI_END_DATE, BELGIENREISLI_TIME_ZONE);
+  const now = new Date();
+  const daysUntilStart = calendarDaysUntil(BELGIENREISLI_DATE, BELGIENREISLI_TIME_ZONE, now);
+  const daysUntilEnd = calendarDaysUntil(BELGIENREISLI_END_DATE, BELGIENREISLI_TIME_ZONE, now);
   const tripIsActive = daysUntilStart !== null && daysUntilEnd !== null
-    && daysUntilStart <= 0 && daysUntilEnd >= 0;
+    && hasDateTimePassed(BELGIENREISLI_START_AT, now) && daysUntilEnd >= 0;
   const factModeIsActive = tripIsActive || belgienSpecialOverride === true;
   const specialThemeIsActive = belgienSpecialOverride === true
     || (belgienSpecialOverride !== false && tripIsActive);
