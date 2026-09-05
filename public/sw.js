@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v17';
+const CACHE_NAME = 'railnews-v18';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -90,7 +90,7 @@ async function networkFirst(request) {
     }
     return response;
   } catch {
-    const cached = await caches.caches.match(request);
+    const cached = await caches.match(request);
     if (cached) return cached;
     throw new Error('Network unavailable and no cached response.');
   }

@@ -17,6 +17,10 @@ import { runDailyBriefing, runEveningBriefingIfNeeded } from './jobs/dailyBriefi
 
 const app = express();
 app.use(express.json());
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 app.use(express.static('public', {
   etag: true,
   lastModified: true,
@@ -27,6 +31,11 @@ app.use(express.static('public', {
     }
 
     if (path.endsWith('/index.html') || path.endsWith('\\index.html')) {
+      res.setHeader('Cache-Control', 'no-store');
+      return;
+    }
+
+    if (/\.(?:css|js|json|webmanifest)$/i.test(path)) {
       res.setHeader('Cache-Control', 'no-cache');
     }
   }
