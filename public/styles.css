@@ -1517,6 +1517,19 @@ menu {
   white-space: nowrap;
 }
 
+.sponsor-logo-button {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sponsor-logo-button:focus-visible {
+  outline: 3px solid #0d5f4b;
+  outline-offset: 4px;
+}
+
 .floating-badge img {
   display: block;
   width: auto;
