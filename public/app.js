@@ -26,6 +26,7 @@ const belgienCountdownDate = document.querySelector('#belgienCountdownDate');
 const belgienCountdownFact = document.querySelector('#belgienCountdownFact');
 const belgienCountdownFactText = document.querySelector('#belgienCountdownFactText');
 const floatingBadge = document.querySelector('#floatingBadge');
+const sponsorLogoButton = document.querySelector('#sponsorLogoButton');
 const floatingBadgeLogo = document.querySelector('#floatingBadgeLogo');
 const commentDialog = document.querySelector('#commentDialog');
 const commentContext = document.querySelector('#commentContext');
@@ -202,9 +203,9 @@ function pickDailyLogo() {
 }
 
 function renderDailyLogo() {
-  if (!floatingBadge || !floatingBadgeLogo || !DAILY_LOGO_ROTATION.length) return;
+  if (!floatingBadge || !sponsorLogoButton || !floatingBadgeLogo || !DAILY_LOGO_ROTATION.length) return;
   const logo = pickDailyLogo();
-  floatingBadge.setAttribute('aria-label', `Präsentiert von ${logo.name}`);
+  sponsorLogoButton.setAttribute('aria-label', `Seite neu laden. Präsentiert von ${logo.name}`);
   floatingBadgeLogo.src = logo.src;
   floatingBadgeLogo.alt = logo.alt;
 }
@@ -240,6 +241,10 @@ if ('serviceWorker' in navigator) {
 renderDailyLogo();
 updateBelgienCountdown();
 window.setInterval(updateBelgienCountdown, 60_000);
+
+sponsorLogoButton?.addEventListener('click', () => {
+  window.location.reload();
+});
 
 belgienCountdown?.addEventListener('click', () => {
   if (belgienCountdown.dataset.mode === 'trip') showNextBelgienFact();
