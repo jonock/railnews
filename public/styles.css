@@ -1518,10 +1518,8 @@ menu {
 }
 
 .sponsor-logo-button {
+  all: unset;
   display: block;
-  padding: 0;
-  border: 0;
-  background: transparent;
   cursor: pointer;
 }
 
