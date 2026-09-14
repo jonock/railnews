@@ -335,7 +335,7 @@ h2 {
 
 .belgien-countdown {
   position: relative;
-  display: block;
+  display: none;
   width: min(100%, 560px);
   margin-top: 30px;
   padding: 24px 30px 22px;
