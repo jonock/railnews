@@ -1,9 +1,7 @@
 import {
   briefingTitle,
-  calendarDaysUntil,
   formatDateTime,
   formatLongDate,
-  hasDateTimePassed,
   localDateKey
 } from './dateTime.js';
 
@@ -18,13 +16,6 @@ const articleSearchForm = document.querySelector('#articleSearchForm');
 const articleSearchInput = document.querySelector('#articleSearchInput');
 const clearArticleSearchButton = document.querySelector('#clearArticleSearch');
 const articleSearchStatus = document.querySelector('#articleSearchStatus');
-const themeColor = document.querySelector('#themeColor');
-const belgienCountdown = document.querySelector('#belgienCountdown');
-const belgienCountdownDays = document.querySelector('#belgienCountdownDays');
-const belgienCountdownLabel = document.querySelector('#belgienCountdownLabel');
-const belgienCountdownDate = document.querySelector('#belgienCountdownDate');
-const belgienCountdownFact = document.querySelector('#belgienCountdownFact');
-const belgienCountdownFactText = document.querySelector('#belgienCountdownFactText');
 const floatingBadge = document.querySelector('#floatingBadge');
 const floatingBadgeLogo = document.querySelector('#floatingBadgeLogo');
 const commentDialog = document.querySelector('#commentDialog');
@@ -43,67 +34,6 @@ let selectedCommentTarget = null;
 let commentsByBriefing = {};
 
 const COMMENTER_FACE_STORAGE_KEY = 'railnews:commenter-face';
-const BELGIENREISLI_DATE = '2026-09-10';
-// 17:00 in Zurich is UTC+02:00 while daylight-saving time is in effect.
-const BELGIENREISLI_START_AT = '2026-09-10T17:00:00+02:00';
-const BELGIENREISLI_END_DATE = '2026-09-13';
-const BELGIENREISLI_TIME_ZONE = 'Europe/Zurich';
-const BELGIENREISLI_THEME_COLOR = '#f4bb19';
-const DEFAULT_THEME_COLOR = '#0d5f4b';
-const belgienSpecialOverrideValue = new URLSearchParams(window.location.search).get('belgien-special');
-const belgienSpecialOverride = belgienSpecialOverrideValue === '1'
-  ? true
-  : belgienSpecialOverrideValue === '0' ? false : null;
-const BELGIENREISLI_FACTS = [
-  'Am 5. Mai 1835 fuhr zwischen Brüssel und Mechelen die erste Eisenbahn auf dem europäischen Festland.',
-  'Brüssel war die erste Hauptstadt der Welt, die mit der Eisenbahn erreichbar war.',
-  'König Leopold I. sah bei der Eröffnungsfahrt 1835 zu, fuhr aber nicht mit: Eine Mitfahrt galt offenbar noch als zu riskant.',
-  'Die drei Eröffnungszüge von 1835 wurden von den englischen Dampflokomotiven La Flèche, Stephenson und L’Elephant gezogen.',
-  'Le Belge, die erste in Belgien gebaute Lokomotive, verliess am 30. Dezember 1835 das Cockerill-Werk in Seraing.',
-  'Schon 1843 umfasste das staatliche belgische Eisenbahnnetz 556 Kilometer; sein zentraler Knoten war Mechelen.',
-  '1846 wurden Brüssel und Paris als erste zwei Hauptstädte der Welt direkt per Eisenbahn miteinander verbunden.',
-  'In nur 40 Jahren entstanden in Belgien fast 3.400 Kilometer Bahnstrecken – eines der dichtesten Netze der Welt.',
-  '1870 betrieben 39 private Gesellschaften in Belgien 2.231 Kilometer Bahn, der Staat dagegen erst 863 Kilometer.',
-  'Vor dem Ersten Weltkrieg gehörten bereits 4.786 Kilometer Bahn dem Staat; nur noch 275 Kilometer waren privat.',
-  'Mit fast 80.000 Beschäftigten war die belgische Staatsbahn vor dem Ersten Weltkrieg der grösste Arbeitgeber des Landes.',
-  '1892 führte Belgien als erstes Land auf dem europäischen Festland die Greenwich Mean Time als landesweite Standardzeit ein.',
-  'Die belgische Industrie baute zwischen 1835 und 1939 mehr als 16.000 Dampflokomotiven; über 10.000 davon gingen in den Export.',
-  'Bis 1918 war ein Viertel des belgischen Bahnnetzes zerstört oder unbrauchbar, jeder dritte Bahnhof war nicht zugänglich.',
-  'Die SNCB-NMBS wurde 1926 gegründet und feiert 2026 ihr hundertjähriges Bestehen.',
-  '1931 führte die SNCB-NMBS ihre ersten Metallwagen ein; die Innenräume gestaltete Henry van de Velde.',
-  '1933 machte die durchgehende automatische Druckluftbremse rund 3.000 Bremser im belgischen Güterverkehr überflüssig.',
-  '1935 nahm zwischen Brüssel und Antwerpen die erste elektrifizierte Strecke der SNCB-NMBS den Betrieb auf.',
-  'Das berühmte ovale B-Logo entwarf Jean De Roy. Ab 1938 wurde es allgemein verwendet.',
-  'Die stromlinienförmige Dampflok Typ 12 erreichte 165 km/h und fuhr 1940 in nur 57 Minuten von Brüssel nach Ostende.',
-  '1948 war das 5.034 Kilometer lange belgische Bahnnetz das dichteste der Welt.',
-  '1956 führte die SNCB-NMBS den ersten Autoreisezug auf dem europäischen Festland ein.',
-  '1966 fuhr zwischen Ath und Denderleeuw der letzte kommerzielle Dampfzug der SNCB-NMBS.',
-  'Mit Brüssel-Schuman eröffnete 1969 Belgiens erster gemeinsamer Bahnhof für Eisenbahn und Metro.',
-  'Seit 1970 können elektrische Züge den Flughafen Brüssel-Zaventem erreichen.',
-  'Schon 1975 führte die SNCB-NMBS ein Kombiangebot für Bahn und Fahrrad ein.',
-  'Seit dem IC-IR-Plan von 1984 fahren belgische Züge nach festen Fahrplänen.',
-  '1994 verband der Eurostar Brüssel durch den Kanaltunnel mit London.',
-  '1996 nahm Thalys den Hochgeschwindigkeitsverkehr von und nach Brüssel auf.',
-  '2009 war Belgien das erste europäische Land mit einem vollständig fertiggestellten Hochgeschwindigkeitsnetz.',
-  'Seit 2012 bindet die Diabolo-Bahnstrecke den unterirdischen Flughafenbahnhof direkt an die wichtigsten Achsen des Netzes an.',
-  '2015 startete das S-Bahn-Angebot in und um Brüssel.',
-  'Belgien eröffnete seine erste Bahnstrecke 1835 – zwölf Jahre vor der Schweizer Spanischbrötlibahn von 1847.',
-  'Die SBB nahm 1902 den Betrieb auf, die SNCB-NMBS erst 1926: Die belgische Staatsbahn ist 24 Jahre jünger als die schweizerische.',
-  'Infrabel betreibt 3.602 Kilometer Bahnstrecken; das gesamte Schweizer Netz umfasst 5.317 Kilometer und zählt dabei mehrere Betreiber und Spurweiten.',
-  'Das Infrabel-Netz ist vollständig normalspurig. Zur Schweizer Bahnwelt gehören dagegen auch zahlreiche Schmalspur- und Zahnradbahnen.',
-  'Als Belgien 1935 seine erste elektrische Strecke eröffnete, stand in der Schweiz bereits seit Jahren mehr als die Hälfte des SBB-Netzes unter Strom.',
-  'Belgien fährt überwiegend mit 3.000 Volt Gleichstrom und auf einigen Strecken mit 25.000 Volt Wechselstrom; die SBB nutzt 15.000 Volt bei 16,7 Hertz.',
-  'Das SBB-Netz ist vollständig elektrifiziert und bezieht 90 Prozent seines Bahnstroms aus Wasserkraft; in Belgien gibt es noch nicht elektrifizierte Strecken.',
-  '2021 legte die Schweizer Bevölkerung pro Kopf 2.464 Bahnkilometer zurück, die belgische 928 – in der Schweiz also gut zweieinhalbmal so viele.',
-  'Pünktlich heisst nicht überall dasselbe: In Belgien gelten weniger als sechs Minuten Verspätung als pünktlich, bei der SBB weniger als drei.',
-  'Die Schweiz führte ihren landesweiten Taktfahrplan 1982 ein, Belgien folgte 1984 mit dem IC-IR-Plan.',
-  'Belgien baute Strecken für 300 km/h; die Schweiz setzt mit Bahn 2000 auf Knotenfahrzeiten und schlanke Anschlüsse – mehr als 200 km/h braucht sie dafür nicht.',
-  'Der 6,53 Kilometer lange Soumagne-Tunnel ist Belgiens längster Bahntunnel; der 57 Kilometer lange Gotthard-Basistunnel ist fast neunmal so lang.',
-  'In Belgien sind Zugbetrieb und Infrastruktur auf SNCB-NMBS und Infrabel verteilt; bei der SBB gehören Personenverkehr und Infrastruktur zum selben Konzern.',
-  'Zwei mehrsprachige Länder, zwei Buchstabensalate: SNCB-NMBS trägt französische und niederländische Initialen, SBB-CFF-FFS deutsche, französische und italienische.',
-  'Die Zürcher S-Bahn startete 1990, die Brüsseler S-Züge 2015 – ein Vierteljahrhundert später.'
-];
-let belgienFactIndex = -1;
 const DAILY_LOGO_ROTATION = [
   { name: 'Traficom', src: '/images/Traficom_logo.svg', alt: 'Traficom Logo' },
   { name: 'Trafikverket', src: '/images/Trafikverket_logo.svg', alt: 'Trafikverket Logo' },
@@ -146,52 +76,6 @@ function todayRotationKey() {
     month: '2-digit',
     day: '2-digit'
   }).format(new Date());
-}
-
-function updateBelgienCountdown() {
-  if (!belgienCountdown || !belgienCountdownDays || !belgienCountdownLabel
-    || !belgienCountdownDate || !belgienCountdownFact || !belgienCountdownFactText) return;
-
-  const now = new Date();
-  const daysUntilStart = calendarDaysUntil(BELGIENREISLI_DATE, BELGIENREISLI_TIME_ZONE, now);
-  const daysUntilEnd = calendarDaysUntil(BELGIENREISLI_END_DATE, BELGIENREISLI_TIME_ZONE, now);
-  const tripIsActive = daysUntilStart !== null && daysUntilEnd !== null
-    && hasDateTimePassed(BELGIENREISLI_START_AT, now) && daysUntilEnd >= 0;
-  const factModeIsActive = tripIsActive || belgienSpecialOverride === true;
-  const specialThemeIsActive = belgienSpecialOverride === true
-    || (belgienSpecialOverride !== false && tripIsActive);
-
-  document.body.classList.toggle('belgien-special', specialThemeIsActive);
-  themeColor?.setAttribute('content', specialThemeIsActive ? BELGIENREISLI_THEME_COLOR : DEFAULT_THEME_COLOR);
-
-  belgienCountdown.hidden = belgienSpecialOverride !== true
-    && (daysUntilStart === null || daysUntilEnd === null || daysUntilEnd < 0);
-  if (belgienCountdown.hidden) return;
-
-  belgienCountdown.disabled = !factModeIsActive;
-  belgienCountdown.dataset.mode = factModeIsActive ? 'trip' : 'countdown';
-  belgienCountdownLabel.hidden = factModeIsActive;
-  belgienCountdownDate.hidden = factModeIsActive;
-  belgienCountdownFact.hidden = !factModeIsActive;
-
-  if (factModeIsActive) {
-    belgienCountdown.setAttribute('aria-label', 'Belgischer Bahnfakt. Klicken für den nächsten Fakt.');
-    if (belgienFactIndex < 0) showNextBelgienFact();
-  } else {
-    belgienCountdown.setAttribute('aria-label', `${daysUntilStart} Tage bis zum Belgienreisli`);
-    belgienCountdownDays.textContent = daysUntilStart;
-  }
-}
-
-function showNextBelgienFact() {
-  if (!belgienCountdownFactText || !BELGIENREISLI_FACTS.length) return;
-  belgienFactIndex = belgienFactIndex < 0
-    ? Math.floor(Math.random() * BELGIENREISLI_FACTS.length)
-    : (belgienFactIndex + 1) % BELGIENREISLI_FACTS.length;
-  belgienCountdownFactText.textContent = BELGIENREISLI_FACTS[belgienFactIndex];
-  belgienCountdownFactText.classList.remove('is-changing');
-  void belgienCountdownFactText.offsetWidth;
-  belgienCountdownFactText.classList.add('is-changing');
 }
 
 function pickDailyLogo() {
@@ -238,12 +122,6 @@ if ('serviceWorker' in navigator) {
 }
 
 renderDailyLogo();
-updateBelgienCountdown();
-window.setInterval(updateBelgienCountdown, 60_000);
-
-belgienCountdown?.addEventListener('click', () => {
-  if (belgienCountdown.dataset.mode === 'trip') showNextBelgienFact();
-});
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
