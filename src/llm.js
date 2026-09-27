@@ -99,7 +99,7 @@ export async function createBriefingText(articles, options = {}) {
   const input = [
     {
       role: 'system',
-      content: 'Du schreibst ausschließlich auf Deutsch. Du erstellst knappe tägliche Briefings zur Eisenbahnbranche. Übersetze fremdsprachige Inhalte sinngemäß ins Deutsche, erhalte Quellenlinks unverändert und fokussiere auf Skandinavien sowie praktische Auswirkungen für die Branche. Antworte mit klaren Zwischentiteln und kurzen Absätzen.'
+      content: 'Du schreibst ausschließlich auf Deutsch. Du erstellst knappe tägliche Briefings zur Eisenbahnbranche in Skandinavien. Berücksichtige nur Beiträge mit einem klaren, direkten Bezug zu Schweden, Norwegen, Dänemark oder Finnland und ignoriere alle anderen vollständig. Übersetze fremdsprachige Inhalte sinngemäß ins Deutsche, erhalte Quellenlinks unverändert und fokussiere auf praktische Auswirkungen für die Branche. Antworte mit klaren Zwischentiteln und kurzen Absätzen.'
     },
     {
       role: 'user',
@@ -118,6 +118,7 @@ Formatvorgaben:
 - Beende mit einem kurzen Abschnitt "## Einordnung" als Fließtext: maximal 2–3 kurze Sätze, nur die wesentlichen Punkte. Dort darfst du einen kleinen, harmlosen Witz machen, wenn er zur Meldung passt.
 
 Inhalt:
+- Prüfe jeden Kandidaten zuerst auf einen klaren, direkten Bezug zur Eisenbahnbranche in Schweden, Norwegen, Dänemark oder Finnland. Ignoriere Beiträge ohne diesen Bezug vollständig; die Herkunft der Quelle allein genügt nicht.
 - Übersetze schwedische oder englische Titel/Inhalte sinngemäß.
 - Erkläre kurz die Relevanz für die Bahnbranche in Skandinavien.
 - Wenn eine Meldung eine Staatsbahn betrifft, formuliere kollegial mit Bezug auf die jeweilige Bahn: SJ als schwedische Staatsbahn, Vy als norwegische Staatsbahn, DSB als dänische Staatsbahn und VR als finnische Staatsbahn. Nutze dabei Formulierungen wie "Bei den Kollegen der dänischen Staatsbahn DSB ..." oder eine passende natürliche Variante.
@@ -143,13 +144,14 @@ export async function shouldCreateEveningBriefing({ morningBriefing, eveningArti
   const input = [
     {
       role: 'system',
-      content: 'Du bewertest deutschsprachige Eisenbahn-Briefings nüchtern. Antworte ausschließlich mit kompaktem JSON.'
+      content: 'Du bewertest deutschsprachige Eisenbahn-Briefings nüchtern. Berücksichtige ausschließlich Beiträge mit einem klaren, direkten Bezug zur Eisenbahnbranche in Schweden, Norwegen, Dänemark oder Finnland und ignoriere alle anderen vollständig. Antworte ausschließlich mit kompaktem JSON.'
     },
     {
       role: 'user',
       content: `Entscheide, ob aus diesen neu gefundenen Abend-Artikeln ein zusätzliches Abend-Briefing entstehen soll.
 
 Erstelle es nur, wenn es gegenüber dem Morgen-Briefing große neue Entwicklungen, viele substanzielle Zusatzmeldungen oder klare Schwerpunktverschiebungen gibt.
+Prüfe die Abend-Artikel zuerst auf ihren Skandinavienbezug. Beiträge ohne klaren, direkten Bezug zur Eisenbahnbranche in Schweden, Norwegen, Dänemark oder Finnland dürfen weder für die Entscheidung gezählt noch als Begründung verwendet werden; die Herkunft der Quelle allein genügt nicht.
 
 Antworte ausschließlich als JSON mit diesem Schema:
 {"create":true|false,"reason":"kurze deutsche Begründung"}
@@ -183,7 +185,7 @@ export async function createEveningBriefingText({ morningBriefing, eveningArticl
   const input = [
     {
       role: 'system',
-      content: 'Du schreibst ausschließlich auf Deutsch. Du erstellst ein kurzes Abend-Update zur Eisenbahnbranche in Skandinavien. Der Ton ist fachlich, aber lockerer und leicht humorvoll. Du darfst freundlich über dänische Sprache, norwegische Zurückhaltung oder schwedisches Laissez-faire scherzen, aber nie verletzend, stereotyp-abwertend oder respektlos. Quellenlinks bleiben unverändert.'
+      content: 'Du schreibst ausschließlich auf Deutsch. Du erstellst ein kurzes Abend-Update zur Eisenbahnbranche in Skandinavien. Berücksichtige nur Beiträge mit einem klaren, direkten Bezug zu Schweden, Norwegen, Dänemark oder Finnland und ignoriere alle anderen vollständig. Der Ton ist fachlich, aber lockerer und leicht humorvoll. Du darfst freundlich über dänische Sprache, norwegische Zurückhaltung oder schwedisches Laissez-faire scherzen, aber nie verletzend, stereotyp-abwertend oder respektlos. Quellenlinks bleiben unverändert.'
     },
     {
       role: 'user',
@@ -197,6 +199,7 @@ Formatvorgaben:
 - Beende mit einem kurzen Abschnitt "## Feierabend-Einordnung" als lockerer Fließtext: maximal 2–3 kurze Sätze, nur die wesentlichen Punkte. Dort darfst du einen kleinen, harmlosen Witz machen, wenn er zur Meldung passt.
 
 Inhalt:
+- Prüfe jeden Kandidaten zuerst auf einen klaren, direkten Bezug zur Eisenbahnbranche in Schweden, Norwegen, Dänemark oder Finnland. Ignoriere Beiträge ohne diesen Bezug vollständig; die Herkunft der Quelle allein genügt nicht.
 - Konzentriere dich auf das, was seit dem Morgen neu oder deutlich wichtiger geworden ist.
 - Reiseberichte von Schwedenreisli sind immer relevant: Nimm neue Artikel dieser Quelle immer mit auf, solange sie nicht bereits im Morgen-Briefing behandelt wurden.
 - Formuliere etwas lockerer und pointierter als morgens.
