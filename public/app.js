@@ -1,5 +1,4 @@
 import {
-  briefingCountryDetails,
   briefingTitle,
   calendarDaysUntil,
   formatDateTime,
@@ -7,6 +6,7 @@ import {
   hasDateTimePassed,
   localDateKey
 } from './dateTime.js';
+import { briefingCountryDetails } from './briefingCountries.js';
 
 const briefingList = document.querySelector('#briefingList');
 const articleList = document.querySelector('#articleList');

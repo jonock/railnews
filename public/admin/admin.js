@@ -1,4 +1,5 @@
-import { briefingCountryDetails, briefingTitle, formatDate, formatDateTime } from '../dateTime.js';
+import { briefingTitle, formatDate, formatDateTime } from '../dateTime.js';
+import { briefingCountryDetails } from '../briefingCountries.js';
 
 const state = {
   token: localStorage.getItem('railnews.adminToken') || ''

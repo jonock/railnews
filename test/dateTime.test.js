@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  briefingCountryDetails,
   briefingCountryFlags,
   briefingTitle,
   calendarDaysUntil,
@@ -36,6 +37,7 @@ test('briefing titles show the flags of countries present in the briefing', () =
   ].join('\n');
 
   assert.equal(briefingCountryFlags(summary), '🇸🇪 🇩🇰');
+  assert.deepEqual(briefingCountryDetails(summary).map(({ code }) => code), ['se', 'dk']);
   assert.equal(
     briefingTitle('Skandinavien-Bahnbriefing - 2026-09-30', summary),
     '🇸🇪 🇩🇰 Skandinavien-Bahnbriefing'

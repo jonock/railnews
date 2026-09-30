@@ -5,6 +5,7 @@ const APP_SHELL = [
   '/styles.css',
   '/app.js',
   '/dateTime.js',
+  '/briefingCountries.js',
   '/manifest.webmanifest',
   '/apple-touch-icon.png',
   '/icons/icon-192.png',
