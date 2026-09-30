@@ -2,8 +2,10 @@ const sqliteTimestampPattern = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 const dateOnlyPattern = /^(\d{4})-(\d{2})-(\d{2})$/;
 const titleDatePattern = /\s+-\s+(\d{4}-\d{2}-\d{2})$/;
 
-const briefingCountries = [
+const BRIEFING_COUNTRIES = [
   {
+    code: 'se',
+    name: 'Schweden',
     flag: '🇸🇪',
     terms: [
       'schweden', 'schwedisch', 'schwedische', 'schwedischen', 'schwedischer', 'schwedisches',
@@ -12,6 +14,8 @@ const briefingCountries = [
     ]
   },
   {
+    code: 'no',
+    name: 'Norwegen',
     flag: '🇳🇴',
     terms: [
       'norwegen', 'norwegisch', 'norwegische', 'norwegischen', 'norwegischer', 'norwegisches',
@@ -20,6 +24,8 @@ const briefingCountries = [
     ]
   },
   {
+    code: 'dk',
+    name: 'Dänemark',
     flag: '🇩🇰',
     terms: [
       'danemark', 'danisch', 'danische', 'danischen', 'danischer', 'danisches',
@@ -28,6 +34,8 @@ const briefingCountries = [
     ]
   },
   {
+    code: 'fi',
+    name: 'Finnland',
     flag: '🇫🇮',
     terms: [
       'finnland', 'finnisch', 'finnische', 'finnischen', 'finnischer', 'finnisches',
@@ -118,11 +126,14 @@ export function hasDateTimePassed(dateTime, now = new Date()) {
 }
 
 export function briefingCountryFlags(summary = '') {
+  return briefingCountryDetails(summary).map(({ flag }) => flag).join(' ');
+}
+
+export function briefingCountryDetails(summary = '') {
   const text = normalizeCountryText(summary);
-  return briefingCountries
+  return BRIEFING_COUNTRIES
     .filter(({ terms }) => terms.some((term) => containsCountryTerm(text, term)))
-    .map(({ flag }) => flag)
-    .join(' ');
+    .map(({ code, name, flag }) => ({ code, name, flag }));
 }
 
 export function briefingTitle(title = '', summary = '') {

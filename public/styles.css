@@ -812,6 +812,22 @@ h2 {
   line-height: 1.18;
 }
 
+.briefing-title-flags {
+  display: inline-flex;
+  gap: .22em;
+  margin-right: .45em;
+  vertical-align: -.12em;
+}
+
+.briefing-title-flags img {
+  display: block;
+  width: 1.28em;
+  height: .86em;
+  border: 1px solid rgba(0, 0, 0, .16);
+  border-radius: 2px;
+  object-fit: cover;
+}
+
 .briefing-card-evening h3 {
   display: inline;
   padding: 2px 8px 4px;

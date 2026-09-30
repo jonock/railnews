@@ -1,4 +1,4 @@
-import { briefingTitle, formatDate, formatDateTime } from '../dateTime.js';
+import { briefingCountryDetails, briefingTitle, formatDate, formatDateTime } from '../dateTime.js';
 
 const state = {
   token: localStorage.getItem('railnews.adminToken') || ''
@@ -33,6 +33,15 @@ function escapeHtml(value = '') {
     '"': '&quot;',
     "'": '&#39;'
   })[character]);
+}
+
+function renderBriefingTitle(title = '', summary = '') {
+  const countries = briefingCountryDetails(summary);
+  const flags = countries.length ? `
+    <span class="briefing-title-flags" aria-label="Länder: ${escapeHtml(countries.map(({ name }) => name).join(', '))}">
+      ${countries.map(({ code }) => `<img src="/images/flags/${code}.svg" alt="">`).join('')}
+    </span>` : '';
+  return `${flags}<span>${escapeHtml(briefingTitle(title))}</span>`;
 }
 
 
@@ -103,7 +112,7 @@ function renderBriefings(briefings) {
   briefingList.innerHTML = briefings.length ? briefings.map((briefing) => `
     <article class="briefing-card${briefing.briefing_type === 'evening' ? ' briefing-card-evening' : ''}">
       <p class="meta">${escapeHtml(formatDateTime(briefing.created_at))}</p>
-      <h3>${escapeHtml(briefingTitle(briefing.title, briefing.summary))}</h3>
+      <h3>${renderBriefingTitle(briefing.title, briefing.summary)}</h3>
       <div class="briefing-body">${renderBriefingBody(briefing.summary)}</div>
     </article>
   `).join('') : '<p>Noch keine Briefings vorhanden.</p>';
