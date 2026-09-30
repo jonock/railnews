@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railnews-v18';
+const CACHE_NAME = 'railnews-v19';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -61,7 +61,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (url.pathname === '/app.js' || url.pathname === '/styles.css' || url.pathname === '/manifest.webmanifest' || url.pathname.startsWith('/lan/')) {
+  if (url.pathname === '/app.js' || url.pathname === '/dateTime.js' || url.pathname === '/styles.css' || url.pathname === '/manifest.webmanifest' || url.pathname.startsWith('/lan/')) {
     event.respondWith(networkFirst(request));
     return;
   }

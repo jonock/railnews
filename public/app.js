@@ -448,7 +448,7 @@ function renderBriefings(briefings) {
         <details class="briefing-details"${isLatest ? ' open data-lock-open="true"' : ''}>
           <summary class="briefing-summary">
             <p class="meta">${escapeHtml(formatDateTime(briefing.created_at))}</p>
-            <h3>${escapeHtml(briefingTitle(briefing.title))}</h3>
+            <h3>${escapeHtml(briefingTitle(briefing.title, briefing.summary))}</h3>
             ${isLatest ? '' : '<span class="briefing-toggle-label">Briefing öffnen</span>'}
           </summary>
           <div class="briefing-body">${chapterMarkup}</div>

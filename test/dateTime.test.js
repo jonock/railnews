@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { calendarDaysUntil, hasDateTimePassed } from '../public/dateTime.js';
+import {
+  briefingCountryFlags,
+  briefingTitle,
+  calendarDaysUntil,
+  hasDateTimePassed
+} from '../public/dateTime.js';
 
 const EVENT_DATE = '2026-09-10';
 const TIME_ZONE = 'Europe/Zurich';
@@ -22,4 +27,23 @@ test('the Belgium special starts at exactly 17:00 in Zurich', () => {
 
   assert.equal(hasDateTimePassed(startAt, new Date('2026-09-10T14:59:59.999Z')), false);
   assert.equal(hasDateTimePassed(startAt, new Date('2026-09-10T15:00:00.000Z')), true);
+});
+
+test('briefing titles show the flags of countries present in the briefing', () => {
+  const summary = [
+    'In Schweden investiert Trafikverket in die Malmbanan.',
+    'Dänemark modernisiert mit Banedanmark mehrere Strecken.'
+  ].join('\n');
+
+  assert.equal(briefingCountryFlags(summary), '🇸🇪 🇩🇰');
+  assert.equal(
+    briefingTitle('Skandinavien-Bahnbriefing - 2026-09-30', summary),
+    '🇸🇪 🇩🇰 Skandinavien-Bahnbriefing'
+  );
+});
+
+test('briefing country matching is case-insensitive and respects word boundaries', () => {
+  assert.equal(briefingCountryFlags('Neues von Väylävirasto in Helsinki.'), '🇫🇮');
+  assert.equal(briefingCountryFlags('Das DSB-Projekt verbindet København und Malmö.'), '🇸🇪 🇩🇰');
+  assert.equal(briefingCountryFlags('Eine virtuelle Plattform wird vorgestellt.'), '');
 });
