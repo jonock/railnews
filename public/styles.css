@@ -2402,3 +2402,66 @@ menu {
     transition: none;
   }
 }
+
+.new-comments-button {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 12px);
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 10px;
+  border-radius: 50%;
+  background: #0d5f4b;
+  color: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
+}
+.new-comments-button[hidden] { display: none; }
+.new-comments-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f4bb19;
+  border: 2px solid white;
+}
+.recent-comments {
+  position: fixed;
+  inset: auto 1rem 6.5rem auto;
+  margin: 0;
+  width: min(360px, calc(100vw - 2rem));
+  max-height: min(70vh, 600px);
+  overflow-y: auto;
+  padding: 1rem;
+  border: 1px solid #d7ded9;
+  border-radius: 16px;
+  background: white;
+  color: #27313c;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .2);
+}
+.recent-comments h2 { margin: 0 0 .75rem; font-size: 1.05rem; }
+.recent-comment {
+  display: grid;
+  gap: .35rem;
+  width: 100%;
+  padding: .8rem;
+  margin-bottom: .65rem;
+  background: #f3f6f4;
+  color: #27313c;
+  text-align: left;
+  border: 1px solid #d7ded9;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.recent-comment:hover { background: #e5eee9; }
+.recent-comment-meta { font-size: .75rem; color: #54645b; }
+.recent-comment-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: normal;
+}

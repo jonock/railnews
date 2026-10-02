@@ -42,6 +42,79 @@ const existingCommentsSection = document.querySelector('#existingCommentsSection
 const existingCommentsBody = document.querySelector('#existingCommentsBody');
 let selectedCommentTarget = null;
 let commentsByBriefing = {};
+const newCommentsButton = document.querySelector('#newCommentsButton');
+const recentComments = document.querySelector('#recentComments');
+const recentCommentsList = document.querySelector('#recentCommentsList');
+const COMMENT_VISIT_STORAGE_KEY = 'railnews:last-visit-comment-id';
+const OWN_COMMENT_STORAGE_KEY = 'railnews:own-comment-ids';
+let previousVisitCommentId = null;
+let latestAvailableCommentId = 0;
+let commentVisitInitialized = false;
+let recentCommentItems = [];
+const ownCommentIds = new Set();
+try {
+  const storedIds = JSON.parse(localStorage.getItem(OWN_COMMENT_STORAGE_KEY) || '[]');
+  if (Array.isArray(storedIds)) {
+    storedIds.filter((id) => Number.isSafeInteger(id) && id > 0).forEach((id) => ownCommentIds.add(id));
+  }
+} catch { /* Own comments are still tracked in memory if storage is unavailable. */ }
+
+function renderRecentComments(comments) {
+  const newestId = Number(comments[0]?.id || 0);
+  if (!commentVisitInitialized) {
+    try {
+      const stored = localStorage.getItem(COMMENT_VISIT_STORAGE_KEY);
+      const storedId = Number(stored);
+      const hasReadMarker = stored !== null && Number.isSafeInteger(storedId) && storedId >= 0;
+      previousVisitCommentId = hasReadMarker ? storedId : newestId;
+      // Establish a baseline on the first visit, without acknowledging later arrivals.
+      if (!hasReadMarker) localStorage.setItem(COMMENT_VISIT_STORAGE_KEY, String(newestId));
+    } catch {
+      previousVisitCommentId = newestId;
+    }
+    commentVisitInitialized = true;
+  }
+  latestAvailableCommentId = Math.max(newestId, previousVisitCommentId);
+  recentCommentItems = comments
+    .filter((comment) => Number(comment.id) > previousVisitCommentId && !ownCommentIds.has(Number(comment.id)))
+    .slice(0, 3);
+  newCommentsButton.hidden = recentCommentItems.length === 0;
+  if (newCommentsButton.hidden && recentComments.matches(':popover-open')) recentComments.hidePopover();
+  recentCommentsList.innerHTML = recentCommentItems.map((comment, index) => `
+    <button type="button" class="recent-comment" data-recent-comment="${index}">
+      <span class="recent-comment-meta">${escapeHtml(commentFaceLabel(comment.commenter_face))} · ${escapeHtml(formatDateTime(comment.created_at))}</span>
+      <strong>${escapeHtml(comment.chapter_title || 'Kommentar zum Briefing')}</strong>
+      <span class="recent-comment-text">${escapeHtml(comment.comment_text)}</span>
+    </button>
+  `).join('');
+}
+
+recentComments.addEventListener('toggle', (event) => {
+  if (event.newState !== 'open') return;
+  previousVisitCommentId = latestAvailableCommentId;
+  newCommentsButton.hidden = true;
+  try {
+    localStorage.setItem(COMMENT_VISIT_STORAGE_KEY, String(previousVisitCommentId));
+  } catch { /* Acknowledgement still works for this visit without storage. */ }
+});
+
+recentCommentsList.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-recent-comment]');
+  if (!button) return;
+  const comment = recentCommentItems[Number(button.dataset.recentComment)];
+  button.disabled = true;
+  try {
+    const data = await api(`/api/briefings/${comment.briefing_id}/comments`);
+    commentsByBriefing[comment.briefing_id] = data.comments;
+    recentComments.hidePopover();
+    showChapterComments(comment.briefing_id, comment.chapter_key, comment.chapter_title, commentId(comment));
+  } catch {
+    button.title = 'Kommentar konnte nicht geladen werden. Bitte erneut versuchen.';
+    button.querySelector('.recent-comment-meta').textContent = button.title;
+  } finally {
+    button.disabled = false;
+  }
+});
 
 const COMMENTER_FACE_STORAGE_KEY = 'railnews:commenter-face';
 const BELGIENREISLI_DATE = '2026-09-10';
@@ -401,12 +474,17 @@ function openReadCommentDialog(chapterElement, activeCommentId) {
   const briefingId = Number(chapterElement.dataset.briefingId);
   const chapterKey = chapterElement.dataset.chapterKey || '';
   const chapterTitle = chapterElement.dataset.chapterTitle || '';
+  showChapterComments(briefingId, chapterKey, chapterTitle, activeCommentId);
+}
+
+function showChapterComments(briefingId, chapterKey, chapterTitle, activeCommentId) {
   const comments = (commentsByBriefing[briefingId] || []).filter((comment) => comment.chapter_key === chapterKey);
   if (!comments.length) return;
 
   readCommentMeta.textContent = `Abschnitt: ${chapterTitle}`;
   readCommentBody.innerHTML = renderReadCommentsList(comments, activeCommentId);
   readCommentDialog.showModal();
+  readCommentBody.querySelector('.active')?.scrollIntoView({ block: 'nearest' });
 }
 
 async function api(path, options = {}) {
@@ -517,8 +595,15 @@ function renderArticles(articles) {
 }
 
 async function load() {
-  const data = await api(`/api/public?t=${Date.now()}`);
+  let sinceCommentId = previousVisitCommentId;
+  if (sinceCommentId === null) {
+    try {
+      sinceCommentId = Number(localStorage.getItem(COMMENT_VISIT_STORAGE_KEY) || 0);
+    } catch { sinceCommentId = 0; }
+  }
+  const data = await api(`/api/public?t=${Date.now()}&commentsSince=${sinceCommentId}`);
   commentsByBriefing = data.commentsByBriefing || {};
+  renderRecentComments(data.latestComments || []);
   renderBriefings(data.briefings);
   renderArticles(data.articles);
   articleSearchStatus.textContent = '';
@@ -667,7 +752,7 @@ commentForm.addEventListener('submit', async (event) => {
   const selectedFace = commentFaceValue.value || 'left';
   commentStatus.textContent = 'Kommentar wird gespeichert...';
   try {
-    await api(`/api/briefings/${selectedCommentTarget.briefingId}/comments`, {
+    const result = await api(`/api/briefings/${selectedCommentTarget.briefingId}/comments`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -677,6 +762,10 @@ commentForm.addEventListener('submit', async (event) => {
         commenterFace: selectedFace
       })
     });
+    ownCommentIds.add(Number(result.comment.id));
+    try {
+      localStorage.setItem(OWN_COMMENT_STORAGE_KEY, JSON.stringify([...ownCommentIds]));
+    } catch { /* Keep excluding the submitted comment during this visit. */ }
     commentDialog.close();
     await load();
   } catch (error) {

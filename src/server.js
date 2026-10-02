@@ -6,6 +6,7 @@ import {
   db,
   latestArticles,
   latestBriefings,
+  latestComments,
   latestCrawlFailures,
   listBriefingComments,
   listSources,
@@ -58,7 +59,9 @@ app.get('/health', (_req, res) => {
   }
 });
 
-app.get('/api/public', (_req, res) => {
+app.get('/api/public', (req, res) => {
+  const requestedSinceId = Number(req.query.commentsSince || 0);
+  const sinceId = Number.isSafeInteger(requestedSinceId) && requestedSinceId >= 0 ? requestedSinceId : 0;
   const briefings = latestBriefings();
   const commentsByBriefing = Object.fromEntries(
     briefings.map((briefing) => [briefing.id, listBriefingComments(briefing.id)])
@@ -66,6 +69,7 @@ app.get('/api/public', (_req, res) => {
   res.json({
     briefings,
     articles: latestArticles(),
+    latestComments: latestComments(sinceId),
     commentsByBriefing
   });
 });
