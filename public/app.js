@@ -653,7 +653,15 @@ document.querySelector('#cancelComment').addEventListener('click', () => {
   commentDialog.close();
 });
 
-document.querySelector('.comment-form').addEventListener('submit', async (event) => {
+const commentForm = document.querySelector('.comment-form');
+
+commentText.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' || !event.shiftKey || event.isComposing) return;
+  event.preventDefault();
+  if (!event.repeat) commentForm.requestSubmit(document.querySelector('#saveComment'));
+});
+
+commentForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!selectedCommentTarget) return;
   const selectedFace = commentFaceValue.value || 'left';
