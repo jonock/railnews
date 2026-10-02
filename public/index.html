@@ -145,9 +145,19 @@
     </dialog>
 
     <aside class="floating-badge" id="floatingBadge" aria-live="polite">
+      <button id="newCommentsButton" class="new-comments-button" type="button" hidden popovertarget="recentComments" aria-label="Neue Kommentare anzeigen" title="Neue Kommentare">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-3 3V11.5a10 10 0 0 1 20 0Z"/></svg>
+        <span class="new-comments-dot" aria-hidden="true"></span>
+      </button>
       <p>Präsentiert von</p>
       <img id="floatingBadgeLogo" src="/images/Traficom_logo.svg" alt="Traficom Logo">
     </aside>
+
+    <section id="recentComments" class="recent-comments" popover aria-labelledby="recentCommentsHeading">
+      <h2 id="recentCommentsHeading">Die letzten drei Kommentare</h2>
+      <div id="recentCommentsList"></div>
+      <button type="button" class="secondary" popovertarget="recentComments" popovertargetaction="hide">Schließen</button>
+    </section>
 
     <script src="/app.js" type="module"></script>
   </body>

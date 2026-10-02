@@ -6,6 +6,7 @@ import {
   db,
   latestArticles,
   latestBriefings,
+  latestComments,
   latestCrawlFailures,
   listBriefingComments,
   listSources,
@@ -66,6 +67,7 @@ app.get('/api/public', (_req, res) => {
   res.json({
     briefings,
     articles: latestArticles(),
+    latestComments: latestComments(),
     commentsByBriefing
   });
 });
