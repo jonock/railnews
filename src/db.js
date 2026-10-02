@@ -268,8 +268,8 @@ export function createBriefingComment({ briefingId, chapterKey, chapterTitle = '
   return db.prepare('SELECT * FROM comments WHERE id = ?').get(result.lastInsertRowid);
 }
 
-export function latestComments() {
-  return db.prepare('SELECT * FROM comments ORDER BY id DESC LIMIT 3').all();
+export function latestComments(sinceId = 0) {
+  return db.prepare('SELECT * FROM comments WHERE id > ? ORDER BY id DESC').all(sinceId);
 }
 
 export function listBriefingComments(briefingId) {

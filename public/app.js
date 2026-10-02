@@ -49,24 +49,29 @@ const COMMENT_VISIT_STORAGE_KEY = 'railnews:last-visit-comment-id';
 let previousVisitCommentId = null;
 let commentVisitInitialized = false;
 let recentCommentItems = [];
+const ownCommentIds = new Set();
 
 function renderRecentComments(comments) {
-  recentCommentItems = comments;
   const newestId = Number(comments[0]?.id || 0);
   if (!commentVisitInitialized) {
     try {
       const stored = localStorage.getItem(COMMENT_VISIT_STORAGE_KEY);
-      previousVisitCommentId = stored === null ? newestId : Number(stored);
+      const storedId = Number(stored);
+      previousVisitCommentId = stored !== null && Number.isSafeInteger(storedId) && storedId >= 0 ? storedId : newestId;
     } catch {
       previousVisitCommentId = newestId;
     }
     commentVisitInitialized = true;
   }
-  newCommentsButton.hidden = newestId <= previousVisitCommentId;
+  recentCommentItems = comments
+    .filter((comment) => Number(comment.id) > previousVisitCommentId && !ownCommentIds.has(Number(comment.id)))
+    .slice(0, 3);
+  newCommentsButton.hidden = recentCommentItems.length === 0;
+  if (newCommentsButton.hidden && recentComments.matches(':popover-open')) recentComments.hidePopover();
   try {
-    localStorage.setItem(COMMENT_VISIT_STORAGE_KEY, String(newestId));
+    localStorage.setItem(COMMENT_VISIT_STORAGE_KEY, String(Math.max(newestId, previousVisitCommentId)));
   } catch { /* The current visit still works when storage is unavailable. */ }
-  recentCommentsList.innerHTML = comments.map((comment, index) => `
+  recentCommentsList.innerHTML = recentCommentItems.map((comment, index) => `
     <button type="button" class="recent-comment" data-recent-comment="${index}">
       <span class="recent-comment-meta">${escapeHtml(commentFaceLabel(comment.commenter_face))} · ${escapeHtml(formatDateTime(comment.created_at))}</span>
       <strong>${escapeHtml(comment.chapter_title || 'Kommentar zum Briefing')}</strong>
@@ -572,7 +577,13 @@ function renderArticles(articles) {
 }
 
 async function load() {
-  const data = await api(`/api/public?t=${Date.now()}`);
+  let sinceCommentId = previousVisitCommentId;
+  if (sinceCommentId === null) {
+    try {
+      sinceCommentId = Number(localStorage.getItem(COMMENT_VISIT_STORAGE_KEY) || 0);
+    } catch { sinceCommentId = 0; }
+  }
+  const data = await api(`/api/public?t=${Date.now()}&commentsSince=${sinceCommentId}`);
   commentsByBriefing = data.commentsByBriefing || {};
   renderRecentComments(data.latestComments || []);
   renderBriefings(data.briefings);
@@ -723,7 +734,7 @@ commentForm.addEventListener('submit', async (event) => {
   const selectedFace = commentFaceValue.value || 'left';
   commentStatus.textContent = 'Kommentar wird gespeichert...';
   try {
-    await api(`/api/briefings/${selectedCommentTarget.briefingId}/comments`, {
+    const result = await api(`/api/briefings/${selectedCommentTarget.briefingId}/comments`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -733,6 +744,7 @@ commentForm.addEventListener('submit', async (event) => {
         commenterFace: selectedFace
       })
     });
+    ownCommentIds.add(Number(result.comment.id));
     commentDialog.close();
     await load();
   } catch (error) {
