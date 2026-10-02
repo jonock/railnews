@@ -46,10 +46,18 @@ const newCommentsButton = document.querySelector('#newCommentsButton');
 const recentComments = document.querySelector('#recentComments');
 const recentCommentsList = document.querySelector('#recentCommentsList');
 const COMMENT_VISIT_STORAGE_KEY = 'railnews:last-visit-comment-id';
+const OWN_COMMENT_STORAGE_KEY = 'railnews:own-comment-ids';
 let previousVisitCommentId = null;
+let latestAvailableCommentId = 0;
 let commentVisitInitialized = false;
 let recentCommentItems = [];
 const ownCommentIds = new Set();
+try {
+  const storedIds = JSON.parse(localStorage.getItem(OWN_COMMENT_STORAGE_KEY) || '[]');
+  if (Array.isArray(storedIds)) {
+    storedIds.filter((id) => Number.isSafeInteger(id) && id > 0).forEach((id) => ownCommentIds.add(id));
+  }
+} catch { /* Own comments are still tracked in memory if storage is unavailable. */ }
 
 function renderRecentComments(comments) {
   const newestId = Number(comments[0]?.id || 0);
@@ -57,20 +65,21 @@ function renderRecentComments(comments) {
     try {
       const stored = localStorage.getItem(COMMENT_VISIT_STORAGE_KEY);
       const storedId = Number(stored);
-      previousVisitCommentId = stored !== null && Number.isSafeInteger(storedId) && storedId >= 0 ? storedId : newestId;
+      const hasReadMarker = stored !== null && Number.isSafeInteger(storedId) && storedId >= 0;
+      previousVisitCommentId = hasReadMarker ? storedId : newestId;
+      // Establish a baseline on the first visit, without acknowledging later arrivals.
+      if (!hasReadMarker) localStorage.setItem(COMMENT_VISIT_STORAGE_KEY, String(newestId));
     } catch {
       previousVisitCommentId = newestId;
     }
     commentVisitInitialized = true;
   }
+  latestAvailableCommentId = Math.max(newestId, previousVisitCommentId);
   recentCommentItems = comments
     .filter((comment) => Number(comment.id) > previousVisitCommentId && !ownCommentIds.has(Number(comment.id)))
     .slice(0, 3);
   newCommentsButton.hidden = recentCommentItems.length === 0;
   if (newCommentsButton.hidden && recentComments.matches(':popover-open')) recentComments.hidePopover();
-  try {
-    localStorage.setItem(COMMENT_VISIT_STORAGE_KEY, String(Math.max(newestId, previousVisitCommentId)));
-  } catch { /* The current visit still works when storage is unavailable. */ }
   recentCommentsList.innerHTML = recentCommentItems.map((comment, index) => `
     <button type="button" class="recent-comment" data-recent-comment="${index}">
       <span class="recent-comment-meta">${escapeHtml(commentFaceLabel(comment.commenter_face))} · ${escapeHtml(formatDateTime(comment.created_at))}</span>
@@ -79,6 +88,15 @@ function renderRecentComments(comments) {
     </button>
   `).join('');
 }
+
+recentComments.addEventListener('toggle', (event) => {
+  if (event.newState !== 'open') return;
+  previousVisitCommentId = latestAvailableCommentId;
+  newCommentsButton.hidden = true;
+  try {
+    localStorage.setItem(COMMENT_VISIT_STORAGE_KEY, String(previousVisitCommentId));
+  } catch { /* Acknowledgement still works for this visit without storage. */ }
+});
 
 recentCommentsList.addEventListener('click', async (event) => {
   const button = event.target.closest('[data-recent-comment]');
@@ -745,6 +763,9 @@ commentForm.addEventListener('submit', async (event) => {
       })
     });
     ownCommentIds.add(Number(result.comment.id));
+    try {
+      localStorage.setItem(OWN_COMMENT_STORAGE_KEY, JSON.stringify([...ownCommentIds]));
+    } catch { /* Keep excluding the submitted comment during this visit. */ }
     commentDialog.close();
     await load();
   } catch (error) {
